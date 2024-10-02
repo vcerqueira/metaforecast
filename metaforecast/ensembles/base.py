@@ -23,6 +23,8 @@ EXPERT_LOSS = {
 class ForecastingEnsemble(ABC):
     """ ForecastingEnsemble
 
+    Abstract class for a forecasting ensemble method
+
     """
 
     METADATA = ['unique_id', 'ds', 'y']
@@ -162,6 +164,32 @@ class ForecastingEnsemble(ABC):
 
 
 class Mixture(ForecastingEnsemble):
+    """ Mixture
+
+    Class for a forecasting ensemble method based on regret minimization
+
+    Parameters
+    ----------
+    loss_type: str
+        Loss function used to compute the weights of individual models. Should be one of 'square', 'absolute',
+        'percentage', 'log', or 'pinball'
+
+    gradient: bool
+        Whether to use the gradient trick to compute the weights of individual models
+
+    trim_ratio: float
+        Ratio of models to use in the final combination rule. 1-trim_ratio of models will not be used.
+
+    weight_by_uid: bool
+        Whether to compute the weights by unique_id or globally. Setting this parameter to true may be computationally demanding
+        for datasets with a large number of unique_ids
+
+    Returns
+    -------
+    Mixture
+        self, optional
+
+    """
 
     def __init__(self,
                  loss_type: str,
