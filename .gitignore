@@ -167,3 +167,4 @@ lightning_logs
 assets/
 experiments_extra/
 scripts/
+dist/

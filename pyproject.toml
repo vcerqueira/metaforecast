@@ -1,1 +1,32 @@
-sadsaa
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+
+name = "metaforecast"
+version = "0.1.0"
+authors = [
+    {name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
+]
+keywords = [
+    "Machine Learning",
+    "Data Science",
+    "Time Series",
+    "Forecasting"
+]
+description = "Meta-learning and Data-centric Forecasting"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/vcerqueira/metaforecast"
+"Bug Tracker" = "https://github.com/vcerqueira/metaforecast/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["metaforecast"]
