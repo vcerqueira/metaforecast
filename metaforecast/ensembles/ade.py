@@ -15,6 +15,7 @@ DForDFTuple = Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]
 
 class ADE(BaseADE):
     LGB_PARS = {'verbosity': -1, 'n_jobs': 1, 'linear_tree': True}
+    MLF_PREPROCESS_PARS = {'static_features': []}
 
     def __init__(self,
                  freq: str,
@@ -68,7 +69,7 @@ class ADE(BaseADE):
         self.insample_scores = self.evaluate_base_fcst(insample_fcst=insample_fcst,
                                                        use_window=self.use_window)
 
-        self.raw_meta_data = self.meta_mlf.preprocess(in_sample_loss_df)
+        self.raw_meta_data = self.meta_mlf.preprocess(in_sample_loss_df, **self.MLF_PREPROCESS_PARS)
 
         self.meta_df = self._process_meta_data(self.raw_meta_data)
 
@@ -95,7 +96,7 @@ class ADE(BaseADE):
         df_ext = df_ext[self.METADATA]
         df_ext['y'] = df_ext['y'].fillna(value=-1)
 
-        meta_dataset = self.meta_mlf.preprocess(df_ext)
+        meta_dataset = self.meta_mlf.preprocess(df_ext, **self.MLF_PREPROCESS_PARS)
 
         weights = self._weights_by_uid(meta_dataset, h=h)
 
