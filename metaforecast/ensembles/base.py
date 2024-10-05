@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 import numpy as np
 from neuralforecast.losses.numpy import smape
@@ -24,7 +25,6 @@ class ForecastingEnsemble(ABC):
     """ ForecastingEnsemble
 
     Abstract class for a forecasting ensemble method
-
     """
 
     METADATA = ['unique_id', 'ds', 'y']
@@ -93,7 +93,8 @@ class ForecastingEnsemble(ABC):
         raise NotImplementedError
 
     def update_weights(self, fcst: pd.DataFrame):
-        """
+        """ update_weights
+
         Updating loss statistics for dynamic model selection
 
         param fcst: dataset with actual values and predictions, similar to insample predictions
@@ -102,7 +103,16 @@ class ForecastingEnsemble(ABC):
 
         raise NotImplementedError
 
-    def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool):
+    def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
+        """ evaluate_base_fcst
+
+        Evaluating the forecasts of ensemble members (base models) by individual time series (unique_id) based on SMAPE.
+
+        :param insample_fcst: (pd.DataFrame) with in-sample or CV forecasts and actual values
+        :param use_window: (bool) whether to compute performance in all data or in the last self.window_size observations
+
+        :return: (pd.DataFrame) performance accuracy of each model on each time series
+        """
 
         all_scores, window_scores = {}, {}
         in_sample_loss_g = insample_fcst.groupby('unique_id')
@@ -133,6 +143,10 @@ class ForecastingEnsemble(ABC):
         raise NotImplementedError
 
     def _set_n_models(self):
+        """ _set_n_models
+
+        Setting the number of models to be used based on the trim ratio
+        """
         self.tot_n_models = len(self.model_names)
 
         self.n_models = int(self.trim_ratio * self.tot_n_models)
@@ -141,14 +155,27 @@ class ForecastingEnsemble(ABC):
 
         self.n_poor_models = self.tot_n_models - self.n_models
 
-    def _get_top_k(self, scores: pd.Series):
-        """
-        :param scores: models LOSS scores (to minimize)
+    def _get_top_k(self, scores: pd.Series) -> List[str]:
+        """ _get_top_k
+
+        Get the top k models based on loss scores
+
+        :param scores: (pd.Series) models error scores (to minimize)
+
+        :return List[str] of the top k models
         """
         return scores.sort_values().index.tolist()[:self.n_models]
 
     @staticmethod
     def _weights_from_errors(scores: pd.Series) -> pd.Series:
+        """ _weights_from_errors
+
+        Transforming error scores into convex weights
+
+        :param scores: (pd.Series) error scores of each ensemble member
+
+        :return: (pd.Series) ensemble member weights
+        """
 
         weights = Normalizations.normalize_and_proportion(-scores)
 
@@ -156,6 +183,16 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _weighted_average(pred: pd.Series, weights: pd.DataFrame):
+        """ _weighted_average
+
+        Compute a weighted average of a prediction based on models' weights
+
+        :param pred: forecasts
+        :param weights: weights
+
+        :return: ensemble weighted forecast
+        """
+
         w = weights.loc[pred['unique_id']]
 
         wa = (pred[w.index] * w).sum()
@@ -196,6 +233,7 @@ class Mixture(ForecastingEnsemble):
                  gradient: bool,
                  trim_ratio: float,
                  weight_by_uid: bool):
+
         self.alias = 'Mixture'
 
         super().__init__()
@@ -251,8 +289,7 @@ class Mixture(ForecastingEnsemble):
             self.uid_coefficient[uid] = self._weights_from_regret()
 
     def _fit_all(self, insample_fcst: pd.DataFrame):
-        # todo add sort back
-        # just commenting so the estimation match the r bridge
+        # todo can comment the sorting to have the estimation match the r bridge
         insample_fcst_ = insample_fcst.sort_values('ds')
 
         uid_list = insample_fcst_['unique_id'].unique().tolist()
@@ -351,11 +388,6 @@ class BaseADE(ForecastingEnsemble):
                  trim_ratio: float,
                  trim_by_uid: bool,
                  meta_model):
-        """
-        : param window_size: No of recent observations used to trim ensemble
-        :param trim_ratio:
-        :param meta_model:
-        """
 
         super().__init__()
 

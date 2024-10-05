@@ -17,12 +17,12 @@ class MLpol(Mixture):
                  trim_ratio: float,
                  weight_by_uid: bool):
 
-        self.alias = 'MLpol'
-
         super().__init__(loss_type=loss_type,
                          gradient=gradient,
                          trim_ratio=trim_ratio,
                          weight_by_uid=weight_by_uid)
+
+        self.alias = 'MLpol'
 
         self.B = None
 

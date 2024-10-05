@@ -9,6 +9,11 @@ RowIDType = typing.Union[int, typing.Hashable]
 
 
 class MLewa(Mixture):
+    """ MLewa
+
+    Dynamic expert aggregation based on exponentially-weighted average
+
+    """
 
     def __init__(self,
                  loss_type: str,
@@ -16,12 +21,12 @@ class MLewa(Mixture):
                  trim_ratio: float,
                  weight_by_uid: bool):
 
-        self.alias = 'MLewa'
-
         super().__init__(loss_type=loss_type,
                          gradient=gradient,
                          trim_ratio=trim_ratio,
                          weight_by_uid=weight_by_uid)
+
+        self.alias = 'MLewa'
 
     def _update_mixture(self, fcst: pd.DataFrame, y: np.ndarray, **kwargs):
         for i, fc in fcst.iterrows():
