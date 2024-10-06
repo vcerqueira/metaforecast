@@ -6,22 +6,21 @@ from metaforecast.ensembles.base import ForecastingEnsemble
 
 
 class Windowing(ForecastingEnsemble):
-    """
-    Windowing
+    """ Windowing
 
-    Forecast combination based on windowing
+    Forecast combination based on windowing - forecast accuracy (squared error) on a recent window of data
 
     """
 
     def __init__(self,
                  freq: str,
-                 trim_ratio: float,
                  select_best: bool,
                  weight_by_uid: bool,
+                 trim_ratio: float = 1,
                  window_size: Optional[int] = None):
         """
-        :param window_size: No of recent observations used to trim ensemble
         :param trim_ratio:
+        :param window_size: No of recent observations used to trim ensemble
         """
 
         super().__init__()
@@ -66,7 +65,8 @@ class Windowing(ForecastingEnsemble):
         return fcst_c
 
     def update_weights(self, **kwargs):
-        """
+        """ update_weights
+
         Updating loss statistics for dynamic model selection
 
         """
@@ -74,17 +74,19 @@ class Windowing(ForecastingEnsemble):
         raise NotImplementedError
 
     def _weights_by_uid(self):
-        top_overall = self._get_top_k(self.insample_scores.mean())
-        top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
+        if self.weight_by_uid:
+            top_models = self._get_top_k(self.insample_scores.mean())
+        else:
+            top_models = self.insample_scores.apply(self._get_top_k, axis=1)
 
         uid_weights = {}
         for uid, uid_scr in self.insample_scores.iterrows():
             weights = self._weights_from_errors(uid_scr)
 
             if self.weight_by_uid:
-                poor_models = [x not in top_by_uid[uid] for x in weights.index]
+                poor_models = [x not in top_models[uid] for x in weights.index]
             else:
-                poor_models = [x not in top_overall for x in weights.index]
+                poor_models = [x not in top_models for x in weights.index]
 
             weights[poor_models] = 0
             weights /= weights.sum()

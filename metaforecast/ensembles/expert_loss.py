@@ -5,6 +5,11 @@ import pandas as pd
 
 
 class LossFunctions(ABC):
+    """ LossFunctions
+
+    Abstract class for loss functions and respective gradient
+
+    """
 
     @staticmethod
     @abstractmethod
