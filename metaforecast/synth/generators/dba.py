@@ -1,14 +1,13 @@
 import numpy as np
 import pandas as pd
 
-from tslearn.barycenters import (dtw_barycenter_averaging as dtw,
-                                 dtw_barycenter_averaging_subgradient as dtw2)
+from tslearn.barycenters import dtw_barycenter_averaging_subgradient as dtw
 
 from metaforecast.synth.generators._base import SemiSyntheticGenerator
 
 
 class DBA(SemiSyntheticGenerator):
-    DTW_PARAMS = {'max_iter': 10, 'tol': 1e-3}
+    DTW_PARAMS = {'max_iter': 5, 'tol': 1e-3}
 
     def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
         super().__init__(alias='DBA')
@@ -48,7 +47,7 @@ class DBA(SemiSyntheticGenerator):
 
         w = self.sample_weights_dirichlet(1, len(y_list))
 
-        synth_y = dtw2(X=y_list, weights=w, **self.DTW_PARAMS)
+        synth_y = dtw(X=y_list, weights=w, **self.DTW_PARAMS)
         synth_y = synth_y.flatten()
 
         synth_df = pd.DataFrame({'ds': ds[:len(synth_y)], 'y': synth_y})

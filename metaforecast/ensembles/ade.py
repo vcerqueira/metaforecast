@@ -28,7 +28,7 @@ class ADE(BaseADE):
 
     def __init__(self,
                  freq: str,
-                 meta_lags: List[int],
+                 meta_lags: Optional[List[int]] = None,
                  trim_ratio: float = 1,
                  trim_by_uid: bool = True,
                  meta_model=MIMO(lgb.LGBMRegressor(**LGB_PARS))):
@@ -64,7 +64,12 @@ class ADE(BaseADE):
 
         self.model_names = None
 
-        self.meta_lags = meta_lags
+        if meta_lags is None:
+            n_lags = self.WINDOW_SIZE_BY_FREQ[self.frequency]
+            self.meta_lags = [i for i in (1, n_lags+1)]
+        else:
+            self.meta_lags = meta_lags
+
         self.lag_names = [f'lag{i}' for i in self.meta_lags]
 
         self.meta_mlf = MLForecast(
