@@ -10,19 +10,83 @@ class Windowing(ForecastingEnsemble):
 
     Forecast combination based on windowing - forecast accuracy (squared error) on a recent window of data
 
+    References:
+        Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017, October). Dynamic and heterogeneous
+        ensembles for time series forecasting. In 2017 IEEE international conference on data science and
+        advanced analytics (DSAA) (pp. 242-251). IEEE.
+
+        van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015,
+        November). Having a blast: Meta-learning and heterogeneous ensembles
+        for data streams. In 2015 ieee international conference on
+        data mining (pp. 1003-1008). IEEE.
+
+    Example usage (CHECK NOTEBOOKS FOR MORE EXAMPLES)
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS, NBEATS, MLP
+    >>> from metaforecast.ensembles import Windowing
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> # ensemble members setup
+    >>> CONFIG = {'input_size': 12,
+    >>>           'h': 12,
+    >>>           'accelerator': 'cpu',
+    >>>           'max_steps': 10, }
+    >>>
+    >>> models = [
+    >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
+    >>>     NHITS(**CONFIG),
+    >>>     MLP(**CONFIG),
+    >>>     MLP(num_layers=3, **CONFIG),
+    >>> ]
+    >>>
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # cv to build meta-data
+    >>> n_windows = df['unique_id'].value_counts().min()
+    >>> n_windows = int(n_windows // 2)
+    >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
+    >>> fcst_cv = fcst_cv.reset_index()
+    >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
+    >>>
+    >>> # fitting combination rule
+    >>> ensemble = Windowing(freq='ME', trim_ratio=.8)
+    >>> ensemble.fit(fcst_cv)
+    >>>
+    >>> # re-fitting models
+    >>> nf.fit(df=df)
+    >>>
+    >>> # forecasting and combining
+    >>> fcst = nf.predict()
+    >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
     """
 
     def __init__(self,
                  freq: str,
-                 select_best: bool,
+                 select_best: bool = False,
                  trim_ratio: float = 1,
                  weight_by_uid: bool = False,
                  window_size: Optional[int] = None):
         """
-        :param trim_ratio:
+        :param freq: Sampling frequency of the time series (e.g. 'M')
+        :type freq: str
 
+        :param select_best: Whether to select the single model that maximizes forecast performance on in-sample data
+        :type select_best: bool
 
-        :param window_size: No of recent observations used to trim ensemble
+        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
+        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
+        Defaults to 1, which means all ensemble members are used.
+        :type trim_ratio: float
+
+        :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
+        Defaults to True, but this can become computationally demanding for datasets with a large number of time series
+        :type weight_by_uid: bool
+
+        :param window_size: No of recent observations used to trim ensemble. If None, a size equivalent to the
+        sampling frequency will be used.
+        :type window_size: int
         """
 
         super().__init__()

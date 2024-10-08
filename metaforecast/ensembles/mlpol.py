@@ -10,6 +10,60 @@ RowIDType = typing.Union[int, typing.Hashable]
 
 
 class MLpol(Mixture):
+    """ MLpol
+
+    Dynamic expert aggregation based on polynomially-weighted average based on R's opera package
+
+    References:
+        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games. Cambridge university press, 2006.
+
+        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by aggregating experts;
+        how to design a good set of experts. In Modeling and stochastic learning for forecasting in high dimensions
+        (pp. 95-115). Cham: Springer International Publishing.
+
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
+        Machine Learning, 108, 913-944.
+
+    Basic example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS, NBEATS, MLP
+    >>> from metaforecast.ensembles import MLpol
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> CONFIG = {'input_size': 12,
+    >>>           'h': 12,
+    >>>           'accelerator': 'cpu',
+    >>>           'max_steps': 10, }
+    >>>
+    >>> models = [
+    >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
+    >>>     NHITS(**CONFIG),
+    >>>     MLP(**CONFIG),
+    >>>     MLP(num_layers=3, **CONFIG),
+    >>> ]
+    >>>
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # cv to build meta-data
+    >>> n_windows = df['unique_id'].value_counts().min()
+    >>> n_windows = int(n_windows // 2)
+    >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
+    >>> fcst_cv = fcst_cv.reset_index()
+    >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
+    >>>
+    >>> # fitting combination rule
+    >>> ensemble = MLpol(loss_type='square', gradient=True, trim_ratio=.8)
+    >>> ensemble.fit(fcst_cv)
+    >>>
+    >>> # re-fitting models
+    >>> nf.fit(df=df)
+    >>>
+    >>> # forecasting and combining
+    >>> fcst = nf.predict()
+    >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
+    """
 
     def __init__(self,
                  loss_type: str,

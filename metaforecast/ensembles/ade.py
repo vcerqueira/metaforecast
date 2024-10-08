@@ -14,17 +14,60 @@ DForDFTuple = Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]
 
 
 class ADE(BaseADE):
+    """ Arbitrated Dynamic Ensemble
+    
+    Dynamic ensemble approach where ensemble members are weighted based on a meta-model that forecasts their error
+
+    References:
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
+        Machine Learning, 108, 913-944.
+    
+    Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS, NBEATS, MLP
+    >>> 
+    >>> from metaforecast.ensembles import ADE
+    >>> 
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>> 
+    >>> # ensemble members setup
+    >>> 
+    >>> CONFIG = {'input_size': 12,
+    >>>           'h': 12,
+    >>>           'accelerator': 'cpu',
+    >>>           'max_steps': 10, }
+    >>> 
+    >>> models = [
+    >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
+    >>>     NHITS(**CONFIG),
+    >>>     MLP(**CONFIG),
+    >>>     MLP(num_layers=3, **CONFIG),
+    >>> ]
+    >>> 
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>> 
+    >>> # cv to build meta-data
+    >>> n_windows = df['unique_id'].value_counts().min()
+    >>> n_windows = int(n_windows // 2)
+    >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
+    >>> fcst_cv = fcst_cv.reset_index()
+    >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
+    >>> 
+    >>> # fitting combination rule
+    >>> ensemble = ADE(freq='ME', meta_lags=list(range(1,7)), trim_ratio=0.6)
+    >>> ensemble.fit(fcst_cv)
+    >>> 
+    >>> # re-fitting models
+    >>> nf.fit(df=df)
+    >>> 
+    >>> # forecasting and combining
+    >>> fcst = nf.predict()
+    >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df, h=12)
+    """
+
     LGB_PARS = {'verbosity': -1, 'n_jobs': 1, 'linear_tree': True}
     MLF_PREPROCESS_PARS = {'static_features': []}
-
-    """ Arbitrated Dynamic Ensemble
-
-    Reference:
-
-    Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts. 
-    Machine Learning, 108, 913-944.
-
-    """
 
     def __init__(self,
                  freq: str,
@@ -66,7 +109,7 @@ class ADE(BaseADE):
 
         if meta_lags is None:
             n_lags = self.WINDOW_SIZE_BY_FREQ[self.frequency]
-            self.meta_lags = [i for i in (1, n_lags+1)]
+            self.meta_lags = [i for i in (1, n_lags + 1)]
         else:
             self.meta_lags = meta_lags
 
@@ -248,6 +291,43 @@ class MLForecastADE(ADE):
 
     ADE based on a MLForecast object
 
+    Dynamic ensemble approach where ensemble members are weighted based on a meta-model that forecasts their error
+
+    Reference:
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
+        Machine Learning, 108, 913-944.
+
+    Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    >>> from datasetsforecast.m3 import M3
+    >>> from mlforecast import MLForecast
+    >>> from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
+    >>> from sklearn.tree import DecisionTreeRegressor
+    >>> from sklearn.neighbors import KNeighborsRegressor
+    >>>
+    >>> from metaforecast.ensembles import MLForecastADE
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> # ensemble members setup
+    >>> models_ml = {
+    >>>     'Ridge': RidgeCV(),
+    >>>     'Lasso': LassoCV(),
+    >>>     'Elastic-net': ElasticNetCV(),
+    >>>     'DT': DecisionTreeRegressor(max_depth=5),
+    >>>     'DStump': DecisionTreeRegressor(max_depth=1),
+    >>>     'KNN': KNeighborsRegressor(n_neighbors=30),
+    >>> }
+    >>>
+    >>> mlf = MLForecast(models=models_ml, freq='ME', lags=range(1, 7))
+    >>>
+    >>> # make sure fitted=True so we have samples for meta-learning
+    >>> mlf.fit(df=df, fitted=True)
+    >>>
+    >>> # fitting combination rule
+    >>> ensemble = MLForecastADE(mlf=mlf, trim_ratio=0.5)
+    >>> ensemble.fit()
+    >>>
+    >>> fcst = ensemble.predict(train=df, h=12)
     """
 
     def __init__(self,

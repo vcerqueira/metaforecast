@@ -13,7 +13,17 @@ class MLewa(Mixture):
 
     Dynamic expert aggregation based on exponentially-weighted average based on R's opera package
 
-    Example usage (check notebooks for a more serious example):
+    References:
+        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games. Cambridge university press, 2006.
+
+        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by aggregating experts;
+        how to design a good set of experts. In Modeling and stochastic learning for forecasting in high dimensions
+        (pp. 95-115). Cham: Springer International Publishing.
+
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
+        Machine Learning, 108, 913-944.
+
+    Basic example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP
@@ -52,8 +62,6 @@ class MLewa(Mixture):
     >>> # forecasting and combining
     >>> fcst = nf.predict()
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
-
-
     """
 
     def __init__(self,
