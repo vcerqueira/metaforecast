@@ -13,12 +13,53 @@ class MLewa(Mixture):
 
     Dynamic expert aggregation based on exponentially-weighted average based on R's opera package
 
+    Example usage (check notebooks for a more serious example):
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS, NBEATS, MLP
+    >>> from metaforecast.ensembles import MLewa
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> CONFIG = {'input_size': 12,
+    >>>           'h': 12,
+    >>>           'accelerator': 'cpu',
+    >>>           'max_steps': 10, }
+    >>>
+    >>> models = [
+    >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
+    >>>     NHITS(**CONFIG),
+    >>>     MLP(**CONFIG),
+    >>>     MLP(num_layers=3, **CONFIG),
+    >>> ]
+    >>>
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # cv to build meta-data
+    >>> n_windows = df['unique_id'].value_counts().min()
+    >>> n_windows = int(n_windows // 2)
+    >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
+    >>> fcst_cv = fcst_cv.reset_index()
+    >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
+    >>>
+    >>> # fitting combination rule
+    >>> ensemble = MLewa(loss_type='square', gradient=True, trim_ratio=.8)
+    >>> ensemble.fit(fcst_cv)
+    >>>
+    >>> # re-fitting models
+    >>> nf.fit(df=df)
+    >>>
+    >>> # forecasting and combining
+    >>> fcst = nf.predict()
+    >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
+
+
     """
 
     def __init__(self,
                  loss_type: str,
                  gradient: bool,
-                 weight_by_uid: bool,
+                 weight_by_uid: bool = False,
                  trim_ratio: float = 1):
 
         """

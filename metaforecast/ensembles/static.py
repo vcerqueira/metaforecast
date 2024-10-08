@@ -38,7 +38,7 @@ class LossOnTrain(Windowing):
 
     """
 
-    def __init__(self, trim_ratio: float, weight_by_uid: bool):
+    def __init__(self, trim_ratio: float, weight_by_uid: bool = True):
         """
 
         :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)

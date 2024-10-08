@@ -15,11 +15,13 @@ class Windowing(ForecastingEnsemble):
     def __init__(self,
                  freq: str,
                  select_best: bool,
-                 weight_by_uid: bool,
                  trim_ratio: float = 1,
+                 weight_by_uid: bool = False,
                  window_size: Optional[int] = None):
         """
         :param trim_ratio:
+
+
         :param window_size: No of recent observations used to trim ensemble
         """
 

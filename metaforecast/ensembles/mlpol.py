@@ -14,7 +14,7 @@ class MLpol(Mixture):
     def __init__(self,
                  loss_type: str,
                  gradient: bool,
-                 weight_by_uid: bool,
+                 weight_by_uid: bool = False,
                  trim_ratio: float = 1):
 
         """
