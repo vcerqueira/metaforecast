@@ -82,6 +82,7 @@ class ADE(BaseADE):
         self.raw_meta_data = None
         self.insample_scores = None
         self.use_window = False
+        self.weights = None
 
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """
@@ -147,9 +148,9 @@ class ADE(BaseADE):
 
         meta_dataset = self.meta_mlf.preprocess(df_ext, **self.MLF_PREPROCESS_PARS)
 
-        weights = self._weights_by_uid(meta_dataset, h=h)
+        self.weights = self._weights_by_uid(meta_dataset, h=h)
 
-        fcst = preds.apply(lambda x: self._weighted_average(x, weights), axis=1)
+        fcst = preds.apply(lambda x: self._weighted_average(x, self.weights), axis=1)
 
         return fcst
 
@@ -256,8 +257,9 @@ class MLForecastADE(ADE):
                  meta_model=MIMO(lgb.LGBMRegressor(**ADE.LGB_PARS))):
 
         """
-        :param mlf: MLForecast object containing multiple models to form the ensemble
-        :type mlf: MLForecast
+        :param mlf: Fitted MLForecast object containing multiple models to form the ensemble.
+        Make sure the fitted parameter in MLForecast is set to true (fitted=True) to create the meta-dataset
+        :type mlf: fitted MLForecast with parameter fitted=True
 
         :param sf: A StatsForecast object containing classical forecasting models to be added to the ensemble
         :type sf: StatsForecast object

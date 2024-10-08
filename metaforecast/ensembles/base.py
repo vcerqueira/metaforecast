@@ -177,9 +177,9 @@ class ForecastingEnsemble(ABC):
         :return: (pd.Series) ensemble member weights
         """
 
-        weights = Normalizations.normalize_and_proportion(-scores)
+        weights_ = Normalizations.normalize_and_proportion(-scores)
 
-        return weights
+        return weights_
 
     @staticmethod
     def _weighted_average(pred: pd.Series, weights: pd.DataFrame):

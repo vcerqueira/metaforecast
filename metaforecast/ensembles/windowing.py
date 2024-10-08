@@ -77,9 +77,9 @@ class Windowing(ForecastingEnsemble):
 
     def _weights_by_uid(self):
         if self.weight_by_uid:
-            top_models = self._get_top_k(self.insample_scores.mean())
-        else:
             top_models = self.insample_scores.apply(self._get_top_k, axis=1)
+        else:
+            top_models = self._get_top_k(self.insample_scores.mean())
 
         uid_weights = {}
         for uid, uid_scr in self.insample_scores.iterrows():
