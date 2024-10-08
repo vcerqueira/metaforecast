@@ -59,6 +59,8 @@ class Windowing(ForecastingEnsemble):
         self.weights = self._weights_by_uid()
 
     def predict(self, fcst: pd.DataFrame, **kwargs):
+        self._assert_fcst(fcst)
+
         fcst_c = fcst.apply(lambda x: self._weighted_average(x, self.weights), axis=1)
         fcst_c.name = self.alias
 

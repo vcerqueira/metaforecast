@@ -26,7 +26,9 @@ classifiers = [
 
 dependencies = [
     "lightgbm==4.5.0",
-    "tslearn==0.6.3"
+    "tslearn==0.6.3",
+    "neuralforecast==1.7.5",
+    "mlforecast==0.13.4"
 ]
 
 [project.urls]

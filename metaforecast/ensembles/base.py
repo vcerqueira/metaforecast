@@ -199,6 +199,10 @@ class ForecastingEnsemble(ABC):
 
         return wa
 
+    @staticmethod
+    def _assert_fcst(fcst: pd.DataFrame):
+        assert 'unique_id' in fcst.columns, '"unique_id" should be included in the predictions object'
+
 
 class Mixture(ForecastingEnsemble):
     """ Mixture
@@ -309,6 +313,8 @@ class Mixture(ForecastingEnsemble):
             self.uid_coefficient[uid] = self._weights_from_regret()
 
     def predict(self, fcst: pd.DataFrame, **kwargs):
+        self._assert_fcst(fcst)
+
         weights = pd.DataFrame(self.uid_weights).T
         # weights = pd.DataFrame(self.uid_coefficient).T
 
@@ -388,7 +394,6 @@ class BaseADE(ForecastingEnsemble):
                  trim_ratio: float,
                  trim_by_uid: bool,
                  meta_model):
-
         super().__init__()
 
         self.window_size = window_size

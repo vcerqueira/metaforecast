@@ -130,6 +130,7 @@ class ADE(BaseADE):
 
         :return: ensemble forecasts as pd.Series
         """
+        self._assert_fcst(fcst)
 
         ade_fcst = self._predict(preds=fcst, train=train, h=h)
         ade_fcst.name = self.alias
