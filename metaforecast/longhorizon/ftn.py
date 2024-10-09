@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import List, Optional
 import copy
+
 from tqdm import tqdm
 
 import numpy as np
@@ -43,6 +45,7 @@ class ForecastTrajectoryNeighbors(ABC):
         self.alpha_w = np.linspace(start=0, stop=1, num=self.horizon)
 
         self.uid_insample_traj = {}
+        self.model_names = None
 
     @abstractmethod
     def fit(self, df: pd.DataFrame):
@@ -152,12 +155,12 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         Y_hat: pd.DF with the multi-step forecasts of a base-model
         Y_hat has shape (n_test_observations, forecasting_horizon)
         """
-        model_names = [x for x in fcst.columns if x not in self.METADATA]
+        self.model_names = [x for x in fcst.columns if x not in self.METADATA]
 
         fcst_ftn = []
         for uid, df_ in tqdm(fcst.groupby('unique_id')):
             ftn_df = df_.copy()
-            for m in model_names:
+            for m in self.model_names:
                 # m='lgbm'
                 fcst_ = df_[m].values
                 x0 = fcst_[0]
@@ -186,21 +189,30 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         return fcst_ftn_df
 
-    @classmethod
-    def alpha_cv_scoring(cls, cv: pd.DataFrame, model_name: str):
+    def alpha_cv_scoring(self,
+                         cv: pd.DataFrame,
+                         model_names: Optional[List[str]] = None):
 
-        cv_ = cv[cls.EVAL_BASE_COLS + [model_name, f'{model_name}(FTN)']]
+        if model_names is None:
+            assert self.model_names is not None
+            models = self.model_names
+        else:
+            models = model_names
 
-        eval_by_horizon = {}
-        for h_, h_df in cv_.groupby('horizon'):
-            h_df = accuracy(h_df, [smape], agg_by=['unique_id'])
-            h_df_avg = h_df.drop(columns=['horizon', 'metric', 'unique_id']).mean()
+        weights = {}
+        for m in models:
+            cv_ = cv[self.EVAL_BASE_COLS + [m, f'{m}(FTN)']]
 
-            eval_by_horizon[h_] = h_df_avg
+            eval_by_horizon = {}
+            for h_, h_df in cv_.groupby('horizon'):
+                h_df = accuracy(h_df, [smape], agg_by=['unique_id'])
+                h_df_avg = h_df.drop(columns=['horizon', 'metric', 'unique_id']).mean()
 
-        h_eval_df = pd.DataFrame(eval_by_horizon).T
+                eval_by_horizon[h_] = h_df_avg
 
-        horizon_weights = h_eval_df.apply(lambda x: 1 - softmax(x)[1], axis=1)
-        weights_arr = horizon_weights.values
+            h_eval_df = pd.DataFrame(eval_by_horizon).T
 
-        return weights_arr
+            horizon_weights = h_eval_df.apply(lambda x: 1 - softmax(x)[1], axis=1)
+            weights[m] = horizon_weights.values
+
+        return weights
