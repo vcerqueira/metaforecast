@@ -1,7 +1,6 @@
+import copy
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict
-import copy
-
 from tqdm import tqdm
 
 import numpy as np
@@ -14,14 +13,17 @@ from datasetsforecast.evaluation import accuracy
 from datasetsforecast.losses import smape
 
 
-# from metaforecast.utils.barycenters import BarycentricAveraging
-
-
 class ForecastTrajectoryNeighbors(ABC):
-    """
+    """ ForecastTrajectoryNeighbors
+
     Forecasted Trajectory Neighbors
 
-    Improving Multi-step Forecasts with Neighbors Adjustments
+    Improving Multi-step Forecasts with Neighbors Adjustments, especially for long horizons
+
+    References:
+        Cerqueira, Vitor, Luis Torgo, and Gianluca Bontempi. "Instance-based meta-learning for
+        conditionally dependent univariate multi-step forecasting." International Journal of Forecasting (2024).
+
     """
     KNN_WEIGHTING = 'uniform'
     EVAL_BASE_COLS = ['unique_id', 'ds', 'y', 'horizon']
@@ -49,7 +51,7 @@ class ForecastTrajectoryNeighbors(ABC):
 
     @abstractmethod
     def fit(self, df: pd.DataFrame):
-        """
+        """ fit
 
         Fitting in this case means indexation of training data
         """
@@ -58,22 +60,44 @@ class ForecastTrajectoryNeighbors(ABC):
 
     @abstractmethod
     def predict(self, fcst: pd.DataFrame):
-        """
-        Making predictions
+        """ predict
 
-        Y_hat: pd.DF with the multi-step forecasts of a base-model
-        Y_hat has shape (n_test_observations, forecasting_horizon)
-        """
+        Correct the forecasts of a model
 
+        :param fcst: predictions in a nixtla-based structure with multi-step forecasts
+        :type fcst: pd.DataFrame
+        """
         raise NotImplementedError
 
     def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
+        """ set_alpha_weights
+
+        When weighting the corrected (FTN) forecasts with the original ones you need to set the weights of FTN
+        using this function.
+        The function expects an array of weights with size equal to the forecasting horizon.
+        Each weight should be in a 0-1 range, where 1 means that the final prediction only considers FTN
+
+        :param alpha: the FTN weights for a dict of forecasting models
+        :type alpha: dict, with keys being the model names (str) and the values a numpy array with weight values
+        for each horizon.
+
+        :return: self
+        """
         for k in alpha:
             assert len(alpha[k]) == self.horizon
 
         self.alpha_weights = alpha
 
     def _smooth_series(self, df: pd.DataFrame):
+        """ _smooth_series
+
+        Apply an exponential moving average to a time series dataset
+
+        :param df: time series dataset, following a nixtla-based structure, with unique_id, ds, y
+        :type df: pd.DataFrame
+
+        :return: smoothed df
+        """
         smoothed_uid_l = []
         for uid, uid_df in df.groupby(['unique_id']):
             uid_df['y'] = uid_df['y'].ewm(alpha=self.ewm_smooth).mean()
@@ -85,6 +109,10 @@ class ForecastTrajectoryNeighbors(ABC):
         return smooth_df
 
     def reset_learning(self):
+        """ reset_learning
+
+        Reset previous meta-models
+        """
         self.model = {}
         self.uid_insample_traj = {}
 
@@ -99,7 +127,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                  horizon: int,
                  apply_ewm: bool = False,
                  apply_weighting: bool = False,
-                 apply_1_diff: bool = False,
+                 apply_diff1: bool = False,
                  apply_global: bool = False,
                  ewm_smooth: float = 0.6):
 
@@ -110,20 +138,18 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                          apply_global=apply_global,
                          ewm_smooth=ewm_smooth)
 
-        self.apply_1_diff = apply_1_diff
+        self.apply_diff1 = apply_diff1
         self.lags = range(1, self.horizon)
 
         self.preprocess_params = {'lags': self.lags, **self.BASE_PARAMS}
-        # self.barycenter = barycenter
 
-        if self.apply_1_diff:
+        if self.apply_diff1:
             self.preprocess_params['target_transforms'] = [Differences([1])]
 
         self.preprocess = MLForecast(**self.preprocess_params)
 
     def fit(self, df: pd.DataFrame):
-        """
-
+        """ fit
         Fitting in this case means indexation of training data
         """
 
@@ -173,9 +199,8 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                     ftn_knn = self.uid_insample_traj[uid][k_neighbors[0], :]
 
                 ftn_fcst = ftn_knn.mean(axis=0)
-                # ftn_fcst = BarycentricAveraging.calc_average(ftn_knn, self.barycenter)
 
-                if self.apply_1_diff:
+                if self.apply_diff1:
                     ftn_fcst = np.r_[x0, ftn_fcst[1:]].cumsum()
 
                 name_ = f'{m}(FTN)'

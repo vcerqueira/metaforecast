@@ -4,7 +4,7 @@ import numpy as np
 from metaforecast.synth.generators._base import SemiSyntheticTransformer
 
 
-class TSjittering(SemiSyntheticTransformer):
+class Jittering(SemiSyntheticTransformer):
     # https://github.com/luisroque/robustness_hierarchical_time_series_forecasting_algorithms/blob/main/tsaugmentation/transformations/manipulate_data.py
     # https://github.com/uchidalab/time_series_augmentation/blob/master/utils/augmentation.py
 

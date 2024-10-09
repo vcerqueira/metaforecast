@@ -7,7 +7,9 @@ import pandas as pd
 class LossFunctions(ABC):
     """ LossFunctions
 
-    Abstract class for loss functions and respective gradient
+    Abstract class for loss functions and respective gradient.
+
+    These loss functions are used in the context of weighting expert advice, i.e. ensemble learning
 
     """
 

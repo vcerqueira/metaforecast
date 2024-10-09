@@ -4,7 +4,7 @@ import numpy as np
 from metaforecast.synth.generators._base import SemiSyntheticTransformer
 
 
-class TSscaling(SemiSyntheticTransformer):
+class Scaling(SemiSyntheticTransformer):
 
     def __init__(self, sigma: float = 0.1, rename_uids: bool=True):
         super().__init__(alias='SCALE', rename_uids=rename_uids)
