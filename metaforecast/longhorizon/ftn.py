@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict
 import copy
 
 from tqdm import tqdm
@@ -30,7 +30,7 @@ class ForecastTrajectoryNeighbors(ABC):
                  n_neighbors: int,
                  horizon: int,
                  apply_ewm: bool = False,
-                 apply_partial: bool = False,
+                 apply_weighting: bool = False,
                  apply_global: bool = False,
                  ewm_smooth: float = 0.6):
         self.base_knn = KNN(n_neighbors=n_neighbors, weights=self.KNN_WEIGHTING)
@@ -40,9 +40,9 @@ class ForecastTrajectoryNeighbors(ABC):
         self.horizon = horizon
         self.ewm_smooth = ewm_smooth
         self.apply_ewm = apply_ewm
-        self.apply_partial = apply_partial
+        self.apply_weighting = apply_weighting
         self.apply_global = apply_global
-        self.alpha_w = np.linspace(start=0, stop=1, num=self.horizon)
+        self.alpha_weights = {}
 
         self.uid_insample_traj = {}
         self.model_names = None
@@ -67,10 +67,11 @@ class ForecastTrajectoryNeighbors(ABC):
 
         raise NotImplementedError
 
-    def set_alpha_weights(self, alpha: np.ndarray):
-        assert len(alpha) == self.horizon
+    def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
+        for k in alpha:
+            assert len(alpha[k]) == self.horizon
 
-        self.alpha_w = alpha
+        self.alpha_weights = alpha
 
     def _smooth_series(self, df: pd.DataFrame):
         smoothed_uid_l = []
@@ -97,7 +98,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                  n_neighbors: int,
                  horizon: int,
                  apply_ewm: bool = False,
-                 apply_partial: bool = False,
+                 apply_weighting: bool = False,
                  apply_1_diff: bool = False,
                  apply_global: bool = False,
                  ewm_smooth: float = 0.6):
@@ -105,7 +106,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         super().__init__(n_neighbors=n_neighbors,
                          horizon=horizon,
                          apply_ewm=apply_ewm,
-                         apply_partial=apply_partial,
+                         apply_weighting=apply_weighting,
                          apply_global=apply_global,
                          ewm_smooth=ewm_smooth)
 
@@ -161,7 +162,6 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         for uid, df_ in tqdm(fcst.groupby('unique_id')):
             ftn_df = df_.copy()
             for m in self.model_names:
-                # m='lgbm'
                 fcst_ = df_[m].values
                 x0 = fcst_[0]
 
@@ -178,10 +178,15 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                 if self.apply_1_diff:
                     ftn_fcst = np.r_[x0, ftn_fcst[1:]].cumsum()
 
-                if self.apply_partial:
-                    ftn_fcst = ftn_fcst * self.alpha_w + fcst_ * (1 - self.alpha_w)
+                name_ = f'{m}(FTN)'
+                if self.apply_weighting:
+                    if m in self.alpha_weights:
+                        w = self.alpha_weights[m]
 
-                ftn_df[f'{m}(FTN)'] = ftn_fcst
+                        ftn_fcst = ftn_fcst * w + fcst_ * (1 - w)
+                        name_ = f'{m}(WFTN)'
+
+                ftn_df[name_] = ftn_fcst
 
             fcst_ftn.append(ftn_df)
 
