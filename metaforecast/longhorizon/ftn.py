@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 import copy
+from tqdm import tqdm
 
 import numpy as np
 import pandas as pd
+from scipy.special import softmax
 from sklearn.neighbors import KNeighborsRegressor as KNN
 from mlforecast import MLForecast
 from mlforecast.target_transforms import Differences
+from datasetsforecast.evaluation import accuracy
+from datasetsforecast.losses import smape
 
 
 # from metaforecast.utils.barycenters import BarycentricAveraging
@@ -18,12 +22,14 @@ class ForecastTrajectoryNeighbors(ABC):
     Improving Multi-step Forecasts with Neighbors Adjustments
     """
     KNN_WEIGHTING = 'uniform'
+    EVAL_BASE_COLS = ['unique_id', 'ds', 'y', 'horizon']
 
     def __init__(self,
                  n_neighbors: int,
                  horizon: int,
                  apply_ewm: bool = False,
                  apply_partial: bool = False,
+                 apply_global: bool = False,
                  ewm_smooth: float = 0.6):
         self.base_knn = KNN(n_neighbors=n_neighbors, weights=self.KNN_WEIGHTING)
         self.model = {}
@@ -33,6 +39,7 @@ class ForecastTrajectoryNeighbors(ABC):
         self.ewm_smooth = ewm_smooth
         self.apply_ewm = apply_ewm
         self.apply_partial = apply_partial
+        self.apply_global = apply_global
         self.alpha_w = np.linspace(start=0, stop=1, num=self.horizon)
 
         self.uid_insample_traj = {}
@@ -73,9 +80,15 @@ class ForecastTrajectoryNeighbors(ABC):
 
         return smooth_df
 
+    def reset_learning(self):
+        self.model = {}
+        self.uid_insample_traj = {}
+
 
 class MLForecastFTN(ForecastTrajectoryNeighbors):
     BASE_PARAMS = {'models': [], 'freq': ''}
+    METADATA = ['unique_id', 'ds']
+    GLB_UID = 'glob'
 
     def __init__(self,
                  n_neighbors: int,
@@ -83,13 +96,14 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                  apply_ewm: bool = False,
                  apply_partial: bool = False,
                  apply_1_diff: bool = False,
-                 # barycenter: str = 'euclidean',
+                 apply_global: bool = False,
                  ewm_smooth: float = 0.6):
 
         super().__init__(n_neighbors=n_neighbors,
                          horizon=horizon,
                          apply_ewm=apply_ewm,
                          apply_partial=apply_partial,
+                         apply_global=apply_global,
                          ewm_smooth=ewm_smooth)
 
         self.apply_1_diff = apply_1_diff
@@ -109,6 +123,8 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         Fitting in this case means indexation of training data
         """
 
+        self.reset_learning()
+
         if self.apply_ewm:
             df = self._smooth_series(df)
 
@@ -117,11 +133,17 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         lag_names = [f'lag{i}' for i in range(self.horizon)]
 
-        for uid, df_ in rec_df.groupby('unique_id'):
-            self.uid_insample_traj[uid] = df_[lag_names[::-1]].values
-            self.model[uid] = copy.deepcopy(self.base_knn)
-            self.model[uid] = self.model[uid].fit(self.uid_insample_traj[uid],
-                                                  self.uid_insample_traj[uid][:, 0])
+        if self.apply_global:
+            self.uid_insample_traj[self.GLB_UID] = rec_df[lag_names[::-1]].values
+            self.model[self.GLB_UID] = copy.deepcopy(self.base_knn)
+            self.model[self.GLB_UID] = self.model[self.GLB_UID].fit(self.uid_insample_traj[self.GLB_UID],
+                                                                    self.uid_insample_traj[self.GLB_UID][:, 0])
+        else:
+            for uid, df_ in tqdm(rec_df.groupby('unique_id')):
+                self.uid_insample_traj[uid] = df_[lag_names[::-1]].values
+                self.model[uid] = copy.deepcopy(self.base_knn)
+                self.model[uid] = self.model[uid].fit(self.uid_insample_traj[uid],
+                                                      self.uid_insample_traj[uid][:, 0])
 
     def predict(self, fcst: pd.DataFrame):
         """
@@ -130,19 +152,22 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         Y_hat: pd.DF with the multi-step forecasts of a base-model
         Y_hat has shape (n_test_observations, forecasting_horizon)
         """
-        model_names = [x for x in fcst.columns if x not in ['unique_id', 'ds']]
+        model_names = [x for x in fcst.columns if x not in self.METADATA]
 
         fcst_ftn = []
-        for uid, df_ in fcst.groupby('unique_id'):
+        for uid, df_ in tqdm(fcst.groupby('unique_id')):
             ftn_df = df_.copy()
             for m in model_names:
                 # m='lgbm'
                 fcst_ = df_[m].values
                 x0 = fcst_[0]
 
-                _, k_neighbors = self.model[uid].kneighbors(fcst_.reshape(1, -1))
-
-                ftn_knn = self.uid_insample_traj[uid][k_neighbors[0], :]
+                if self.apply_global:
+                    _, k_neighbors = self.model[self.GLB_UID].kneighbors(fcst_.reshape(1, -1))
+                    ftn_knn = self.uid_insample_traj[self.GLB_UID][k_neighbors[0], :]
+                else:
+                    _, k_neighbors = self.model[uid].kneighbors(fcst_.reshape(1, -1))
+                    ftn_knn = self.uid_insample_traj[uid][k_neighbors[0], :]
 
                 ftn_fcst = ftn_knn.mean(axis=0)
                 # ftn_fcst = BarycentricAveraging.calc_average(ftn_knn, self.barycenter)
@@ -153,10 +178,29 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                 if self.apply_partial:
                     ftn_fcst = ftn_fcst * self.alpha_w + fcst_ * (1 - self.alpha_w)
 
-                ftn_df[m] = ftn_fcst
+                ftn_df[f'{m}(FTN)'] = ftn_fcst
 
             fcst_ftn.append(ftn_df)
 
         fcst_ftn_df = pd.concat(fcst_ftn)
 
         return fcst_ftn_df
+
+    @classmethod
+    def alpha_cv_scoring(cls, cv: pd.DataFrame, model_name: str):
+
+        cv_ = cv[cls.EVAL_BASE_COLS + [model_name, f'{model_name}(FTN)']]
+
+        eval_by_horizon = {}
+        for h_, h_df in cv_.groupby('horizon'):
+            h_df = accuracy(h_df, [smape], agg_by=['unique_id'])
+            h_df_avg = h_df.drop(columns=['horizon', 'metric', 'unique_id']).mean()
+
+            eval_by_horizon[h_] = h_df_avg
+
+        h_eval_df = pd.DataFrame(eval_by_horizon).T
+
+        horizon_weights = h_eval_df.apply(lambda x: 1 - softmax(x)[1], axis=1)
+        weights_arr = horizon_weights.values
+
+        return weights_arr
