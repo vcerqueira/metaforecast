@@ -1,4 +1,5 @@
 import copy
+from warnings import simplefilter
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict
 from tqdm import tqdm
@@ -11,6 +12,8 @@ from mlforecast import MLForecast
 from mlforecast.target_transforms import Differences
 from datasetsforecast.evaluation import accuracy
 from datasetsforecast.losses import smape
+
+simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
 class ForecastTrajectoryNeighbors(ABC):
