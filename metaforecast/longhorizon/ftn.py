@@ -119,6 +119,49 @@ class ForecastTrajectoryNeighbors(ABC):
         self.model = {}
         self.uid_insample_traj = {}
 
+    @staticmethod
+    def get_horizon(cv: pd.DataFrame):
+        """ get_horizon
+
+        Get the forecasting horizon for cross-validation results.
+
+        :param cv: cross-validation results from a nixtla-based pipeline
+        :type cv: pd.DataFrame with nitxla-based columns: unique_id, cutoff, ds
+
+        :return: cv with horizon column
+        """
+        if 'horizon' in cv.columns:
+            raise ValueError('"horizon" column already in the dataset.')
+
+        if 'cutoff' in cv.columns:
+            cv_g = cv.groupby(['unique_id', 'cutoff'])
+        else:
+            cv_g = cv.groupby(['unique_id'])
+
+        horizon = []
+        for g, df in cv_g:
+            df = df.sort_values('ds')
+            h = np.asarray(range(1, df.shape[0] + 1))
+            hs = {
+                'horizon': h,
+                'ds': df['ds'].values,
+                'unique_id': df['unique_id'].values,
+            }
+            if 'cutoff' in df.columns:
+                hs['cutoff'] = df['cutoff'].values,
+
+            hs = pd.DataFrame(hs)
+            horizon.append(hs)
+
+        horizon = pd.concat(horizon)
+
+        if 'cutoff' in cv.columns:
+            cv = cv.merge(horizon, on=['unique_id', 'ds', 'cutoff'])
+        else:
+            cv = cv.merge(horizon, on=['unique_id', 'ds'])
+
+        return cv
+
 
 class MLForecastFTN(ForecastTrajectoryNeighbors):
     """ MLForecastFTN
