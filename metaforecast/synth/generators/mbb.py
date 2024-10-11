@@ -64,6 +64,41 @@ class SeasonalMBB(SemiSyntheticTransformer):
         Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y., & Bergmeir, C. (2021). Improving the
         accuracy of global forecasting models using time series data augmentation. Pattern Recognition, 120, 108148.
 
+    Example usage (check notebooks for extended examples):
+
+    >>> import pandas as pd
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.synth import SeasonalMBB
+    >>> from metaforecast.utils.data import DataUtils
+    >>>
+    >>>
+    >>> # Loading and preparing data
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 12
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> # Data augmentation
+    >>> tsgen = SeasonalMBB(seas_period=12)
+    >>>
+    >>> # Creating time series using kernelsynth
+    >>> synth_df = tsgen.transform(train)
+    >>>
+    >>> # Concat the synthetic dataset with the original training data
+    >>> train_aug = pd.concat([train, synth_df])
+    >>>
+    >>> # Setting up NHITS
+    >>> models = [NHITS(input_size=horizon, h=horizon, accelerator='cpu')]
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # Fitting NHITS on the augmented data
+    >>> nf.fit(df=train_aug)
+    >>>
+    >>> # Forecasting on the original dataset
+    >>> fcst = nf.predict(df=train)
     """
 
     def __init__(self, seas_period: int, log: bool = True):

@@ -14,6 +14,41 @@ class Scaling(SemiSyntheticTransformer):
         Data augmentation of wearable sensor data for parkinson’s disease monitoring using convolutional neural
         networks. In Proceedings of the 19th ACM international conference on multimodal interaction (pp. 216-220).
 
+
+    Example usage (check notebooks for extended examples):
+    >>> import pandas as pd
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.synth import Scaling
+    >>> from metaforecast.utils.data import DataUtils
+    >>>
+    >>>
+    >>> # Loading and preparing data
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 12
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> # Data augmentation
+    >>> tsgen = Scaling()
+    >>>
+    >>> # Scaling each time series in the dataset
+    >>> synth_df = tsgen.transform(train)
+    >>>
+    >>> # Concat the synthetic dataset with the original training data
+    >>> train_aug = pd.concat([train, synth_df])
+    >>>
+    >>> # Setting up NHITS
+    >>> models = [NHITS(input_size=horizon, h=horizon, accelerator='cpu')]
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # Fitting NHITS on the augmented data
+    >>> nf.fit(df=train_aug)
+    >>>
+    >>> # Forecasting on the original dataset
+    >>> fcst = nf.predict(df=train)
     """
 
     def __init__(self, sigma: float = 0.1, rename_uids: bool = True):

@@ -63,9 +63,11 @@ class KernelSynth(PureSyntheticGenerator):
         Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
         Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
 
-    ks = KernelSynth(max_kernels=3, freq='M',n_obs=50)
-
-    ks.transform(n_series=3)
+    Example Usage (check notebooks for extended examples)
+    >>> from metaforecast.synth import KernelSynth
+    >>>
+    >>> tsgen = KernelSynth(max_kernels=7, freq='ME', n_obs=300)
+    >>> synth_df = tsgen.transform(n_series=100)
     """
 
     def __init__(self, max_kernels: int, n_obs: int, freq: str):
@@ -86,7 +88,7 @@ class KernelSynth(PureSyntheticGenerator):
         self.max_kernels = max_kernels
         self.freq = freq
         self.n_obs = n_obs
-        self.x = np.linspace(0, 1, self.n_obs)
+        self.x = np.linspace(0, 1, int(self.n_obs))
 
     def transform(self, n_series: int):
         dt = pd.date_range(start=self.START,

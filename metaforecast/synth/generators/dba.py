@@ -18,9 +18,41 @@ class DBA(SemiSyntheticGenerator):
 
     Attributes:
         DTW_PARAMS (Dict[str, float]) DTW configuration parameters
+
+    Example usage (CHECK NOTEBOOKS FOR MORE EXTENDED EXAMPLES):
+    >>> import pandas as pd
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.synth import DBA
+    >>> from metaforecast.utils.data import DataUtils
+    >>>
+    >>> # Loading and preparing data
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 12
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> # Data augmentation
+    >>> tsgen = DBA(max_n_uids=10)
+    >>> ## Create 100 time series
+    >>> synth_df = tsgen.transform(train, 100)
+    >>> ## Concat the synthetic dataset with the original training data
+    >>> train_aug = pd.concat([train, synth_df])
+    >>>
+    >>> # Setting up NHITS
+    >>> models = [NHITS(input_size=horizon, h=horizon, accelerator='cpu')]
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # Fitting NHITS on the augmented data
+    >>> nf.fit(df=train_aug)
+    >>>
+    >>> # Forecasting on the original dataset
+    >>> fcst = nf.predict(df=train)
     """
 
-    DTW_PARAMS = {'max_iter': 5, 'tol': 1e-3}
+    DTW_PARAMS = {'max_iter': 10, 'tol': 1e-3}
 
     def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
         """

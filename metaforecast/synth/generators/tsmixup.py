@@ -13,7 +13,40 @@ class TSMixup(SemiSyntheticGenerator):
         Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
         Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
 
-
+    Example usage (check notebooks for extended examples):
+    >>> import pandas as pd
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.synth import TSMixup
+    >>> from metaforecast.utils.data import DataUtils
+    >>>
+    >>>
+    >>> # Loading and preparing data
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 12
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> # Data augmentation
+    >>> tsgen = TSMixup(min_len=50, max_len=96, max_n_uids=7)
+    >>>
+    >>> # Applying time warping to each time series in the dataset
+    >>> synth_df = tsgen.transform(train)
+    >>>
+    >>> # Concat the synthetic dataset with the original training data
+    >>> train_aug = pd.concat([train, synth_df])
+    >>>
+    >>> # Setting up NHITS
+    >>> models = [NHITS(input_size=horizon, h=horizon, accelerator='cpu')]
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> # Fitting NHITS on the augmented data
+    >>> nf.fit(df=train_aug)
+    >>>
+    >>> # Forecasting on the original dataset
+    >>> fcst = nf.predict(df=train)
     """
 
     def __init__(self,
