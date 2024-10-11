@@ -85,7 +85,7 @@ class TSMixup(SemiSyntheticGenerator):
             n_series = len(unq_uids)
 
         dataset = []
-        for i in range(n_series):
+        for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
 
             selected_uids = np.random.choice(unq_uids, n_uids, replace=False).tolist()
@@ -123,10 +123,15 @@ class TSMixup(SemiSyntheticGenerator):
 
         mixup = []
         for j, k in enumerate(uids):
-            uid_df = df.query(f'unique_id=="{k}"').head(n_obs)
+            df_j = df.query(f'unique_id=="{k}"')
+
+            start_idx = np.random.randint(0, df_j.shape[0] - n_obs + 1)
+
+            uid_df = df_j.iloc[start_idx: start_idx + n_obs]
 
             uid_y = uid_df['y'].reset_index(drop=True)
-            uid_y /= uid_y.mean()
+            # todo de-mean?
+            # uid_y /= uid_y.mean()
             uid_y *= w[j]
 
             mixup.append(uid_y)
