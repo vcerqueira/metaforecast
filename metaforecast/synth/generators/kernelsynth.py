@@ -53,8 +53,15 @@ KERNEL_BANK = [
 
 
 class KernelSynth(PureSyntheticGenerator):
-    """
-    # https://github.com/amazon-science/chronos-forecasting/issues/62
+    """ KernelSynth
+
+    Synthetic data generation using KernelSynth.
+
+    CODE BASED ON https://github.com/amazon-science/chronos-forecasting/issues/62
+
+    References:
+        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
+        Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
 
     ks = KernelSynth(max_kernels=3, freq='M',n_obs=50)
 
@@ -62,6 +69,17 @@ class KernelSynth(PureSyntheticGenerator):
     """
 
     def __init__(self, max_kernels: int, n_obs: int, freq: str):
+        """
+
+        :param max_kernels: Maximum number of kernels to draw from the kernel bank
+        :type max_kernels: int
+
+        :param n_obs: Number of observations in each synthetic time series
+        :type n_obs: int
+
+        :param freq: Time series frequency (e.g. ME, H, etc)
+        :type freq: str
+        """
         super().__init__(alias='KS')
 
         self.kernels = KERNEL_BANK

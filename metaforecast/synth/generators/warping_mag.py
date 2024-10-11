@@ -6,8 +6,28 @@ from metaforecast.synth.generators._base import SemiSyntheticTransformer
 
 
 class MagnitudeWarping(SemiSyntheticTransformer):
+    """ MagnitudeWarping
 
-    def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool=True):
+    Apply magnitude warping to each time series in a dataset
+
+    References:
+        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D. (2017, November).
+        Data augmentation of wearable sensor data for parkinson’s disease monitoring using convolutional neural
+        networks. In Proceedings of the 19th ACM international conference on multimodal interaction (pp. 216-220).
+
+    """
+
+    def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
+        """
+        :param sigma: Scaling parameter for the warping factor
+        :type sigma: float. Defaults to 0.2
+
+        :param knot: Number of knots for the CubicSpline
+        :type knot: int. Defaults to 4
+
+        :param rename_uids: whether to rename the original unique_id's
+        :type rename_uids: bool
+        """
         super().__init__(alias='MWARP', rename_uids=rename_uids)
 
         self.sigma = sigma

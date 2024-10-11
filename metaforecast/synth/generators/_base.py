@@ -13,6 +13,7 @@ class BaseTimeSeriesGenerator(ABC):
     Synthetic time series generator abstract class
 
     Attributes:
+        REQUIRED_COLUMNS (List[str]) List of columns required in a dataset
         START (pd.Timestamp) Dummy timestamp that marks the beginning of a synthetic time series
         END (pd.Timestamp) Dummy timestamp that marks the end of a synthetic time series
         REQUIRES_N (bool) Whether the type of generator requires user input about the number of time series to
@@ -20,6 +21,7 @@ class BaseTimeSeriesGenerator(ABC):
         REQUIRES_DF (bool) Whether the type of generator requires user input about the source dataset
     """
 
+    REQUIRED_COLUMNS = ['unique_id', 'ds', 'y']
     START: pd.Timestamp
     END: pd.Timestamp
     REQUIRES_N: bool
@@ -67,6 +69,24 @@ class BaseTimeSeriesGenerator(ABC):
         weights = y / np.sum(y)
 
         return weights
+
+    @classmethod
+    def _assert_datatypes(cls, df: pd.DataFrame):
+        """
+        :param df: time series dataset with a nixtla-based structure
+        """
+        # Check if required columns exist
+        for col in cls.REQUIRED_COLUMNS:
+            assert col in df.columns, f"Column '{col}' is missing from the DataFrame"
+
+        # Assert unique_id is of type string
+        assert df["unique_id"].dtype == "object", "Column 'unique_id' must be of type string"
+
+        # Assert ds is of type pd.Timestamp
+        assert pd.api.types.is_datetime64_any_dtype(df["ds"]), "Column 'ds' must be of type pd.Timestamp"
+
+        # Assert y is numeric
+        assert np.issubdtype(df["y"].dtype, np.number), "Column 'y' must be numeric"
 
 
 class PureSyntheticGenerator(BaseTimeSeriesGenerator):
@@ -138,6 +158,8 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
         :return: Transformed dataset
         """
+        self._assert_datatypes(df)
+
         df_t_list = []
         for uid, uid_df in df.groupby('unique_id'):
             ts_df = self._create_synthetic_ts(uid_df)

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import torch
 from statsmodels.tsa.api import STL
 from arch.bootstrap import MovingBlockBootstrap
 
@@ -9,7 +8,6 @@ from metaforecast.utils.log import LogTransformation
 
 
 class _SeasonalMBB:
-
     @staticmethod
     def _get_mbb(x: pd.Series, w: int, n_samples: int = 1):
         mbb = MovingBlockBootstrap(block_size=w, x=x)
@@ -22,6 +20,19 @@ class _SeasonalMBB:
 
     @classmethod
     def create_bootstrap(cls, y: np.ndarray, seas_period: int, log: bool) -> np.ndarray:
+        """ create_bootstrap
+
+        Create a bootstrapped version of a time series using moving blocks bootstrap
+
+        :param y: univariate time series
+        :type y: np.array
+
+        :param seas_period: Seasonal period (e.g. 12 for monthly time series)
+        :type seas_period: int
+
+        :param log: Whether to transform the time series using the logarithm (to stabilize variance)
+        :type log: bool
+        """
 
         if log:
             y = LogTransformation.transform(y)
@@ -45,8 +56,24 @@ class _SeasonalMBB:
 
 
 class SeasonalMBB(SemiSyntheticTransformer):
+    """ Seasonal Moving Blocks Bootstrap
+
+    Transform the time series in a dataset using bootstrapping
+
+    References:
+        Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y., & Bergmeir, C. (2021). Improving the
+        accuracy of global forecasting models using time series data augmentation. Pattern Recognition, 120, 108148.
+
+    """
 
     def __init__(self, seas_period: int, log: bool = True):
+        """
+        :param seas_period: Seasonal period (e.g. 12 for monthly time series)
+        :type seas_period: int
+
+        :param log: Whether to transform the time series using the logarithm (to stabilize variance)
+        :type log: bool
+        """
         super().__init__(alias='MBB')
 
         self.log = log

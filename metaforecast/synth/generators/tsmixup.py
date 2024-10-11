@@ -5,12 +5,38 @@ from metaforecast.synth.generators._base import SemiSyntheticGenerator
 
 
 class TSMixup(SemiSyntheticGenerator):
+    """ TSMixup
+
+    Synthetic time series generation based on weighted averages of several time series
+
+    References:
+        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
+        Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
+
+
+    """
 
     def __init__(self,
                  max_n_uids: int,
                  min_len: int,
                  max_len: int,
                  dirichlet_alpha: float = 1.5):
+        """
+
+        :param max_n_uids: Maximum number of time series (unique_id's) to consider for generating a given
+        time series
+        :type max_n_uids: int
+
+        :param min_len: Minimum number of observations of the new synthetic time series
+        :param min_len: int
+
+        :param max_len: Maximum number of observations of the new synthetic time series
+        :param max_len: int
+
+        :param dirichlet_alpha: Alpha parameter for the Gamma distribution
+        :type dirichlet_alpha: float. Defaults to 1.5
+        """
+
         super().__init__(alias='TSMixup')
 
         self.min_len = min_len
@@ -19,6 +45,8 @@ class TSMixup(SemiSyntheticGenerator):
         self.dirichlet_alpha = dirichlet_alpha
 
     def transform(self, df: pd.DataFrame, n_series: int = -1):
+        self._assert_datatypes(df)
+
         unq_uids = df['unique_id'].unique()
 
         if n_series < 0:
