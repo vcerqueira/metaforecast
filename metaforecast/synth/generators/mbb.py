@@ -60,23 +60,3 @@ class SeasonalMBB(SemiSyntheticTransformer):
         df['y'] = synth_ts
 
         return df
-
-#
-# class SeasonalMBBTensor(TSDataGeneratorTensor):
-#
-#     def __init__(self,
-#                  seas_period: int,
-#                  log: bool = True,
-#                  augment: bool = True):
-#         super().__init__(augment=augment)
-#
-#         self.log = log
-#         self.seas_period = seas_period
-#
-#         self.fit()
-#
-#     def fit(self, **kwargs) -> 'SeasonalMBBTensor':
-#         pass
-#
-#     def _create_synthetic_ts(self, y: np.ndarray) -> torch.tensor:
-#         return _SeasonalMBB.create_bootstrap(y, seas_period=self.seas_period, log=self.log)

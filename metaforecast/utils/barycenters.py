@@ -11,6 +11,7 @@ class BarycentricAveraging:
     BarycentricAveraging
 
     Averaging a set of time series (or time series subsequences) using barycentric averaging
+    Wrapper for tslearn's functions
 
     >>> import numpy as np
     >>> from metaforecast.utils.barycenters import BarycentricAveraging
