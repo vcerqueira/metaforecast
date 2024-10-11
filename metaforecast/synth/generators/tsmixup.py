@@ -31,7 +31,6 @@ class TSMixup(SemiSyntheticGenerator):
     >>>
     >>> # Data augmentation
     >>> tsgen = TSMixup(min_len=50, max_len=96, max_n_uids=7)
-    >>>
     >>> # Applying time warping to each time series in the dataset
     >>> synth_df = tsgen.transform(train)
     >>>
