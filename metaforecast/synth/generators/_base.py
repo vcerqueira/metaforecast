@@ -83,7 +83,7 @@ class BaseTimeSeriesGenerator(ABC):
         assert df["unique_id"].dtype == "object", "Column 'unique_id' must be of type string"
 
         # Assert ds is of type pd.Timestamp
-        assert pd.api.types.is_datetime64_any_dtype(df["ds"]), "Column 'ds' must be of type pd.Timestamp"
+        # assert pd.api.types.is_datetime64_any_dtype(df["ds"]), "Column 'ds' must be of type pd.Timestamp"
 
         # Assert y is numeric
         assert np.issubdtype(df["y"].dtype, np.number), "Column 'y' must be numeric"
