@@ -1,18 +1,41 @@
 import copy
+from typing import Union
 
 import pandas as pd
 import numpy as np
 import torch
 import pytorch_lightning as pl
 
+from metaforecast.synth.generators._base import (PureSyntheticGenerator,
+                                                 SemiSyntheticGenerator,
+                                                 SemiSyntheticTransformer)
 
-class OntheFlyDataAugmentationCallback(pl.Callback):
+TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
+
+
+class OnlineDataAugmentationCallback(pl.Callback):
+    """ OnlineDataAugmentationCallback
+
+    Online (batch-by-batch) data augmentation via a callback
+
+    """
+
     def __init__(self, generator):
+        """
+
+        :param generator: A synthetic time series generator
+        :type generator: An object of that extends BaseTimeSeriesGenerator, i.e. PureSyntheticGenerator,
+        SemiSyntheticGenerator, or SemiSyntheticTransformer
+
+        """
         super().__init__()
 
         self.generator = generator
 
     def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
+        """
+        Applying data augmentation after getting a batch of time series for training
+        """
         temporal = batch['temporal']
 
         df_ = self.temporal_to_df(temporal)
@@ -29,6 +52,15 @@ class OntheFlyDataAugmentationCallback(pl.Callback):
 
     @staticmethod
     def temporal_to_df(temporal: torch.Tensor) -> pd.DataFrame:
+        """ temporal_to_df
+
+        Converting the batch of time series into a DataFrame structure with (unique_id, ds, y) data.
+
+        :param temporal: A tensor with a batch of time series
+        :type temporal: torch.Tensor
+
+        :return: Time series dataset as a pd.DataFrame
+        """
         temporal_ = copy.deepcopy(temporal)
 
         arr_list = []
@@ -47,7 +79,17 @@ class OntheFlyDataAugmentationCallback(pl.Callback):
         return df
 
     @staticmethod
-    def create_mask(df):
+    def create_mask(df) -> pd.DataFrame:
+        """ create_mask
+
+        Transforming the time series into the same size (equal to the largest one) using a mask.
+        Shorter time series will be left-padded with 0 and the padded samples will be denoted by a binary variable.
+
+        :param df: Time series dataset as pd.DataFrame with columns (unique_id, ds, y)
+        :type df: pd.DataFrame
+
+        :return: Masked time series dataset
+        """
         uids = df['unique_id'].unique()
         all_ds = np.arange(0, df['ds'].max() + 1)
 
@@ -67,7 +109,16 @@ class OntheFlyDataAugmentationCallback(pl.Callback):
         return result
 
     @classmethod
-    def df_to_tensor(cls, df):
+    def df_to_tensor(cls, df: pd.DataFrame) -> torch.Tensor:
+        """ df_to_tensor
+
+        Converting a time series dataset from pd.DataFrame into a torch.Tensor based on neuralforecast's workflow
+
+        :param df: Masked time series dataset with (unique_id, ds, y, y_mask) variables
+
+        :return: Time series dataset as a torch Tensor
+        """
+
         df_ = cls.create_mask(df).copy()
 
         arr_list = []
