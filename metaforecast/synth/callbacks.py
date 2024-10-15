@@ -18,11 +18,38 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
     Online (batch-by-batch) data augmentation via a callback
 
+    Example usage
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.synth import SeasonalMBB
+    >>> from metaforecast.synth.callbacks import OnlineDataAugmentationCallback
+    >>>
+    >>> augmentation_cb = OnlineDataAugmentationCallback(generator=SeasonalMBB(seas_period=12))
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 24
+    >>>
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> models = [NHITS(input_size=horizon,
+    >>>                 h=horizon,
+    >>>                 start_padding_enabled=True,
+    >>>                 callbacks=[augmentation_cb])]
+    >>>
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> nf.fit(df=train)
+    >>>
+    >>> fcst = nf.predict()
+
     """
 
     def __init__(self, generator):
         """
-
         :param generator: A synthetic time series generator
         :type generator: An object of that extends BaseTimeSeriesGenerator, i.e. PureSyntheticGenerator,
         SemiSyntheticGenerator, or SemiSyntheticTransformer
