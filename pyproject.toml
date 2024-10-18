@@ -25,8 +25,10 @@ classifiers = [
 ]
 
 dependencies = [
+    "arch==7.0.0",
     "lightgbm==4.5.0",
     "tslearn==0.6.3",
+    "datasetsforecast==0.0.8",
     "neuralforecast==1.7.5",
     "statsforecast==1.7.5",
     "mlforecast==0.13.4"
@@ -42,3 +44,11 @@ packages = ["metaforecast"]
 [tool.pylint.design]
 max-attributes = 15
 max-args = 10
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "too-few-public-methods"
+]

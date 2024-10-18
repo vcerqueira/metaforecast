@@ -63,10 +63,9 @@ class Jittering(SemiSyntheticTransformer):
 
         self.sigma = sigma
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
-        # todo or standardize first?
         sig = self.sigma * df_['y'].std()
 
         df_.loc[:, 'y'] += np.random.normal(loc=0., scale=sig, size=df_.shape[0])

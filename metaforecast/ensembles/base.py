@@ -137,8 +137,8 @@ class ForecastingEnsemble(ABC):
 
         if use_window:
             return wdw_scr_df
-        else:
-            return all_scr_df
+
+        return all_scr_df
 
     @abstractmethod
     def _weights_by_uid(self, **kwargs):
@@ -152,8 +152,7 @@ class ForecastingEnsemble(ABC):
         self.tot_n_models = len(self.model_names)
 
         self.n_models = int(self.trim_ratio * self.tot_n_models)
-        if self.n_models < 1:
-            self.n_models = 1
+        self.n_models = max(self.n_models, 1)
 
         self.n_poor_models = self.tot_n_models - self.n_models
 
@@ -261,6 +260,7 @@ class Mixture(ForecastingEnsemble):
         self.uid_weights = {}
         self.uid_coefficient = {}
 
+    # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame):
 
         if self.model_names is None:
@@ -297,7 +297,13 @@ class Mixture(ForecastingEnsemble):
             self.uid_coefficient[uid] = self._weights_from_regret()
 
     def _fit_all(self, insample_fcst: pd.DataFrame):
-        # todo can comment the sorting to have the estimation match the r bridge
+        """
+
+        Can comment the initial sorting to have the estimation match the r bridge
+
+        :param insample_fcst: forecasts
+        """
+
         insample_fcst_ = insample_fcst.sort_values('ds')
 
         uid_list = insample_fcst_['unique_id'].unique().tolist()
@@ -316,6 +322,7 @@ class Mixture(ForecastingEnsemble):
             self.uid_weights[uid] = self.weights.iloc[-1]
             self.uid_coefficient[uid] = self._weights_from_regret()
 
+    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
         self._assert_fcst(fcst)
 
@@ -338,6 +345,7 @@ class Mixture(ForecastingEnsemble):
 
         return loss
 
+    # pylint: disable=arguments-differ
     def update_weights(self, fcst: pd.DataFrame):
         raise NotImplementedError
 
@@ -350,7 +358,8 @@ class Mixture(ForecastingEnsemble):
     def _update_mixture(self, fcst: pd.DataFrame, y: np.ndarray, **kwargs):
         raise NotImplementedError
 
-    def _weights_by_uid(self, weights: pd.DataFrame):
+    # pylint: disable=arguments-differ
+    def _weights_by_uid(self, weights: pd.DataFrame, **kwargs):
         neg_w = -weights
 
         top_overall = self._get_top_k(-weights.mean())

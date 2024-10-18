@@ -115,6 +115,7 @@ class Windowing(ForecastingEnsemble):
 
         self.weights = None
 
+    # pylint: disable=arguments-differ
     def fit(self, insample_fcst, **kwargs):
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
@@ -127,6 +128,7 @@ class Windowing(ForecastingEnsemble):
 
         self.weights = self._weights_by_uid()
 
+    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
         self._assert_fcst(fcst)
 
@@ -135,6 +137,7 @@ class Windowing(ForecastingEnsemble):
 
         return fcst_c
 
+    # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
         """ update_weights
 
@@ -144,7 +147,7 @@ class Windowing(ForecastingEnsemble):
 
         raise NotImplementedError
 
-    def _weights_by_uid(self):
+    def _weights_by_uid(self, **kwargs):
         if self.weight_by_uid:
             top_models = self.insample_scores.apply(self._get_top_k, axis=1)
         else:

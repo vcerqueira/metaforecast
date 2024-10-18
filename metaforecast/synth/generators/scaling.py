@@ -63,7 +63,7 @@ class Scaling(SemiSyntheticTransformer):
 
         self.sigma = sigma
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
         factor = np.random.normal(loc=1.0, scale=self.sigma, size=df_.shape[0])

@@ -121,7 +121,7 @@ class MLewa(Mixture):
                                            y=y[i],
                                            fcst_c=self.ensemble_fcst[i])
 
-            regret_i = (loss_mixture - loss_experts)
+            regret_i = loss_mixture - loss_experts
 
             # update regret
             for mod in self.regret:
@@ -132,7 +132,7 @@ class MLewa(Mixture):
             eta_update = np.sqrt(np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i ** 2))
             self.eta[int(str(i)) + 1] = eta_update
 
-    def _weights_from_regret(self, iteration: RowIDType = -1):
+    def _weights_from_regret(self, iteration: RowIDType = -1, **kwargs):
         """ _weights_from_regret
 
         Updating the weights based on regret minimization

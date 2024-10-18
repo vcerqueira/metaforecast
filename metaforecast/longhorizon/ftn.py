@@ -104,7 +104,7 @@ class ForecastTrajectoryNeighbors(ABC):
         :return: smoothed df
         """
         smoothed_uid_l = []
-        for uid, uid_df in df.groupby(['unique_id']):
+        for _, uid_df in df.groupby(['unique_id']):
             uid_df['y'] = uid_df['y'].ewm(alpha=self.ewm_smooth).mean()
 
             smoothed_uid_l.append(uid_df)
@@ -141,7 +141,7 @@ class ForecastTrajectoryNeighbors(ABC):
             cv_g = cv.groupby(['unique_id'])
 
         horizon = []
-        for g, df in cv_g:
+        for _, df in cv_g:
             df = df.sort_values('ds')
             h = np.asarray(range(1, df.shape[0] + 1))
             hs = {
@@ -150,7 +150,7 @@ class ForecastTrajectoryNeighbors(ABC):
                 'unique_id': df['unique_id'].values,
             }
             if 'cutoff' in df.columns:
-                hs['cutoff'] = df['cutoff'].values,
+                hs['cutoff'] = df['cutoff'].values
 
             hs = pd.DataFrame(hs)
             horizon.append(hs)

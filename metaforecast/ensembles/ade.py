@@ -131,6 +131,7 @@ class ADE(BaseADE):
         self.use_window = False
         self.weights = None
 
+    # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """
 
@@ -166,6 +167,7 @@ class ADE(BaseADE):
 
         self.meta_model.fit(x, y)
 
+    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int, **kwargs):
         """ predict
 
@@ -187,6 +189,7 @@ class ADE(BaseADE):
 
         return ade_fcst
 
+    # pylint: disable=arguments-differ
     def update_weights(self, fcst: pd.DataFrame, **kwargs):
         raise NotImplementedError
 
@@ -231,6 +234,7 @@ class ADE(BaseADE):
 
         return in_sample_loss_df
 
+    # pylint: disable=invalid-name
     def _process_meta_data(self,
                            meta_data: pd.DataFrame,
                            return_X_y: bool = True) -> DataFrameLike:
@@ -242,11 +246,12 @@ class ADE(BaseADE):
             # pylint: disable=invalid-name
             X_meta, Y_meta = meta_data[lag_cols], meta_data[self.model_names]
             return X_meta, Y_meta
-        else:
-            meta_df = meta_data[lag_cols + self.model_names]
+
+        meta_df = meta_data[lag_cols + self.model_names]
 
         return meta_df
 
+    # pylint: disable=arguments-differ
     def _weights_by_uid(self, df: pd.DataFrame, h: int, **kwargs):
         top_overall = self._get_top_k(self.insample_scores.mean())
         top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
@@ -281,15 +286,16 @@ class ADE(BaseADE):
     def _reweight_by_redundancy(self):
         raise NotImplementedError
 
+    # pylint: disable=arguments-renamed
     @staticmethod
     def _weights_from_errors(meta_predictions: pd.DataFrame) -> pd.Series:
         e_hat = meta_predictions.abs()
 
-        W = e_hat.apply(
+        weights = e_hat.apply(
             func=lambda x: Normalizations.normalize_and_proportion(-x),
             axis=1)
 
-        weight_s = W.iloc[0]
+        weight_s = weights.iloc[0]
 
         return weight_s
 
@@ -375,6 +381,7 @@ class MLForecastADE(ADE):
                          meta_model=meta_model,
                          meta_lags=self.mlf.ts.lags)
 
+    # pylint: disable=arguments-differ
     def fit(self, **kwargs):
         """ fit
 
@@ -393,6 +400,7 @@ class MLForecastADE(ADE):
 
         self._fit(insample_fcst)
 
+    # pylint: disable=arguments-differ
     def predict(self, train: pd.DataFrame, h: int, **kwargs):
         """ predict
 

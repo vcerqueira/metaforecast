@@ -75,7 +75,9 @@ class TSMixup(SemiSyntheticGenerator):
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
 
-    def transform(self, df: pd.DataFrame, n_series: int = -1):
+    # pylint: disable=arguments-differ
+    # pylint: disable=unused-variable
+    def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
         self._assert_datatypes(df)
 
         unq_uids = df['unique_id'].unique()
@@ -101,7 +103,12 @@ class TSMixup(SemiSyntheticGenerator):
 
         return synth_df
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    # pylint: disable=arguments-differ
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+        """
+        Should the parts be de-meaned?
+
+        """
         uids = df['unique_id'].unique()
 
         smallest_n = df['unique_id'].value_counts().min()
@@ -129,7 +136,7 @@ class TSMixup(SemiSyntheticGenerator):
             uid_df = df_j.iloc[start_idx: start_idx + n_obs]
 
             uid_y = uid_df['y'].reset_index(drop=True)
-            # todo de-mean?
+
             # uid_y /= uid_y.mean()
             uid_y *= w[j]
 

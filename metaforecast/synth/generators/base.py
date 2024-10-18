@@ -103,8 +103,9 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
     REQUIRES_N = True
     REQUIRES_DF = False
 
+    # pylint: disable=arguments-differ
     @abstractmethod
-    def transform(self, n_series: int):
+    def transform(self, n_series: int, **kwargs):
         raise NotImplementedError
 
 
@@ -116,8 +117,9 @@ class SemiSyntheticGenerator(BaseTimeSeriesGenerator):
     REQUIRES_N = True
     REQUIRES_DF = True
 
+    # pylint: disable=arguments-differ
     @abstractmethod
-    def transform(self, df: DForTensor, n_series: int):
+    def transform(self, df: DForTensor, n_series: int, **kwargs):
         """
 
         :param df: time series dataset, following a nixtla-based structure.
@@ -150,7 +152,8 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
         self.rename_uids = rename_uids
 
-    def transform(self, df: pd.DataFrame):
+    # pylint: disable=arguments-differ
+    def transform(self, df: pd.DataFrame, **kwargs):
         """ transform
 
         Transform the time series of a dataset with a nixtla-based structure (unique_id, ds, y)
@@ -163,7 +166,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
         self._assert_datatypes(df)
 
         df_t_list = []
-        for uid, uid_df in df.groupby('unique_id'):
+        for _, uid_df in df.groupby('unique_id'):
             ts_df = self._create_synthetic_ts(uid_df)
             if self.rename_uids:
                 ts_df['unique_id'] = \
@@ -178,7 +181,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
         return transformed_df
 
     @abstractmethod
-    def _create_synthetic_ts(self, df: pd.DataFrame):
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs):
         """ _create_synthetic_ts
 
         Transforming a given time series

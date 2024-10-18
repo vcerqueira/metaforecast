@@ -90,7 +90,7 @@ class KernelSynth(PureSyntheticGenerator):
         self.n_obs = n_obs
         self.x = np.linspace(0, 1, int(self.n_obs))
 
-    def transform(self, n_series: int):
+    def transform(self, n_series: int, **kwargs):
         dt = pd.date_range(start=self.START,
                            periods=self.n_obs,
                            freq=self.freq)
@@ -113,7 +113,7 @@ class KernelSynth(PureSyntheticGenerator):
 
         return df
 
-    def _create_synthetic_ts(self):
+    def _create_synthetic_ts(self, **kwargs):
         selected_kernels = np.random.choice(
             self.kernels, np.random.randint(1, self.max_kernels + 1), replace=True
         )

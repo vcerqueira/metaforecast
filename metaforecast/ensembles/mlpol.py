@@ -98,7 +98,7 @@ class MLpol(Mixture):
 
         self.alias = 'MLpol'
 
-        self.B = None
+        self.b = None
 
     def _update_mixture(self, fcst: pd.DataFrame, y: np.ndarray, **kwargs):
         """ _update_mixture
@@ -124,20 +124,20 @@ class MLpol(Mixture):
                                            y=y[i],
                                            fcst_c=self.ensemble_fcst[i])
 
-            regret_i = (loss_mixture - loss_experts)
+            regret_i = loss_mixture - loss_experts
 
             # update regret
             for mod in self.regret:
                 self.regret[mod] += regret_i[mod]
 
             # update learning rate
-            b_iter = np.max([self.B, np.max(regret_i ** 2)])
+            b_iter = np.max([self.b, np.max(regret_i ** 2)])
 
-            self.eta[int(str(i)) + 1] = 1 / (1 / self.eta[i] + regret_i ** 2 + b_iter - self.B)
+            self.eta[int(str(i)) + 1] = 1 / (1 / self.eta[i] + regret_i ** 2 + b_iter - self.b)
 
-            self.B = copy.deepcopy(b_iter)
+            self.b = copy.deepcopy(b_iter)
 
-    def _weights_from_regret(self, iteration: RowIDType = -1):
+    def _weights_from_regret(self, iteration: RowIDType = -1, **kwargs):
         curr_regret = np.array(list(self.regret.values()))
 
         if np.max(curr_regret) > 0:
@@ -155,7 +155,7 @@ class MLpol(Mixture):
         n_row, n_col = fcst.shape[0], len(self.model_names)
 
         self.eta = np.full(shape=(n_row + 1, n_col), fill_value=np.exp(100))
-        self.B = 0
+        self.b = 0
         self.regret = {k: 0 for k in self.model_names}
         self.weights = np.zeros((n_row, n_col))
         self.ensemble_fcst = np.zeros(n_row)

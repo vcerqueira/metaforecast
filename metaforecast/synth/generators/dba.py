@@ -69,7 +69,8 @@ class DBA(SemiSyntheticGenerator):
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
 
-    def transform(self, df: pd.DataFrame, n_series: int = -1):
+    # pylint: disable=unused-variable
+    def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
         """ transform
 
         Generate synthetic time series based on a source df using DBA
@@ -108,7 +109,7 @@ class DBA(SemiSyntheticGenerator):
 
         return synth_df
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """ _create_synthetic_ts
 
         Apply DBA to a time series dataset

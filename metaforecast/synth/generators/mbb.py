@@ -9,7 +9,7 @@ from metaforecast.utils.log import LogTransformation
 
 class _SeasonalMBB:
     @staticmethod
-    def _get_mbb(x: pd.Series, w: int, n_samples: int = 1):
+    def get_mbb(x: pd.Series, w: int, n_samples: int = 1):
         mbb = MovingBlockBootstrap(block_size=w, x=x)
 
         xt = mbb.bootstrap(n_samples)
@@ -41,7 +41,7 @@ class _SeasonalMBB:
             stl = STL(y, period=seas_period).fit()
 
             try:
-                synth_res = cls._get_mbb(stl.resid, seas_period)
+                synth_res = cls.get_mbb(stl.resid, seas_period)
             except ValueError:
                 synth_res = pd.Series(stl.resid).sample(len(stl.resid), replace=True).values
 
