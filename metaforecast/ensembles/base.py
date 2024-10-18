@@ -106,10 +106,12 @@ class ForecastingEnsemble(ABC):
     def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
         """ evaluate_base_fcst
 
-        Evaluating the forecasts of ensemble members (base models) by individual time series (unique_id) based on SMAPE.
+        Evaluating the forecasts of ensemble members (base models) by individual time series
+        (unique_id) based on SMAPE.
 
         :param insample_fcst: (pd.DataFrame) with in-sample or CV forecasts and actual values
-        :param use_window: (bool) whether to compute performance in all data or in the last self.window_size observations
+        :param use_window: (bool) whether to compute performance in all data or in the last
+        self.window_size observations
 
         :return: (pd.DataFrame) performance accuracy of each model on each time series
         """
@@ -187,7 +189,7 @@ class ForecastingEnsemble(ABC):
 
         Compute a weighted average of a prediction based on models' weights
 
-        :param pred: forecasts
+        :param pred: forecast
         :param weights: weights
 
         :return: ensemble weighted forecast
@@ -201,7 +203,8 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _assert_fcst(fcst: pd.DataFrame):
-        assert 'unique_id' in fcst.columns, '"unique_id" should be included in the predictions object'
+        assert 'unique_id' in fcst.columns, \
+            '"unique_id" should be included in the predictions object'
 
 
 class Mixture(ForecastingEnsemble):
@@ -212,18 +215,19 @@ class Mixture(ForecastingEnsemble):
     Parameters
     ----------
     loss_type: str
-        Loss function used to compute the weights of individual models. Should be one of 'square', 'absolute',
-        'percentage', 'log', or 'pinball'
+        Loss function used to compute the weights of individual models. Should be one of 'square',
+        'absolute', 'percentage', 'log', or 'pinball'
 
     gradient: bool
         Whether to use the gradient trick to compute the weights of individual models
 
     trim_ratio: float
-        Ratio of models to use in the final combination rule. 1-trim_ratio of models will not be used.
+        Ratio of models to use in the final combination rule.
+        1-trim_ratio of models will not be used.
 
     weight_by_uid: bool
-        Whether to compute the weights by unique_id or globally. Setting this parameter to true may be computationally demanding
-        for datasets with a large number of unique_ids
+        Whether to compute the weights by unique_id or globally. Setting this parameter to
+        true may be computationally demanding for datasets with a large number of unique_ids
 
     Returns
     -------

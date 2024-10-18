@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 name = "metaforecast"
 version = "0.1.5"
 authors = [
-    {name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
+    { name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
 ]
 keywords = [
     "Machine Learning",
@@ -28,6 +28,7 @@ dependencies = [
     "lightgbm==4.5.0",
     "tslearn==0.6.3",
     "neuralforecast==1.7.5",
+    "statsforecast==1.7.5",
     "mlforecast==0.13.4"
 ]
 
@@ -37,3 +38,7 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["metaforecast"]
+
+[tool.pylint.design]
+max-attributes = 15
+max-args = 10

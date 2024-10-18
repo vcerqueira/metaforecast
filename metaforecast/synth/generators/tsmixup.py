@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from metaforecast.synth.generators._base import SemiSyntheticGenerator
+from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
 class TSMixup(SemiSyntheticGenerator):
@@ -10,8 +10,8 @@ class TSMixup(SemiSyntheticGenerator):
     Synthetic time series generation based on weighted averages of several time series
 
     References:
-        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
-        Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
+        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y.
+        (2024). Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
 
     Example usage (check notebooks for extended examples):
     >>> import pandas as pd
@@ -54,9 +54,8 @@ class TSMixup(SemiSyntheticGenerator):
                  max_len: int,
                  dirichlet_alpha: float = 1.5):
         """
-
-        :param max_n_uids: Maximum number of time series (unique_id's) to consider for generating a given
-        time series
+        :param max_n_uids: Maximum number of time series (unique_id's) to consider for
+        generating a given time series
         :type max_n_uids: int
 
         :param min_len: Minimum number of observations of the new synthetic time series

@@ -3,7 +3,7 @@ import pandas as pd
 from statsmodels.tsa.api import STL
 from arch.bootstrap import MovingBlockBootstrap
 
-from metaforecast.synth.generators._base import SemiSyntheticTransformer
+from metaforecast.synth.generators.base import SemiSyntheticTransformer
 from metaforecast.utils.log import LogTransformation
 
 
@@ -62,7 +62,8 @@ class SeasonalMBB(SemiSyntheticTransformer):
 
     References:
         Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y., & Bergmeir, C. (2021). Improving the
-        accuracy of global forecasting models using time series data augmentation. Pattern Recognition, 120, 108148.
+        accuracy of global forecasting models using time series data augmentation.
+        Pattern Recognition, 120, 108148.
 
     Example usage (check notebooks for extended examples):
 

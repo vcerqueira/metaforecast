@@ -10,17 +10,19 @@ from sklearn.multioutput import MultiOutputRegressor as MIMO
 from metaforecast.utils.normalization import Normalizations
 from metaforecast.ensembles.base import BaseADE
 
-DForDFTuple = Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]
+DataFrameTuple = Tuple[pd.DataFrame, pd.DataFrame]
+DataFrameLike = Union[pd.DataFrame, DataFrameTuple]
 
 
 class ADE(BaseADE):
     """ Arbitrated Dynamic Ensemble
     
-    Dynamic ensemble approach where ensemble members are weighted based on a meta-model that forecasts their error
+    Dynamic ensemble approach where ensemble members are weighted based on
+    a meta-model that forecasts their error
 
     References:
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
-        Machine Learning, 108, 913-944.
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+        Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
     
     Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
     >>> from datasetsforecast.m3 import M3
@@ -85,15 +87,17 @@ class ADE(BaseADE):
         Defaults to 1, which means all ensemble members are used.
         :type trim_ratio: float
 
-        :param meta_lags: (List of ints) List of lags to be used in the training of the meta-model.
-        Follows the structure of mlforecast. Example: [1,2,3,8]
+        :param meta_lags: (List of ints) List of lags to be used in
+        the training of the meta-model. Follows the structure of mlforecast. Example: [1,2,3,8]
         :type meta_lags: list
 
         :param trim_by_uid: Whether to trim the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a large number of time series
+        Defaults to True, but this can become computationally demanding for datasets with
+        a large number of time series
         :type trim_by_uid: bool
 
-        :param meta_model: Learning algorithm to use in the meta-level to forecast the error of ensemble members.
+        :param meta_model: Learning algorithm to use in the meta-level to forecast the
+        error of ensemble members.
         Defaults to a linear LGBM with a default configuration
         :type meta_model: object
         """
@@ -109,7 +113,7 @@ class ADE(BaseADE):
 
         if meta_lags is None:
             n_lags = self.WINDOW_SIZE_BY_FREQ[self.frequency]
-            self.meta_lags = [i for i in (1, n_lags + 1)]
+            self.meta_lags = list((1, n_lags + 1))
         else:
             self.meta_lags = meta_lags
 
@@ -130,7 +134,8 @@ class ADE(BaseADE):
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """
 
-        :param insample_fcst: In-sample forecasts and actual value following a cross-validation object from mlforecast
+        :param insample_fcst: In-sample forecasts and actual value following
+        a cross-validation object from mlforecast
         :type insample_fcst: pd.DataFrame
 
         :return: self
@@ -150,7 +155,8 @@ class ADE(BaseADE):
         self.insample_scores = self.evaluate_base_fcst(insample_fcst=insample_fcst,
                                                        use_window=self.use_window)
 
-        self.raw_meta_data = self.meta_mlf.preprocess(in_sample_loss_df, **self.MLF_PREPROCESS_PARS)
+        self.raw_meta_data = self.meta_mlf.preprocess(in_sample_loss_df,
+                                                      **self.MLF_PREPROCESS_PARS)
 
         self.meta_df = self._process_meta_data(self.raw_meta_data)
 
@@ -160,7 +166,7 @@ class ADE(BaseADE):
 
         self.meta_model.fit(x, y)
 
-    def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int):
+    def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int, **kwargs):
         """ predict
 
         :param fcst: forecasts of ensemble members
@@ -181,7 +187,7 @@ class ADE(BaseADE):
 
         return ade_fcst
 
-    def update_weights(self, fcst: pd.DataFrame):
+    def update_weights(self, fcst: pd.DataFrame, **kwargs):
         raise NotImplementedError
 
     def _predict(self, preds: pd.DataFrame, train: pd.DataFrame, h: int):
@@ -202,14 +208,15 @@ class ADE(BaseADE):
 
         Compute in-sample (CV) point-wise loss
 
-        :param insample_fcst: validation predictions for each ensemble member and actual values (y)
+        :param insample_fcst: validation predictions for each model and actual values (y)
         :type insample_fcst: pd.DataFrame
 
-        :return: pd.DataFrame with point-wise error scores of each ensemble member across the validation set
+        :return: pd.DataFrame with point-wise error scores of each ensemble member
+        across the validation set
         """
         in_sample_loss = []
         in_sample_uid = insample_fcst.copy().groupby('unique_id')
-        for uid, uid_df in in_sample_uid:
+        for _, uid_df in in_sample_uid:
             for mod in self.model_names:
                 uid_df[mod] = uid_df[mod] - uid_df['y']
 
@@ -226,12 +233,13 @@ class ADE(BaseADE):
 
     def _process_meta_data(self,
                            meta_data: pd.DataFrame,
-                           return_X_y: bool = True) -> DForDFTuple:
+                           return_X_y: bool = True) -> DataFrameLike:
 
         lag_locs = meta_data.columns.str.startswith('lag')
         lag_cols = meta_data.columns[lag_locs].to_list()
 
         if return_X_y:
+            # pylint: disable=invalid-name
             X_meta, Y_meta = meta_data[lag_cols], meta_data[self.model_names]
             return X_meta, Y_meta
         else:
@@ -239,7 +247,7 @@ class ADE(BaseADE):
 
         return meta_df
 
-    def _weights_by_uid(self, df: pd.DataFrame, h: int):
+    def _weights_by_uid(self, df: pd.DataFrame, h: int, **kwargs):
         top_overall = self._get_top_k(self.insample_scores.mean())
         top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
 
@@ -291,11 +299,12 @@ class MLForecastADE(ADE):
 
     ADE based on a MLForecast object
 
-    Dynamic ensemble approach where ensemble members are weighted based on a meta-model that forecasts their error
+    Dynamic ensemble approach where ensemble members are weighted based on
+    a meta-model that forecasts their error
 
     Reference:
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
-        Machine Learning, 108, 913-944.
+        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+        Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
 
     Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
     >>> from datasetsforecast.m3 import M3
@@ -338,10 +347,12 @@ class MLForecastADE(ADE):
 
         """
         :param mlf: Fitted MLForecast object containing multiple models to form the ensemble.
-        Make sure the fitted parameter in MLForecast is set to true (fitted=True) to create the meta-dataset
+        Make sure the fitted parameter in MLForecast is set to true (fitted=True)
+        to create the meta-dataset
         :type mlf: fitted MLForecast with parameter fitted=True
 
-        :param sf: A StatsForecast object containing classical forecasting models to be added to the ensemble
+        :param sf: A StatsForecast object containing classical forecasting models
+         to be added to the ensemble
         :type sf: StatsForecast object
 
         :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
@@ -349,7 +360,8 @@ class MLForecastADE(ADE):
         Defaults to 1, which means all ensemble members are used.
         :type trim_ratio: float
 
-        :param meta_model: Learning algorithm to use in the meta-level to forecast the error of ensemble members.
+        :param meta_model: Learning algorithm to use in the meta-level to forecast
+        the error of ensemble members.
         Defaults to a linear LGBM with a default configuration
         :type meta_model: object
         """
@@ -404,7 +416,7 @@ class MLForecastADE(ADE):
 
         return fcst
 
-    def update_weights(self, fcst: pd.DataFrame):
+    def update_weights(self, fcst: pd.DataFrame, **kwargs):
         raise NotImplementedError
 
     def _reweight_by_redundancy(self):

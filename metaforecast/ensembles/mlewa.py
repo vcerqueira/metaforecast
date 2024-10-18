@@ -14,11 +14,12 @@ class MLewa(Mixture):
     Dynamic expert aggregation based on exponentially-weighted average based on R's opera package
 
     References:
-        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games. Cambridge university press, 2006.
+        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games.
+        Cambridge university press, 2006.
 
-        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by aggregating experts;
-        how to design a good set of experts. In Modeling and stochastic learning for forecasting in high dimensions
-        (pp. 95-115). Cham: Springer International Publishing.
+        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by
+        aggregating experts; how to design a good set of experts. In Modeling and stochastic
+        learning for forecasting in high dimensions (pp. 95-115). Cham: Springer
 
         Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
         Machine Learning, 108, 913-944.
@@ -79,7 +80,8 @@ class MLewa(Mixture):
         :type gradient: bool
 
         :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a large number of time series
+        Defaults to True, but this can become computationally demanding for datasets with a
+        large number of time series
         :type weight_by_uid: bool
 
         :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
@@ -115,7 +117,9 @@ class MLewa(Mixture):
             self.weights[i], self.ensemble_fcst[i] = self._calc_ensemble_fcst(fc, w)
 
             loss_experts = self._calc_loss(fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i])
-            loss_mixture = self._calc_loss(fcst=self.ensemble_fcst[i], y=y[i], fcst_c=self.ensemble_fcst[i])
+            loss_mixture = self._calc_loss(fcst=self.ensemble_fcst[i],
+                                           y=y[i],
+                                           fcst_c=self.ensemble_fcst[i])
 
             regret_i = (loss_mixture - loss_experts)
 
@@ -124,7 +128,9 @@ class MLewa(Mixture):
                 self.regret[mod] += regret_i[mod]
 
             n = len(self.model_names)
-            self.eta[int(str(i)) + 1] = np.sqrt(np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i ** 2))
+
+            eta_update = np.sqrt(np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i ** 2))
+            self.eta[int(str(i)) + 1] = eta_update
 
     def _weights_from_regret(self, iteration: RowIDType = -1):
         """ _weights_from_regret

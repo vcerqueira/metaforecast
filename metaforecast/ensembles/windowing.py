@@ -8,12 +8,13 @@ from metaforecast.ensembles.base import ForecastingEnsemble
 class Windowing(ForecastingEnsemble):
     """ Windowing
 
-    Forecast combination based on windowing - forecast accuracy (squared error) on a recent window of data
+    Forecast combination based on windowing - forecast accuracy (squared error) on a
+    recent window of data
 
     References:
-        Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017, October). Dynamic and heterogeneous
-        ensembles for time series forecasting. In 2017 IEEE international conference on data science and
-        advanced analytics (DSAA) (pp. 242-251). IEEE.
+        Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017, October).
+        Dynamic and heterogeneous ensembles for time series forecasting. In 2017 IEEE international
+        conference on data science and advanced analytics (DSAA) (pp. 242-251). IEEE.
 
         van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015,
         November). Having a blast: Meta-learning and heterogeneous ensembles
@@ -72,7 +73,8 @@ class Windowing(ForecastingEnsemble):
         :param freq: Sampling frequency of the time series (e.g. 'M')
         :type freq: str
 
-        :param select_best: Whether to select the single model that maximizes forecast performance on in-sample data
+        :param select_best: Whether to select the single model that maximizes forecast performance
+        on in-sample data
         :type select_best: bool
 
         :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
@@ -81,11 +83,12 @@ class Windowing(ForecastingEnsemble):
         :type trim_ratio: float
 
         :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a large number of time series
+        Defaults to True, but this can become computationally demanding for datasets with a large
+        number of time series
         :type weight_by_uid: bool
 
-        :param window_size: No of recent observations used to trim ensemble. If None, a size equivalent to the
-        sampling frequency will be used.
+        :param window_size: No of recent observations used to trim ensemble. If None, a size
+        equivalent to the sampling frequency will be used.
         :type window_size: int
         """
 

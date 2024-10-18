@@ -44,7 +44,8 @@ class BarycentricAveraging:
         :param fcst: time series subsequences or forecasts as an array-like structure
         :type fcst: np.ndarray
 
-        :param barycenter: Barycenter used for averaging. One of "euclidean", "dtw","dtw_subgradient", or "softdtw"
+        :param barycenter: Barycenter used for averaging. One of "euclidean", "dtw",
+        "dtw_subgradient", or "softdtw"
         :type barycenter: str
 
         :return: averaged subsequences as np.ndarray

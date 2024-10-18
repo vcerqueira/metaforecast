@@ -2,7 +2,7 @@ from scipy.interpolate import CubicSpline
 import pandas as pd
 import numpy as np
 
-from metaforecast.synth.generators._base import SemiSyntheticTransformer
+from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
 
 class TimeWarping(SemiSyntheticTransformer):
@@ -11,9 +11,10 @@ class TimeWarping(SemiSyntheticTransformer):
     Apply time warping to each time series in a dataset
 
     References:
-        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D. (2017, November).
-        Data augmentation of wearable sensor data for parkinson’s disease monitoring using convolutional neural
-        networks. In Proceedings of the 19th ACM international conference on multimodal interaction (pp. 216-220).
+        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
+        (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
+        monitoring using convolutional neural networks. In Proceedings of the 19th ACM
+        international conference on multimodal interaction (pp. 216-220).
 
     Example usage (check notebooks for extended examples):
     >>> import pandas as pd
@@ -51,7 +52,7 @@ class TimeWarping(SemiSyntheticTransformer):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool=True):
+    def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
         """
         :param sigma: Scaling parameter for the warping factor
         :type sigma: float. Defaults to 0.2

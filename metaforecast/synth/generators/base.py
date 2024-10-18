@@ -16,9 +16,10 @@ class BaseTimeSeriesGenerator(ABC):
         REQUIRED_COLUMNS (List[str]) List of columns required in a dataset
         START (pd.Timestamp) Dummy timestamp that marks the beginning of a synthetic time series
         END (pd.Timestamp) Dummy timestamp that marks the end of a synthetic time series
-        REQUIRES_N (bool) Whether the type of generator requires user input about the number of time series to
-        be generated
-        REQUIRES_DF (bool) Whether the type of generator requires user input about the source dataset
+        REQUIRES_N (bool) Whether the type of generator requires user input about the number of
+        time series to be generated
+        REQUIRES_DF (bool) Whether the type of generator requires user input about
+        the source dataset
     """
 
     REQUIRED_COLUMNS = ['unique_id', 'ds', 'y']
@@ -83,7 +84,8 @@ class BaseTimeSeriesGenerator(ABC):
         assert df["unique_id"].dtype == "object", "Column 'unique_id' must be of type string"
 
         # Assert ds is of type pd.Timestamp
-        # assert pd.api.types.is_datetime64_any_dtype(df["ds"]), "Column 'ds' must be of type pd.Timestamp"
+        # assert pd.api.types.is_datetime64_any_dtype(df["ds"]),
+        # "Column 'ds' must be of type pd.Timestamp"
 
         # Assert y is numeric
         assert np.issubdtype(df["y"].dtype, np.number), "Column 'y' must be numeric"
@@ -118,9 +120,9 @@ class SemiSyntheticGenerator(BaseTimeSeriesGenerator):
     def transform(self, df: DForTensor, n_series: int):
         """
 
-        :param df: time series dataset, following a nixtla-based structure. Either a pd.DataFrame (unique_id, ds, y)
-        or a inner tensor structure
-        :type pd.DataFrame of torch.tensor
+        :param df: time series dataset, following a nixtla-based structure.
+        Either a pd.DataFrame (unique_id, ds, y) or an inner tensor structure
+        :type df: pd.DataFrame of torch.tensor
 
         :param n_series: Number of time series to be generated
         :type n_series: int
@@ -164,7 +166,8 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
         for uid, uid_df in df.groupby('unique_id'):
             ts_df = self._create_synthetic_ts(uid_df)
             if self.rename_uids:
-                ts_df['unique_id'] = ts_df['unique_id'].apply(lambda x: f'{x}_{self.alias}{self.counter}')
+                ts_df['unique_id'] = \
+                    ts_df['unique_id'].apply(lambda x: f'{x}_{self.alias}{self.counter}')
 
             self.counter += 1
 

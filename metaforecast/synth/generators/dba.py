@@ -3,7 +3,7 @@ import pandas as pd
 
 from tslearn.barycenters import dtw_barycenter_averaging_subgradient as dtw
 
-from metaforecast.synth.generators._base import SemiSyntheticGenerator
+from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
 class DBA(SemiSyntheticGenerator):
@@ -56,10 +56,12 @@ class DBA(SemiSyntheticGenerator):
 
     def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
         """
-        :param max_n_uids: Maximum number of time series (unique_id's) to use in a given generation operation
+        :param max_n_uids: Maximum number of time series (unique_id's) to use in a given generation
+        operation
         :type max_n_uids: int
 
-        :param dirichlet_alpha: Gamma distribution alpha parameter value for weighting the selected time series.
+        :param dirichlet_alpha: Gamma distribution alpha parameter value for weighting the selected
+        time series.
         :type dirichlet_alpha: float. Default = 1.0
         """
         super().__init__(alias='DBA')
@@ -72,12 +74,13 @@ class DBA(SemiSyntheticGenerator):
 
         Generate synthetic time series based on a source df using DBA
 
-        :param df: time series dataset with unique_id, ds, y columns following a nixtla-based structure
+        :param df: time series dataset with unique_id, ds, y columns following a nixtla-based
+        structure
         :type df: pd.DataFrame
 
         :param n_series: Number of series to generate
-        :type n_series: int. Defaults to -1, which means creating a number of time series equal to the number of
-        time series in the source dataset
+        :type n_series: int. Defaults to -1, which means creating a number of time series
+        equal to the number of time series in the source dataset
 
         """
         self._assert_datatypes(df)

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from metaforecast.synth.generators._base import SemiSyntheticTransformer
+from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
 
 class Jittering(SemiSyntheticTransformer):
@@ -10,9 +10,10 @@ class Jittering(SemiSyntheticTransformer):
     Adding Gaussian noise to time series
 
     References:
-        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D. (2017, November).
-        Data augmentation of wearable sensor data for parkinson’s disease monitoring using convolutional neural
-        networks. In Proceedings of the 19th ACM international conference on multimodal interaction (pp. 216-220).
+        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
+        (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
+        monitoring using convolutional neural networks. In Proceedings of the 19th ACM
+        international conference on multimodal interaction (pp. 216-220).
 
     Example usage:
     >>> import pandas as pd

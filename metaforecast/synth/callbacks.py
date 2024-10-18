@@ -6,9 +6,9 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 
-from metaforecast.synth.generators._base import (PureSyntheticGenerator,
-                                                 SemiSyntheticGenerator,
-                                                 SemiSyntheticTransformer)
+from metaforecast.synth.generators.base import (PureSyntheticGenerator,
+                                                SemiSyntheticGenerator,
+                                                SemiSyntheticTransformer)
 
 TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
 
@@ -51,8 +51,8 @@ class OnlineDataAugmentationCallback(pl.Callback):
     def __init__(self, generator):
         """
         :param generator: A synthetic time series generator
-        :type generator: An object of that extends BaseTimeSeriesGenerator, i.e. PureSyntheticGenerator,
-        SemiSyntheticGenerator, or SemiSyntheticTransformer
+        :type generator: An object of that extends BaseTimeSeriesGenerator, i.e.
+        PureSyntheticGenerator, SemiSyntheticGenerator, or SemiSyntheticTransformer
 
         """
         super().__init__()
@@ -117,7 +117,8 @@ class OnlineDataAugmentationCallback(pl.Callback):
         """ create_mask
 
         Transforming the time series into the same size (equal to the largest one) using a mask.
-        Shorter time series will be left-padded with 0 and the padded samples will be denoted by a binary variable.
+        Shorter time series will be left-padded with 0 and the padded samples will be denoted by
+        a binary variable.
 
         :param df: Time series dataset as pd.DataFrame with columns (unique_id, ds, y)
         :type df: pd.DataFrame
@@ -146,7 +147,8 @@ class OnlineDataAugmentationCallback(pl.Callback):
     def df_to_tensor(cls, df: pd.DataFrame) -> torch.Tensor:
         """ df_to_tensor
 
-        Converting a time series dataset from pd.DataFrame into a torch.Tensor based on neuralforecast's workflow
+        Converting a time series dataset from pd.DataFrame into a torch.Tensor based on
+        neuralforecast's workflow
 
         :param df: Masked time series dataset with (unique_id, ds, y, y_mask) variables
 

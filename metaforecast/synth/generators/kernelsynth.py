@@ -12,7 +12,7 @@ from sklearn.gaussian_process.kernels import (
     ConstantKernel,
 )
 
-from metaforecast.synth.generators._base import PureSyntheticGenerator
+from metaforecast.synth.generators.base import PureSyntheticGenerator
 
 LENGTH = 1024
 KERNEL_BANK = [
@@ -60,8 +60,8 @@ class KernelSynth(PureSyntheticGenerator):
     CODE BASED ON https://github.com/amazon-science/chronos-forecasting/issues/62
 
     References:
-        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y. (2024).
-        Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
+        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y.
+        (2024). Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
 
     Example Usage (check notebooks for extended examples)
     >>> from metaforecast.synth import KernelSynth

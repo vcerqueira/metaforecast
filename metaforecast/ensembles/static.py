@@ -52,7 +52,8 @@ class BestOnTrain(Windowing):
 
     def __init__(self, select_by_uid: bool = True):
         """
-        :param select_by_uid: whether to select the best ensemble member by unique_id (True) or across all dataset (False)
+        :param select_by_uid: whether to select the best ensemble member by unique_id (True) or
+        across all dataset (False)
         :type select_by_uid: bool
         """
 
@@ -121,7 +122,8 @@ class LossOnTrain(Windowing):
         """
 
         :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a large number of time series
+        Defaults to True, but this can become computationally demanding for datasets with a large
+        number of time series
         :type weight_by_uid: bool
 
         :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.

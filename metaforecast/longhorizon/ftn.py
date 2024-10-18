@@ -25,7 +25,8 @@ class ForecastTrajectoryNeighbors(ABC):
 
     References:
         Cerqueira, Vitor, Luis Torgo, and Gianluca Bontempi. "Instance-based meta-learning for
-        conditionally dependent univariate multi-step forecasting." International Journal of Forecasting (2024).
+        conditionally dependent univariate multistep forecasting."
+        International Journal of Forecasting (2024).
 
     """
     KNN_WEIGHTING = 'uniform'
@@ -67,7 +68,7 @@ class ForecastTrajectoryNeighbors(ABC):
 
         Correct the forecasts of a model
 
-        :param fcst: predictions in a nixtla-based structure with multi-step forecasts
+        :param fcst: predictions in a nixtla-based structure with multistep forecasts
         :type fcst: pd.DataFrame
         """
         raise NotImplementedError
@@ -75,14 +76,15 @@ class ForecastTrajectoryNeighbors(ABC):
     def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
         """ set_alpha_weights
 
-        When weighting the corrected (FTN) forecasts with the original ones you need to set the weights of FTN
-        using this function.
+        When weighting the corrected (FTN) forecasts with the original ones you need to set the
+        weights of FTN using this function.
         The function expects an array of weights with size equal to the forecasting horizon.
-        Each weight should be in a 0-1 range, where 1 means that the final prediction only considers FTN
+        Each weight should be in a 0-1 range, where 1 means that the final prediction only
+        considers FTN
 
         :param alpha: the FTN weights for a dict of forecasting models
-        :type alpha: dict, with keys being the model names (str) and the values a numpy array with weight values
-        for each horizon.
+        :type alpha: dict, with keys being the model names (str) and the values a numpy array
+        with weight values for each horizon.
 
         :return: self
         """
@@ -126,7 +128,7 @@ class ForecastTrajectoryNeighbors(ABC):
         Get the forecasting horizon for cross-validation results.
 
         :param cv: cross-validation results from a nixtla-based pipeline
-        :type cv: pd.DataFrame with nitxla-based columns: unique_id, cutoff, ds
+        :type cv: pd.DataFrame with nixtla-based columns: unique_id, cutoff, ds
 
         :return: cv with horizon column
         """
@@ -169,11 +171,12 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
     FTN based on mlforecast ecosystem
 
     FTN (Forecasted Trajectory Neighbors) is an instance-based (good old KNN) approach for improving
-    multi-step forecasts, especially for long horizons.
+    multistep forecasts, especially for long horizons.
 
     References:
         Cerqueira, Vitor, Luis Torgo, and Gianluca Bontempi. "Instance-based meta-learning for
-        conditionally dependent univariate multi-step forecasting." International Journal of Forecasting (2024).
+        conditionally dependent univariate multistep forecasting."
+        International Journal of Forecasting (2024).
 
     Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
     >>> import lightgbm as lgb
@@ -230,16 +233,17 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         time series before fitting the KNN
         :param apply_ewm: bool
 
-        :param apply_weighting: Whether to weight the FTN predictions with the original forecasts. The weights of FTN
-        should be set using the set_alpha_weights method. See notebooks for an example of how to set these using
-        cross-validation
+        :param apply_weighting: Whether to weight the FTN predictions with the original forecasts.
+        The weights of FTN should be set using the set_alpha_weights method.
+        See notebooks for an example of how to set these using cross-validation
         :type apply_weighting: bool
 
-        :param apply_diff1: Whether to apply first differences before fitting the KNN to stabilize the mean level
+        :param apply_diff1: Whether to apply first differences before fitting the KNN to
+        stabilize the mean level
         :type apply_diff1: bool
 
-        :param apply_global: Whether to fit a KNN for all dataset (True) or for each time series (unique_id) (False)
-        A global approach tends to perform poorly (wip)
+        :param apply_global: Whether to fit a KNN for all dataset (True) or for each time series
+        (unique_id) (False) A global approach tends to perform poorly (wip)
         :type apply_global: bool
 
         :param ewm_smooth: Exponential moving average strength parameter. Defaults to 0.6.
@@ -287,8 +291,9 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         if self.apply_global:
             self.uid_insample_traj[self.GLB_UID] = rec_df[lag_names[::-1]].values
             self.model[self.GLB_UID] = copy.deepcopy(self.base_knn)
-            self.model[self.GLB_UID] = self.model[self.GLB_UID].fit(self.uid_insample_traj[self.GLB_UID],
-                                                                    self.uid_insample_traj[self.GLB_UID][:, 0])
+            self.model[self.GLB_UID] = \
+                self.model[self.GLB_UID].fit(self.uid_insample_traj[self.GLB_UID],
+                                             self.uid_insample_traj[self.GLB_UID][:, 0])
         else:
             for uid, df_ in tqdm(rec_df.groupby('unique_id')):
                 self.uid_insample_traj[uid] = df_[lag_names[::-1]].values
@@ -301,7 +306,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         Correcting the forecasts of a model using KNN
 
-        :param fcst: predictions in a nixtla-based structure with multi-step forecasts
+        :param fcst: predictions in a nixtla-based structure with multistep forecasts
         :type fcst: pd.DataFrame
         """
         self.model_names = [x for x in fcst.columns if x not in self.METADATA]
@@ -352,7 +357,8 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         :param cv: Validation or cross-validation results from a nixtla-based procedure
         :type cv: pd.DataFrame
 
-        :param model_names: List of model(s) to estimate the weights for. If None, uses the models found during fit
+        :param model_names: List of model(s) to estimate the weights for.
+        If None, uses the models found during fit
         :type model_names: Optional list of str
         """
 
