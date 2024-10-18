@@ -6,11 +6,11 @@
 
 
 Meta-learning and data-centric techniques for time series forecasting models. 
-Built on top of the Nixtla ecosystem, leveraging its state-of-the-art forecasting methods.
+Built on top of Nixtla's ecosystem, leveraging its state-of-the-art forecasting methods.
 
 ## Features
 
-MetaForecast currently consists of three main modules:
+metaforecast currently consists of three main modules:
 
 1. **Dynamic Ensembles**: Leveraging multiple models with adaptive ensemble techniques.
 2. **Synthetic Time Series Generation**: Creating realistic synthetic time series data for robust model training and testing. 

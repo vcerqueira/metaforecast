@@ -73,6 +73,9 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
         temporal_aug = self.df_to_tensor(df_aug)
 
+        if isinstance(temporal, torch.mps.Tensor):
+            temporal_aug = temporal_aug.to('mps')
+
         batch['temporal'] = temporal_aug
 
         return batch
@@ -92,7 +95,11 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
         arr_list = []
         for i, arr in enumerate(temporal_):
-            arr_t = arr.numpy().T
+            if isinstance(arr, torch.mps.Tensor):
+                arr = arr.cpu()
+
+            arr_t = arr.cpu().numpy().T
+
             arr_df = pd.DataFrame(arr_t).copy()
             arr_df.columns = ['y', 'y_mask']
             arr_df['ds'] = np.arange(arr_df.shape[0])
