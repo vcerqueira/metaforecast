@@ -31,7 +31,7 @@ jobs:
         SCORE=$(pylint $(git ls-files '*.py' | grep -v '^docs/') | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p')
         echo "PYLINT_SCORE=$SCORE" >> $GITHUB_ENV
     - name: Create Pylint Badge
-      uses: schneegans/dynamic-badges-action@v1.6.0
+      uses: schneegans/dynamic-badges-action@v1.7.0
       with:
         auth: ${{ secrets.GIST_SECRET }}
         gistID: abcdef1234567890abcdef1234567890

@@ -1,5 +1,5 @@
 """
-Initialization module for the ensembles subpackage.
+Initialization module for the ensembles module.
 
 This file imports and exposes the main forecast combination methods
 """
