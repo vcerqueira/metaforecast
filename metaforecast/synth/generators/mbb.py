@@ -115,7 +115,7 @@ class SeasonalMBB(SemiSyntheticTransformer):
         self.log = log
         self.seas_period = seas_period
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         ts = df['y'].copy().values
 
         synth_ts = _SeasonalMBB.create_bootstrap(ts, seas_period=self.seas_period, log=self.log)

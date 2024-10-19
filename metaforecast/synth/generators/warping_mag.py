@@ -68,7 +68,7 @@ class MagnitudeWarping(SemiSyntheticTransformer):
         self.sigma = sigma
         self.knot = knot
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
         warper = self.get_warper(df_.loc[:, 'y'].values)

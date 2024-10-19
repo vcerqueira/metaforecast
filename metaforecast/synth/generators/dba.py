@@ -109,6 +109,7 @@ class DBA(SemiSyntheticGenerator):
 
         return synth_df
 
+    # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """ _create_synthetic_ts
 

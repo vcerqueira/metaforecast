@@ -69,7 +69,7 @@ class TimeWarping(SemiSyntheticTransformer):
         self.sigma = sigma
         self.knot = knot
 
-    def _create_synthetic_ts(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
         df_.loc[:, 'y'] = self.apply_time_warping(df_.loc[:, 'y'].values)

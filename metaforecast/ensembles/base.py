@@ -245,7 +245,7 @@ class Mixture(ForecastingEnsemble):
 
         super().__init__()
 
-        assert loss_type in EXPERT_LOSS.keys()
+        assert loss_type in EXPERT_LOSS
 
         self.gradient = gradient
         self.loss_type = loss_type
@@ -422,6 +422,7 @@ class BaseADE(ForecastingEnsemble):
     def predict(self, **kwargs):
         raise NotImplementedError
 
+    # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
         raise NotImplementedError
 
