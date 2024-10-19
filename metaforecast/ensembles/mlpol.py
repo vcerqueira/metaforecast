@@ -6,7 +6,7 @@ import numpy as np
 
 from metaforecast.ensembles.base import Mixture
 
-RowIDType = typing.Union[int, typing.Hashable]
+RowIdentifierType = typing.Union[int, typing.Hashable]
 
 
 class MLpol(Mixture):
@@ -137,7 +137,7 @@ class MLpol(Mixture):
 
             self.b = copy.deepcopy(b_iter)
 
-    def _weights_from_regret(self, iteration: RowIDType = -1, **kwargs):
+    def _weights_from_regret(self, iteration: RowIdentifierType = -1, **kwargs):
         curr_regret = np.array(list(self.regret.values()))
 
         if np.max(curr_regret) > 0:

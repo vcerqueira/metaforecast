@@ -10,6 +10,7 @@ from metaforecast.synth.generators.base import (PureSyntheticGenerator,
                                                 SemiSyntheticGenerator,
                                                 SemiSyntheticTransformer)
 
+# pylint: disable=invalid-name
 TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
 
 

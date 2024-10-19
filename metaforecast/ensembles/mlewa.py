@@ -5,7 +5,7 @@ import numpy as np
 
 from metaforecast.ensembles.base import Mixture
 
-RowIDType = typing.Union[int, typing.Hashable]
+RowIdentifierType = typing.Union[int, typing.Hashable]
 
 
 class MLewa(Mixture):
@@ -132,7 +132,7 @@ class MLewa(Mixture):
             eta_update = np.sqrt(np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i ** 2))
             self.eta[int(str(i)) + 1] = eta_update
 
-    def _weights_from_regret(self, iteration: RowIDType = -1, **kwargs):
+    def _weights_from_regret(self, iteration: RowIdentifierType = -1, **kwargs):
         """ _weights_from_regret
 
         Updating the weights based on regret minimization

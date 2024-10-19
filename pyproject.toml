@@ -43,7 +43,7 @@ packages = ["metaforecast"]
 
 [tool.pylint.design]
 max-attributes = 15
-max-args = 10
+max-args = 15
 max-locals = 20
 
 [tool.pylint.messages_control]
@@ -52,5 +52,6 @@ disable = [
     "missing-class-docstring",
     "missing-function-docstring",
     "too-few-public-methods",
-    "R0801"
+    "R0801",
+    "R0917"
 ]
