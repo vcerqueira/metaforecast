@@ -9,7 +9,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
     strategy:
       matrix:
-        python-version: "3.9"
+        python-version: ["3.9"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
