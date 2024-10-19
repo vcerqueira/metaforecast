@@ -3,6 +3,7 @@
 [![PyPi Version](https://img.shields.io/pypi/v/metaforecast)](https://pypi.org/project/metaforecast/)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue)](todo)
 [![GitHub](https://img.shields.io/github/stars/vcerqueira/metaforecast?style=social)](https://github.com/vcerqueira/metaforecast)
+![Pylint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/vcerqueira/7ad63bc9902a43eb21993a755006f5de/raw/pylint-badge.json)
 
 
 Meta-learning and data-centric techniques for time series forecasting models. 
