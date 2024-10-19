@@ -9,6 +9,7 @@ class Scaling(SemiSyntheticTransformer):
 
     Apply scaling to the time series in a dataset
 
+
     References:
         Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
         (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
