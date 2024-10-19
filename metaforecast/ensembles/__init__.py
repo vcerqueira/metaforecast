@@ -1,9 +1,3 @@
-"""
-Initialization module for the ensembles module.
-
-This file imports and exposes the main forecast combination methods
-"""
-
 from .ade import ADE, MLForecastADE
 from .mlewa import MLewa
 from .mlpol import MLpol
