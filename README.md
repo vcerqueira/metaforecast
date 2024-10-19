@@ -38,4 +38,4 @@ TDA
 
 ## Examples
 
-Check out the `notebooks` folder (currently under construction) for example usage and tutorials. 
+Check out the `notebooks` folder for example usage and tutorials. 
