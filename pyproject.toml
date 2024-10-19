@@ -51,5 +51,6 @@ disable = [
     "missing-module-docstring",
     "missing-class-docstring",
     "missing-function-docstring",
-    "too-few-public-methods"
+    "too-few-public-methods",
+    "R0801"
 ]
