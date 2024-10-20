@@ -18,6 +18,7 @@ documentation for details.
    ensembles
    synth
    longhorizon
+   notebooks
 
    Indices and tables
    ==================
