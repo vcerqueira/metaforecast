@@ -166,7 +166,7 @@ class MLewa(Mixture):
         curr_regret = np.array(list(self.regret.values()))
 
         if np.max(curr_regret) > 0:
-            w = self.truncate_loss(np.exp(self.eta[iteration] * curr_regret))
+            w = self._truncate_loss(np.exp(self.eta[iteration] * curr_regret))
             w /= np.sum(w)
         else:
             w = np.ones_like(curr_regret) / len(curr_regret)
@@ -188,5 +188,5 @@ class MLewa(Mixture):
         raise NotImplementedError
 
     @staticmethod
-    def truncate_loss(x):
+    def _truncate_loss(x):
         return np.clip(x, np.exp(-700), np.exp(700))
