@@ -9,22 +9,38 @@ RowIdentifierType = typing.Union[int, typing.Hashable]
 
 
 class MLewa(Mixture):
-    """ MLewa
+    """ Dynamic ensemble using exponentially weighted averaging (EWA).
 
-    Dynamic expert aggregation based on exponentially-weighted average based on R's opera package
+     Implementation inspired by R's opera package, this class combines forecasts using
+     online learning with exponential weights. Weights are updated based on recent
+     performance to adapt to changing patterns.
 
-    References:
-        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games.
-        Cambridge university press, 2006.
+     See Also
+     --------
+     Mixture : Parent class implementing core ensemble functionality
+     opera : R package with original implementation
 
-        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by
-        aggregating experts; how to design a good set of experts. In Modeling and stochastic
-        learning for forecasting in high dimensions (pp. 95-115). Cham: Springer
+     Notes
+     -----
+     This implementation follows the EWA algorithm described in [1]_ and [2]_
 
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
-        Machine Learning, 108, 913-944.
+     References
+     ----------
+     .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
+            "Prediction, learning, and games."
+            Cambridge University Press.
 
-    Basic example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+     .. [2] Gaillard, P., & Goude, Y. (2015).
+            "Forecasting electricity consumption by aggregating experts."
+            In Modeling and Stochastic Learning for Forecasting in High Dimensions
+            (pp. 95-115). Springer, Cham.
+
+     .. [3] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+            "Arbitrage of forecasting experts."
+            Machine Learning, 108, 913-944.
+
+    Examples
+    --------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP
@@ -63,6 +79,7 @@ class MLewa(Mixture):
     >>> # forecasting and combining
     >>> fcst = nf.predict()
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
+
     """
 
     def __init__(self,
@@ -70,24 +87,32 @@ class MLewa(Mixture):
                  gradient: bool,
                  weight_by_uid: bool = False,
                  trim_ratio: float = 1):
+        """Initialize online ensemble with exponential weighting strategy.
 
-        """
-        :param loss_type: Loss function used to quantify forecast accuracy of ensemble members.
-        Should be one of 'square', 'pinball', 'percentage', 'absolute', or 'log'
-        :type loss_type: str
+        Parameters
+        ----------
+        loss_type : {'square', 'pinball', 'percentage', 'absolute', 'log'}
+            Loss function for evaluating and weighting ensemble members:
+            - square: Mean squared error
+            - pinball: Quantile loss
+            - percentage: Mean absolute percentage error
+            - absolute: Mean absolute error
+            - log: Log loss
 
-        :param gradient: Whether to use the gradient trick to weight ensemble members
-        :type gradient: bool
+        gradient : bool, default=False
+            If True, use gradient for weight updates
 
-        :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a
-        large number of time series
-        :type weight_by_uid: bool
+        weight_by_uid : bool, default=True
+            Whether to compute weights separately for each series:
+            - True: Individual weights per series (may be computationally intensive)
+            - False: Global weights across all series
 
-        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
-        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
-        Defaults to 1, which means all ensemble members are used.
-        :type trim_ratio: float
+        trim_ratio : float, default=1.0
+            Proportion of models to retain in ensemble, between 0 and 1:
+            - 1.0: Keep all models
+            - 0.5: Keep top 50% of models
+            Models are selected based on validation performance
+
         """
 
         super().__init__(loss_type=loss_type,

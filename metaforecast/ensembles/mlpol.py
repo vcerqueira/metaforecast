@@ -10,22 +10,39 @@ RowIdentifierType = typing.Union[int, typing.Hashable]
 
 
 class MLpol(Mixture):
-    """ MLpol
+    """Dynamic ensemble using polynomially weighted averaging (PWA).
 
-    Dynamic expert aggregation based on polynomially-weighted average based on R's opera package
+    Implementation inspired by R's opera package, this class combines forecasts using
+    online learning with polynomial weights.
 
-    References:
-        Cesa-Bianchi, Nicolo, and Gábor Lugosi. Prediction, learning, and games.
-        Cambridge university press, 2006.
+    See Also
+    --------
+    Mixture : Parent class implementing core ensemble functionality
+    MLewa : Exponentially weighted averaging variant
+    opera : R package with original implementation
 
-        Gaillard, P., & Goude, Y. (2015). Forecasting electricity consumption by
-        aggregating experts; how to design a good set of experts. In Modeling and stochastic
-        learning for forecasting in high dimensions (pp. 95-115). Cham: Springer
+    Notes
+    -----
+    The polynomial weighting scheme follows the theoretical framework in [1]_
+    and practical applications in [2]_.
 
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019). Arbitrage of forecasting experts.
-        Machine Learning, 108, 913-944.
+    References
+    ----------
+    .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
+           "Prediction, learning, and games."
+           Cambridge University Press.
 
-    Basic example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    .. [2] Gaillard, P., & Goude, Y. (2015).
+           "Forecasting electricity consumption by aggregating experts."
+           In Modeling and Stochastic Learning for Forecasting in High Dimensions
+           (pp. 95-115). Springer, Cham.
+
+    .. [3] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+           "Arbitrage of forecasting experts."
+           Machine Learning, 108, 913-944.
+
+    Examples
+    --------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP
@@ -72,23 +89,42 @@ class MLpol(Mixture):
                  weight_by_uid: bool = False,
                  trim_ratio: float = 1):
 
-        """
-        :param loss_type: Loss function used to quantify forecast accuracy of ensemble members.
-        Should be one of 'square', 'pinball', 'percentage', 'absolute', or 'log'
-        :type loss_type: str
+        """Initialize online ensemble with polynomial weighting strategy.
 
-        :param gradient: Whether to use the gradient trick to weight ensemble members
-        :type gradient: bool
+        Parameters
+        ----------
+        loss_type : {'square', 'pinball', 'percentage', 'absolute', 'log'}
+            Loss function for evaluating and weighting ensemble members:
+            - square: Mean squared error
+            - pinball: Quantile loss
+            - percentage: Mean absolute percentage error
+            - absolute: Mean absolute error
+            - log: Log loss
 
-        :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a
-        large number of time series
-        :type weight_by_uid: bool
+        gradient : bool, default=False
+            If True, use gradient for weight updates
 
-        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
-        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
-        Defaults to 1, which means all ensemble members are used.
-        :type trim_ratio: float
+        weight_by_uid : bool, default=True
+            Whether to compute weights separately for each series:
+            - True: Individual weights per series (may be computationally intensive)
+            - False: Global weights across all series
+
+        trim_ratio : float, default=1.0
+            Proportion of models to retain in ensemble, between 0 and 1:
+            - 1.0: Keep all models
+            - 0.5: Keep top 50% of models
+            Models are selected based on validation performance
+
+        See Also
+        --------
+        MLewa : Variant using exponential weighting
+        Mixture : Parent class with core functionality
+
+        References
+        ----------
+        .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
+               "Prediction, learning, and games."
+
         """
 
         super().__init__(loss_type=loss_type,

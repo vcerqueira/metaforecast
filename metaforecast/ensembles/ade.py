@@ -18,89 +18,88 @@ class ADE(BaseADE):
     """ Arbitrated Dynamic Ensemble
     
     Dynamic ensemble approach where ensemble members are weighted based on
-    a meta-model that forecasts their error
+    a meta-model that forecasts their error. The ADE approach dynamically combines
+    forecasts from multiple models by learning
+    their error patterns. It's particularly effective when dealing with heterogeneous
+    time series and when the relative performance of individual models varies over time.
 
-    References:
+    Parameters
+    ----------
+    freq : str
+        String denoting the sampling frequency of the time series (e.g. "MS").
+    trim_ratio : float, optional
+        Ratio (0-1) of ensemble members to keep in the ensemble.
+        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
+        Defaults to 1, which means all ensemble members are used.
+    meta_lags : list of int
+        List of lags to be used in the training of the meta-model.
+        Follows the structure of mlforecast. Example: [1,2,3,8].
+    trim_by_uid : bool, optional
+        Whether to trim the ensemble by unique_id (True) or dataset (False).
+        Defaults to True, but this can become computationally demanding for datasets with
+        a large number of time series.
+    meta_model : object, optional
+        Learning algorithm to use in the meta-level to forecast the
+        error of ensemble members. Defaults to a linear LGBM with a default configuration.
+
+    References
+    ----------
         Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
         Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
     
-    Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
-    >>> from datasetsforecast.m3 import M3
-    >>> from neuralforecast import NeuralForecast
-    >>> from neuralforecast.models import NHITS, NBEATS, MLP
-    >>> 
-    >>> from metaforecast.ensembles import ADE
-    >>> 
-    >>> df, *_ = M3.load('.', group='Monthly')
-    >>> 
-    >>> # ensemble members setup
-    >>> 
-    >>> CONFIG = {'input_size': 12,
-    >>>           'h': 12,
-    >>>           'accelerator': 'cpu',
-    >>>           'max_steps': 10, }
-    >>> 
-    >>> models = [
-    >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
-    >>>     NHITS(**CONFIG),
-    >>>     MLP(**CONFIG),
-    >>>     MLP(num_layers=3, **CONFIG),
-    >>> ]
-    >>> 
-    >>> nf = NeuralForecast(models=models, freq='M')
-    >>> 
-    >>> # cv to build meta-data
-    >>> n_windows = df['unique_id'].value_counts().min()
-    >>> n_windows = int(n_windows // 2)
-    >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
-    >>> fcst_cv = fcst_cv.reset_index()
-    >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
-    >>> 
-    >>> # fitting combination rule
-    >>> ensemble = ADE(freq='ME', meta_lags=list(range(1,7)), trim_ratio=0.6)
-    >>> ensemble.fit(fcst_cv)
-    >>> 
-    >>> # re-fitting models
-    >>> nf.fit(df=df)
-    >>> 
-    >>> # forecasting and combining
-    >>> fcst = nf.predict()
-    >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df, h=12)
+    Examples
+    --------
+        >>> from datasetsforecast.m3 import M3
+        >>> from neuralforecast import NeuralForecast
+        >>> from neuralforecast.models import NHITS, NBEATS, MLP
+        >>>
+        >>> from metaforecast.ensembles import ADE
+        >>>
+        >>> df, *_ = M3.load('.', group='Monthly')
+        >>>
+        >>> # ensemble members setup
+        >>> CONFIG = {'input_size': 12,
+        >>>           'h': 12,
+        >>>           'accelerator': 'cpu',
+        >>>           'max_steps': 10, }
+        >>>
+        >>> models = [
+        >>>     NBEATS(**CONFIG, stack_types=3 * ["identity"]),
+        >>>     NHITS(**CONFIG),
+        >>>     MLP(**CONFIG),
+        >>>     MLP(num_layers=3, **CONFIG),
+        >>> ]
+        >>>
+        >>> nf = NeuralForecast(models=models, freq='M')
+        >>>
+        >>> # cv to build meta-data
+        >>> n_windows = df['unique_id'].value_counts().min()
+        >>> n_windows = int(n_windows // 2)
+        >>> fcst_cv = nf.cross_validation(df=df, n_windows=n_windows, step_size=1)
+        >>> fcst_cv = fcst_cv.reset_index()
+        >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
+        >>>
+        >>> # fitting combination rule
+        >>> ensemble = ADE(freq='ME', meta_lags=list(range(1,7)), trim_ratio=0.6)
+        >>> ensemble.fit(fcst_cv)
+        >>>
+        >>> # re-fitting models
+        >>> nf.fit(df=df)
+        >>>
+        >>> # forecasting and combining
+        >>> fcst = nf.predict()
+        >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df, h=12)
     """
 
-    LGB_PARS = {'verbosity': -1, 'n_jobs': 1, 'linear_tree': True}
-    MLF_PREPROCESS_PARS = {'static_features': []}
+    _LGB_PARS = {'verbosity': -1, 'n_jobs': 1, 'linear_tree': True}
+    _MLF_PREPROCESS_PARS = {'static_features': []}
 
     def __init__(self,
                  freq: str,
                  meta_lags: Optional[List[int]] = None,
                  trim_ratio: float = 1,
                  trim_by_uid: bool = True,
-                 meta_model=MIMO(lgb.LGBMRegressor(**LGB_PARS))):
-
-        """
-        :param freq: String denoting the sampling frequency of the time series (e.g. "MS")
-        :type freq: str
-
-        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
-        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
-        Defaults to 1, which means all ensemble members are used.
-        :type trim_ratio: float
-
-        :param meta_lags: (List of ints) List of lags to be used in
-        the training of the meta-model. Follows the structure of mlforecast. Example: [1,2,3,8]
-        :type meta_lags: list
-
-        :param trim_by_uid: Whether to trim the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with
-        a large number of time series
-        :type trim_by_uid: bool
-
-        :param meta_model: Learning algorithm to use in the meta-level to forecast the
-        error of ensemble members.
-        Defaults to a linear LGBM with a default configuration
-        :type meta_model: object
-        """
+                 meta_model=MIMO(lgb.LGBMRegressor(**_LGB_PARS))):
 
         self.frequency = freq
 
@@ -134,12 +133,24 @@ class ADE(BaseADE):
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """
+        Parameters
+        ----------
+        insample_fcst : pd.DataFrame
+            Forecast and actual values dataset formatted like mlforecast cross-validation output.
+            Contains either:
+                - In-sample forecasts (predictions on training data)
+                - Cross-validation results (out-of-sample predictions)
 
-        :param insample_fcst: In-sample forecasts and actual value following
-        a cross-validation object from mlforecast
-        :type insample_fcst: pd.DataFrame
+            Expected columns:
+                - unique_id (or other id_col): Identifier for each series
+                - ds (or other time_col): Timestamp
+                - y (or other target_col): Actual values
+                - *model_name*: Predictions by a model with name *model_name*
 
-        :return: self
+        Returns
+        -------
+        self, with a fitted self.meta_model
+
         """
 
         self._fit(insample_fcst)
@@ -157,7 +168,7 @@ class ADE(BaseADE):
                                                        use_window=self.use_window)
 
         self.raw_meta_data = self.meta_mlf.preprocess(in_sample_loss_df,
-                                                      **self.MLF_PREPROCESS_PARS)
+                                                      **self._MLF_PREPROCESS_PARS)
 
         self.meta_df = self._process_meta_data(self.raw_meta_data)
 
@@ -169,18 +180,24 @@ class ADE(BaseADE):
 
     # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int, **kwargs):
-        """ predict
+        """ Combine ensemble member forecasts using the meta-model.
 
-        :param fcst: forecasts of ensemble members
-        :type fcst: pd.DataFrame
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Forecasts from individual ensemble members.
+            Expected columns: ['unique_id', 'ds', 'model_name1', 'model_name2', ...]
+        train : pd.DataFrame
+            Training dataset used to compute recent lags for meta-model input.
+            Expected columns: ['unique_id', 'ds', 'y']
+        h : int
+            Forecast horizon (number of future periods to predict)
 
-        :param train: training set to get the most recent lags as the input to the meta-model
-        :type train: pd.DataFrame
+        Returns
+        -------
+        pd.Series
+            Combined ensemble forecasts for h periods ahead.
 
-        :param h: forecasting horizon
-        :type h: int
-
-        :return: ensemble forecasts as pd.Series
         """
         self._assert_fcst(fcst)
 
@@ -191,6 +208,26 @@ class ADE(BaseADE):
 
     # pylint: disable=arguments-differ
     def update_weights(self, fcst: pd.DataFrame, **kwargs):
+        """Update performance statistics of ensemble members based on recent forecasts.
+
+        Used to identify and retain top-performing models for ensemble trimming.
+        Updates internal statistics tracking each model's forecast accuracy.
+
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Recent forecasts and actual values for ensemble members.
+            Expected columns:
+                - unique_id: Series identifier
+                - ds: Timestamp
+                - model_name: Predictions with model with name "model_name"
+                - y: Actual values
+
+        Notes
+        -----
+        Not implemented yet
+
+        """
         raise NotImplementedError
 
     def _predict(self, preds: pd.DataFrame, train: pd.DataFrame, h: int):
@@ -198,7 +235,7 @@ class ADE(BaseADE):
         df_ext = df_ext[self.METADATA]
         df_ext['y'] = df_ext['y'].fillna(value=-1)
 
-        meta_dataset = self.meta_mlf.preprocess(df_ext, **self.MLF_PREPROCESS_PARS)
+        meta_dataset = self.meta_mlf.preprocess(df_ext, **self._MLF_PREPROCESS_PARS)
 
         self.weights = self._weights_by_uid(meta_dataset, h=h)
 
@@ -301,18 +338,23 @@ class ADE(BaseADE):
 
 
 class MLForecastADE(ADE):
-    """ MLForecastADE
+    """Arbitrated Dynamic Ensemble (ADE) implemented for MLForecast.
 
-    ADE based on a MLForecast object
+    Creates a dynamic ensemble where member weights are determined by a meta-model
+    that predicts each model's forecast error. The meta-model adapts weights
+    based on recent performance and input patterns.
 
-    Dynamic ensemble approach where ensemble members are weighted based on
-    a meta-model that forecasts their error
+    Implementation follows the MLForecast conventions and models.
+    To use ADE with statsforecast or neuralforecast, see :class:`ADE`.
 
-    Reference:
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
-        Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
+    References
+    ----------
+    .. [1] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+           "Arbitrage of forecasting experts."
+           Machine Learning, 108, 913-944.
 
-    Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    Examples
+    --------
     >>> from datasetsforecast.m3 import M3
     >>> from mlforecast import MLForecast
     >>> from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
@@ -343,33 +385,43 @@ class MLForecastADE(ADE):
     >>> ensemble.fit()
     >>>
     >>> fcst = ensemble.predict(train=df, h=12)
+
     """
 
     def __init__(self,
                  mlf: MLForecast,
                  sf: Optional[StatsForecast] = None,
                  trim_ratio: float = 1,
-                 meta_model=MIMO(lgb.LGBMRegressor(**ADE.LGB_PARS))):
+                 meta_model=MIMO(lgb.LGBMRegressor(**ADE._LGB_PARS))):
 
-        """
-        :param mlf: Fitted MLForecast object containing multiple models to form the ensemble.
-        Make sure the fitted parameter in MLForecast is set to true (fitted=True)
-        to create the meta-dataset
-        :type mlf: fitted MLForecast with parameter fitted=True
+        """Initialize the Arbitrated Dynamic Ensemble with MLForecast models.
 
-        :param sf: A StatsForecast object containing classical forecasting models
-         to be added to the ensemble
-        :type sf: StatsForecast object
+        Parameters
+        ----------
+        mlf : MLForecast
+            Fitted MLForecast object containing ensemble members.
+            Must be initialized with fitted=True to generate the meta-dataset
+            for error prediction.
 
-        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
-        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
-        Defaults to 1, which means all ensemble members are used.
-        :type trim_ratio: float
+        sf : StatsForecast, optional
+            StatsForecast object containing classical forecasting models to be
+            included in the ensemble alongside MLForecast models.
 
-        :param meta_model: Learning algorithm to use in the meta-level to forecast
-        the error of ensemble members.
-        Defaults to a linear LGBM with a default configuration
-        :type meta_model: object
+        trim_ratio : float, default=1.0
+            Proportion of ensemble members to retain, between 0 and 1.
+            Models are selected based on validation accuracy:
+            - 1.0 keeps all models
+            - 0.5 keeps top 50% of models
+            - Lower values create a more selective ensemble
+
+        meta_model : object, optional
+            Model used to predict ensemble members' errors.
+            If None, defaults to LightGBM with linear trees and default parameters.
+
+        Notes
+        -----
+        The meta_model should support scikit-learn's fit/predict API.
+
         """
 
         self.mlf = mlf
@@ -383,9 +435,13 @@ class MLForecastADE(ADE):
 
     # pylint: disable=arguments-differ
     def fit(self, **kwargs):
-        """ fit
+        """Train the meta-model using ensemble members' in-sample predictions.
 
-        Fitting the meta-model based on in-sample fitted values
+        Uses cross-validation predictions from the MLForecast object to:
+        1. Compute forecast errors for each ensemble member
+        2. Train the meta-model to predict these errors
+        3. Update model weights based on validation performance
+        4. If trim_ratio < 1, selects top performing models
 
         """
 
@@ -402,15 +458,25 @@ class MLForecastADE(ADE):
 
     # pylint: disable=arguments-differ
     def predict(self, train: pd.DataFrame, h: int, **kwargs):
-        """ predict
+        """Generate ensemble forecasts using weighted model combinations.
 
-        :param train: training set to get the most recent lags as the input to the meta-model
-        :type train: pd.DataFrame
+        Parameters
+        ----------
+        train : pd.DataFrame
+            Training dataset used to compute recent lags for meta-model input.
+            Expected columns:
+                - unique_id: Series identifier
+                - ds: Timestamp
+                - y: Target variable
 
-        :param h: forecasting horizon
-        :type h: int
+        h : int
+            Forecast horizon (number of periods to predict ahead)
 
-        :return: ensemble forecasts as pd.Series
+        Returns
+        -------
+        pd.Series
+            Combined ensemble predictions.
+
         """
 
         base_fcst = self.mlf.predict(h=h)
@@ -425,16 +491,11 @@ class MLForecastADE(ADE):
         return fcst
 
     def update_weights(self, fcst: pd.DataFrame, **kwargs):
+        """Update performance statistics of ensemble members.
+
+        See :meth:`ADE.update_weights` for full documentation.
+        """
         raise NotImplementedError
 
     def _reweight_by_redundancy(self):
-        raise NotImplementedError
-
-    def update_estimates(self, df: pd.DataFrame):
-        """
-        Updating loss statistics for dynamic model selection
-
-        :param df: dataset with actual values and predictions, similar to insample predictions
-        """
-
         raise NotImplementedError

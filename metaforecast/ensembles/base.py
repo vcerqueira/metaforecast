@@ -93,27 +93,48 @@ class ForecastingEnsemble(ABC):
         raise NotImplementedError
 
     def update_weights(self, fcst: pd.DataFrame):
-        """ update_weights
+        """Update model performance statistics for dynamic ensemble selection.
 
-        Updating loss statistics for dynamic model selection
-
-        param fcst: dataset with actual values and predictions, similar to insample predictions
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Dataset containing actual values and model predictions.
+            Expected columns:
+                - unique_id: Series identifier
+                - ds: Timestamp
+                - model_name: Predictions of model with name "model_name"
+                - y: Actual values
 
         """
 
         raise NotImplementedError
 
     def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
-        """ evaluate_base_fcst
+        """Evaluate ensemble members' accuracy by series using SMAPE.
 
-        Evaluating the forecasts of ensemble members (base models) by individual time series
-        (unique_id) based on SMAPE.
+        Computes Symmetric Mean Absolute Percentage Error (SMAPE) for each base model
+        on each individual time series. Can evaluate using either full history or
+        recent window of observations.
 
-        :param insample_fcst: (pd.DataFrame) with in-sample or CV forecasts and actual values
-        :param use_window: (bool) whether to compute performance in all data or in the last
-        self.window_size observations
+        Parameters
+        ----------
+        insample_fcst : pd.DataFrame
+            In-sample or cross-validation predictions and actual values.
+            Expected columns:
+                - unique_id: Series identifier
+                - ds: Timestamp
+                - model_name: Predictions of model with name "model_name"
+                - y: Actual values
 
-        :return: (pd.DataFrame) performance accuracy of each model on each time series
+        use_window : bool, default=False
+            If True, evaluate only the last self.window_size observations
+            If False, evaluate using complete history
+
+        Returns
+        -------
+        pd.DataFrame
+            Performance metrics for each model-series combination.
+
         """
 
         all_scores, window_scores = {}, {}
@@ -207,32 +228,45 @@ class ForecastingEnsemble(ABC):
 
 
 class Mixture(ForecastingEnsemble):
-    """ Mixture
+    """Online learning ensemble that combines forecasts using regret minimization.
 
-    Class for a forecasting ensemble method based on regret minimization
+    Adapts model weights over time by minimizing prediction regret. Supports
+    multiple loss functions and can optimize weights globally or per series.
 
     Parameters
     ----------
-    loss_type: str
-        Loss function used to compute the weights of individual models. Should be one of 'square',
-        'absolute', 'percentage', 'log', or 'pinball'
+    loss_type : {'square', 'absolute', 'percentage', 'log', 'pinball'}
+        Loss function for computing model weights:
+        - square: Mean squared error
+        - absolute: Mean absolute error
+        - percentage: Mean absolute percentage error
+        - log: Log loss
+        - pinball: Quantile loss
 
-    gradient: bool
-        Whether to use the gradient trick to compute the weights of individual models
+    gradient : bool, default=False
+        If True, use gradient for weight updates
 
-    trim_ratio: float
-        Ratio of models to use in the final combination rule.
-        1-trim_ratio of models will not be used.
+    trim_ratio : float, default=1.0
+        Proportion of models to retain in ensemble, between 0 and 1.
+        Models are selected based on cumulative performance:
+        - 1.0 keeps all models
+        - 0.5 keeps top 50% of models
+        - Lower values create a more selective ensemble
 
-    weight_by_uid: bool
-        Whether to compute the weights by unique_id or globally. Setting this parameter to
-        true may be computationally demanding for datasets with a large number of unique_ids
+    weight_by_uid : bool, default=False
+        If True, compute separate weights for each time series
+        If False, use global weights across all series
+        Note: Setting to True may be computationally intensive
+        for datasets with many series
 
-    Returns
-    -------
-    Mixture
-        self, optional
+    Notes
+    -----
+    This implementation follows the implementation of opera's R package.
 
+    References
+    ----------
+    .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction,
+           learning, and games.
     """
 
     def __init__(self,
@@ -262,6 +296,27 @@ class Mixture(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame):
+        """ Fitting the dynamic combination rule
+
+        Parameters
+        ----------
+        insample_fcst : pd.DataFrame
+            Forecast and actual values dataset formatted like mlforecast cross-validation output.
+            Contains either:
+                - In-sample forecasts (predictions on training data)
+                - Cross-validation results (out-of-sample predictions)
+
+            Expected columns:
+                - unique_id (or other id_col): Identifier for each series
+                - ds (or other time_col): Timestamp
+                - y (or other target_col): Actual values
+                - *model_name*: Predictions by a model with name *model_name*
+
+        Returns
+        -------
+        self, with computed self.weights
+
+        """
 
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
@@ -324,6 +379,20 @@ class Mixture(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
+        """ Combine ensemble member forecasts using the mixture.
+
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Forecasts from individual ensemble members.
+            Expected columns: ['unique_id', 'ds', 'model_name1', 'model_name2', ...]
+
+        Returns
+        -------
+        pd.Series
+            Combined ensemble forecasts for h periods ahead.
+
+        """
         self._assert_fcst(fcst)
 
         weights = pd.DataFrame(self.uid_weights).T

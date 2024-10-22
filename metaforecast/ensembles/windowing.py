@@ -6,22 +6,26 @@ from metaforecast.ensembles.base import ForecastingEnsemble
 
 
 class Windowing(ForecastingEnsemble):
-    """ Windowing
+    """Combine forecasts based on recent performance in sliding windows.
 
-    Forecast combination based on windowing - forecast accuracy (squared error) on a
-    recent window of data
+    A dynamic ensemble that adapts model weights based on accuracy in
+    recent time windows. This approach is particularly suited for
+    non-stationary data where relative model performance changes over
+    time [1]_, [2]_.
 
-    References:
-        Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017, October).
-        Dynamic and heterogeneous ensembles for time series forecasting. In 2017 IEEE international
-        conference on data science and advanced analytics (DSAA) (pp. 242-251). IEEE.
+    References
+    ----------
+    .. [1] Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017).
+           "Dynamic and heterogeneous ensembles for time series forecasting."
+           In IEEE International Conference on Data Science and Advanced
+           Analytics (DSAA) (pp. 242-251).
 
-        van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015,
-        November). Having a blast: Meta-learning and heterogeneous ensembles
-        for data streams. In 2015 ieee international conference on
-        data mining (pp. 1003-1008). IEEE.
+    .. [2] van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015).
+           "Having a blast: Meta-learning and heterogeneous ensembles for data streams."
+           In IEEE International Conference on Data Mining (pp. 1003-1008).
 
-    Example usage (CHECK NOTEBOOKS FOR MORE EXAMPLES)
+    Examples
+    --------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP
@@ -61,6 +65,7 @@ class Windowing(ForecastingEnsemble):
     >>> # forecasting and combining
     >>> fcst = nf.predict()
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
+
     """
 
     def __init__(self,
@@ -69,27 +74,38 @@ class Windowing(ForecastingEnsemble):
                  trim_ratio: float = 1,
                  weight_by_uid: bool = False,
                  window_size: Optional[int] = None):
-        """
-        :param freq: Sampling frequency of the time series (e.g. 'M')
-        :type freq: str
+        """Initialize window-based dynamic ensemble.
 
-        :param select_best: Whether to select the single model that maximizes forecast performance
-        on in-sample data
-        :type select_best: bool
+        Parameters
+        ----------
+        freq : str
+            Time series sampling frequency (e.g., 'M' for monthly, 'D' for daily).
+            Used to set default window size if not specified.
 
-        :param trim_ratio: Ratio (0-1) of ensemble members to keep in the ensemble.
-        (1-trim_ratio) of models will not be used during inference based on validation accuracy.
-        Defaults to 1, which means all ensemble members are used.
-        :type trim_ratio: float
+        select_best : bool, default=False
+            Model selection strategy:
+            - True: Use single best model from window
+            - False: Use weighted combination of models
+            Single best can be more aggressive in adapting to changes
 
-        :param weight_by_uid: Whether to weight the ensemble by unique_id (True) or dataset (False)
-        Defaults to True, but this can become computationally demanding for datasets with a large
-        number of time series
-        :type weight_by_uid: bool
+        trim_ratio : float, default=1.0
+            Proportion of models to retain in ensemble, between 0 and 1:
+            - 1.0: Keep all models
+            - 0.5: Keep top 50% of models
+            Models are selected based on window performance
 
-        :param window_size: No of recent observations used to trim ensemble. If None, a size
-        equivalent to the sampling frequency will be used.
-        :type window_size: int
+        weight_by_uid : bool, default=True
+            Whether to compute weights separately for each series:
+            - True: Individual weights per series (may be computationally intensive)
+            - False: Global weights across all series
+
+        window_size : int, optional
+            Number of recent observations used for performance evaluation.
+            If None, defaults to frequency-based size:
+            - Monthly: 12 observations
+            - Daily: 30 observations
+            etc.
+
         """
 
         super().__init__()
@@ -117,6 +133,27 @@ class Windowing(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst, **kwargs):
+        """
+        Parameters
+        ----------
+        insample_fcst : pd.DataFrame
+            Forecast and actual values dataset formatted like mlforecast cross-validation output.
+            Contains either:
+                - In-sample forecasts (predictions on training data)
+                - Cross-validation results (out-of-sample predictions)
+
+            Expected columns:
+                - unique_id (or other id_col): Identifier for each series
+                - ds (or other time_col): Timestamp
+                - y (or other target_col): Actual values
+                - *model_name*: Predictions by a model with name *model_name*
+
+        Returns
+        -------
+        self, with computed self.weights
+
+        """
+
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
             self.model_names = [x for x in self.model_names if x not in self.METADATA + ['h']]
@@ -130,6 +167,21 @@ class Windowing(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
+        """ Combine ensemble member forecasts based on recent performance.
+
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Forecasts from individual ensemble members.
+            Expected columns: ['unique_id', 'ds', 'model_name1', 'model_name2', ...]
+
+        Returns
+        -------
+        pd.Series
+            Combined ensemble forecasts for h periods ahead.
+
+        """
+
         self._assert_fcst(fcst)
 
         fcst_c = fcst.apply(lambda x: self._weighted_average(x, self.weights), axis=1)
