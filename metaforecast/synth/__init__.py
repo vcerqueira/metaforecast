@@ -7,13 +7,16 @@ from .generators.kernelsynth import KernelSynth
 from .generators.mbb import SeasonalMBB
 from .generators.tsmixup import TSMixup
 
+from .callbacks import OnlineDataAugmentationCallback
+
 __all__ = [
     "Jittering",
     "Scaling",
     "MagnitudeWarping",
     "TimeWarping",
+    "SeasonalMBB",
     "DBA",
     "KernelSynth",
-    "SeasonalMBB",
     "TSMixup",
+    "OnlineDataAugmentationCallback"
 ]

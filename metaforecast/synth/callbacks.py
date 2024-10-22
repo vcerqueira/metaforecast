@@ -15,11 +15,19 @@ TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheti
 
 
 class OnlineDataAugmentationCallback(pl.Callback):
-    """ OnlineDataAugmentationCallback
+    """Perform data augmentation during training
 
-    Online (batch-by-batch) data augmentation via a callback
+    A callback that applies time series augmentation techniques to each batch
+    during model training. This online approach:
+    - Creates different augmented samples in each batch
+    - Enables dynamic augmentation strategies
 
-    Example usage
+    Features
+    --------
+    - Compatible with PyTorch training loops
+
+    Examples
+    --------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS
@@ -50,10 +58,16 @@ class OnlineDataAugmentationCallback(pl.Callback):
     """
 
     def __init__(self, generator):
-        """
-        :param generator: A synthetic time series generator
-        :type generator: An object of that extends BaseTimeSeriesGenerator, i.e.
-        PureSyntheticGenerator, SemiSyntheticGenerator, or SemiSyntheticTransformer
+        """Initialize online data augmentation callback.
+
+        Parameters
+        ----------
+        generator : BaseTimeSeriesGenerator
+            Time series generator object for data augmentation.
+            Must be one of:
+            - PureSyntheticGenerator: Creates fully synthetic series without reference to a source dataset
+            - SemiSyntheticGenerator: Modifies existing series from a source dataset
+            - SemiSyntheticTransformer: Applies transformations to series from a source dataset
 
         """
         super().__init__()
@@ -83,14 +97,25 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
     @staticmethod
     def temporal_to_df(temporal: torch.Tensor) -> pd.DataFrame:
-        """ temporal_to_df
+        """Convert batch of time series tensors to DataFrame format.
 
-        Converting the batch of time series into a DataFrame structure with (unique_id, ds, y) data.
+        Transforms a tensor containing multiple time series into a long-format
+        DataFrame following the (unique_id, ds, y) structure used in
+        Nixtla-based forecasting workflows.
 
-        :param temporal: A tensor with a batch of time series
-        :type temporal: torch.Tensor
+        Parameters
+        ----------
+        temporal : torch.Tensor
+            Batch of time series data.
 
-        :return: Time series dataset as a pd.DataFrame
+        Returns
+        -------
+        pd.DataFrame
+            Long-format time series data with columns:
+            - unique_id: Series identifier (0 to batch_size-1)
+            - ds: Integer index as time indicator
+            - y: Series values
+
         """
         temporal_ = copy.deepcopy(temporal)
 
@@ -115,16 +140,29 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
     @staticmethod
     def create_mask(df) -> pd.DataFrame:
-        """ create_mask
+        """ Create masked time series datasets
 
-        Transforming the time series into the same size (equal to the largest one) using a mask.
-        Shorter time series will be left-padded with 0 and the padded samples will be denoted by
-        a binary variable.
+        Transforms variable-length time series into fixed-length format by:
+        1. Finding maximum series length
+        2. Left-padding shorter series with zeros
+        3. Creating binary mask to identify padded values
 
-        :param df: Time series dataset as pd.DataFrame with columns (unique_id, ds, y)
-        :type df: pd.DataFrame
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp column
+            - y: Target values
 
-        :return: Masked time series dataset
+        Returns
+        -------
+        pd.DataFrame
+            Padded dataset with added columns:
+            - y_mask: Boolean, False for padded values
+            - All original columns preserved
+            All series padded to same length
+
         """
         uids = df['unique_id'].unique()
         all_ds = np.arange(0, df['ds'].max() + 1)
@@ -146,14 +184,20 @@ class OnlineDataAugmentationCallback(pl.Callback):
 
     @classmethod
     def df_to_tensor(cls, df: pd.DataFrame) -> torch.Tensor:
-        """ df_to_tensor
+        """Convert DataFrame of time series data to PyTorch tensor.
 
-        Converting a time series dataset from pd.DataFrame into a torch.Tensor based on
-        neuralforecast's workflow
+        Transforms a time series DataFrame following neuralforecast's format
+        into a PyTorch tensor for model training. Handles masked values and
+        multiple series.
 
-        :param df: Masked time series dataset with (unique_id, ds, y, y_mask) variables
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
 
-        :return: Time series dataset as a torch Tensor
         """
 
         df_ = cls.create_mask(df).copy()

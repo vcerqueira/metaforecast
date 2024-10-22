@@ -5,22 +5,35 @@ import torch
 import numpy as np
 import pandas as pd
 
-DForTensor = Union[pd.DataFrame, torch.Tensor]
-
 
 class BaseTimeSeriesGenerator(ABC):
-    """
-    Synthetic time series generator abstract class
+    """Abstract base class for synthetic time series generators.
 
-    Attributes:
-        REQUIRED_COLUMNS (List[str]) List of columns required in a dataset
-        START (pd.Timestamp) Dummy timestamp that marks the beginning of a synthetic time series
-        END (pd.Timestamp) Dummy timestamp that marks the end of a synthetic time series
-        REQUIRES_N (bool) Whether the type of generator requires user input about the number of
-        time series to be generated
-        REQUIRES_DF (bool) Whether the type of generator requires user input about
-        the source dataset
-    """
+     Attributes
+     ----------
+     REQUIRED_COLUMNS : List[str]
+         Columns that must be present in input/output datasets:
+         - unique_id: Series identifier
+         - ds: Timestamp
+         - y: Target values
+
+     START : pd.Timestamp
+         Reference start time for synthetic series
+
+     END : pd.Timestamp
+         Reference end time for synthetic series
+
+     REQUIRES_N : bool
+         Whether generator needs explicit number of series:
+         - True: Pure synthetic generation
+         - False: Modification of existing series
+
+     REQUIRES_DF : bool
+         Whether generator needs source dataset:
+         - True: Semi-synthetic/transformation approaches
+         - False: Pure synthetic generation
+
+     """
 
     REQUIRED_COLUMNS = ['unique_id', 'ds', 'y']
     START: pd.Timestamp
@@ -29,23 +42,30 @@ class BaseTimeSeriesGenerator(ABC):
     REQUIRES_DF: bool
 
     def __init__(self, alias: str):
-        """
-        :param alias: method name
-        :type alias: str
+        """Initialize semi-synthetic generator with method identifier.
 
-        Attributes:
-        alias (str) method name
-        counter (int) synthetic time series counter
+        Parameters
+        ----------
+        alias : str
+            Name of the generation method being used.
+            Used to track and identify different generation approaches.
+
+        Attributes
+        ----------
+        alias : str
+            Method identifier for the generator instance.
+            Used to track and identify different generation approaches.
+
+        counter : int
+            Tracks number of synthetic series generated.
+            Starts at 0 and increments with each generation.
+
         """
         self.alias = alias
         self.counter = 0
 
     @abstractmethod
     def transform(self, **kwargs):
-        """ transform
-
-        Create synthetic time series based on **kwargs
-        """
         raise NotImplementedError
 
     @abstractmethod
@@ -54,14 +74,25 @@ class BaseTimeSeriesGenerator(ABC):
 
     @staticmethod
     def sample_weights_dirichlet(alpha, k):
-        """ sample_weights_dirichlet
+        """Sample k weights from a Dirichlet distribution.
 
-        Sampling weights from a Dirichlet distribution
+        Generates random weights that sum to 1 using a Dirichlet distribution.
 
-        :param alpha: Gamma distribution parameter
-        :param k: Number of samples
+        Parameters
+        ----------
+        alpha : float
+            Concentration parameter of the Dirichlet distribution:
 
-        :return: numpy array with weights
+        k : int
+            Number of weights to generate.
+            Must be positive.
+
+        Returns
+        -------
+        np.ndarray
+            Array of k weights that sum to 1.0
+            Shape: (k,)
+
         """
 
         # Sample from Gamma distribution
@@ -92,12 +123,16 @@ class BaseTimeSeriesGenerator(ABC):
 
 
 class PureSyntheticGenerator(BaseTimeSeriesGenerator):
-    """ PureSyntheticGenerator
+    """Generate synthetic time series from scratch without source data.
 
-    Synthetic time series generator
-    Pure in the sense that realistic time series are generated without considering a source dataset.
+    Creates artificial time series using statistical models and patterns,
+    without requiring existing data. Useful for:
+    - Generating training data with known properties
+    - Testing model behavior with controlled patterns
+    - Augmenting small datasets
+    - Creating benchmark datasets
+
     """
-
     START = pd.Timestamp('2000-01-01 00:00:00')
     END = pd.Timestamp('2024-01-01 00:00:00')
     REQUIRES_N = True
@@ -110,43 +145,73 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
 
 
 class SemiSyntheticGenerator(BaseTimeSeriesGenerator):
-    """ SemiSyntheticGenerator
+    """Generate synthetic time series from a source dataset.
 
-    Generate synthetic time series based on a source dataset
+    Creates new time series that, in principle, maintain statistical properties and patterns
+    from a source dataset while introducing controlled variations. This approach:
+    - Preserves realistic temporal patterns
+    - Maintains domain-specific characteristics
+    - Allows controlled modification of specific properties
+    - Generates diverse but plausible variations
+
     """
+
     REQUIRES_N = True
     REQUIRES_DF = True
 
     # pylint: disable=arguments-differ
     @abstractmethod
-    def transform(self, df: DForTensor, n_series: int, **kwargs):
-        """
+    def transform(self, df: pd.DataFrame, n_series: int, **kwargs):
+        """Transform input time series into synthetic variations.
 
-        :param df: time series dataset, following a nixtla-based structure.
-        Either a pd.DataFrame (unique_id, ds, y) or an inner tensor structure
-        :type df: pd.DataFrame of torch.tensor
+        Parameters
+        ----------
+        df : pd.DataFrame
+            - pd.DataFrame with columns:
+                - unique_id: Series identifier
+                - ds: Timestamp
+                - y: Target values
 
-        :param n_series: Number of time series to be generated
-        :type n_series: int
+        n_series : int
+            Number of synthetic series to generate.
+
         """
         raise NotImplementedError
 
 
 class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
-    """ SemiSyntheticTransformer
+    """Transform time series using specific operations while preserving structure.
 
-    Transform the time series in a dataset with a given operation
+    Applies controlled transformations to existing time series to create
+    variations that maintain core patterns while modifying specific properties.
+
     """
     REQUIRES_N = False
     REQUIRES_DF = True
 
     def __init__(self, alias: str, rename_uids: bool = True):
-        """
-        :param alias: method name
-        :type alias: str
+        """Initialize transformer with method identifier and naming preferences.
 
-        :param rename_uids: whether to rename the original unique_id's
-        :type rename_uids: bool
+        Parameters
+        ----------
+        alias : str
+            Name of the transformation method to be applied.
+            Used to identify and track different transformation types.
+            Examples: 'scale', 'noise', 'warp'
+
+        rename_uids : bool, default=True
+            Whether to generate new identifiers for transformed series:
+            - True: Create new unique_ids for transformed series
+            - False: Preserve original series identifiers
+            Useful when tracking relationship to source series
+
+        Attributes
+        ----------
+        counter: int
+            Tracks number of series transformed.
+            Used for generating new unique_ids when rename_uids=True.
+            Automatically increments with each transformation.
+
         """
         super().__init__(alias=alias)
 
@@ -154,14 +219,30 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
     # pylint: disable=arguments-differ
     def transform(self, df: pd.DataFrame, **kwargs):
-        """ transform
+        """Transform time series in a dataset while preserving structure.
 
-        Transform the time series of a dataset with a nixtla-based structure (unique_id, ds, y)
+        Applies transformation method specified by 'alias' to each series
+        in the dataset. Maintains nixtla's standard format throughout
+        the transformation process.
 
-        :param df: time series dataset
-        :type df: pd.DataFrame
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+            Must follow nixtla framework conventions
 
-        :return: Transformed dataset
+        Returns
+        -------
+        pd.DataFrame
+            Transformed dataset with same structure:
+            - Original columns preserved
+            - Same temporal alignment
+            - Modified y values
+            - New/preserved unique_ids based on rename_uids setting
+
         """
         self._assert_datatypes(df)
 

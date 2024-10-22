@@ -191,9 +191,10 @@ class Windowing(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
-        """ update_weights
+        """ Updating the combination weights
 
-        Updating loss statistics for dynamic model selection
+
+        Not implemented yet
 
         """
 
