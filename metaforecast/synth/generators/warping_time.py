@@ -6,17 +6,21 @@ from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
 
 class TimeWarping(SemiSyntheticTransformer):
-    """ TimeWarping
+    """Transform time series by applying non-linear temporal distortions.
 
-    Apply time warping to each time series in a dataset
+    Implements time warping augmentation by distorting the time axis while
+    preserving value relationships.
 
-    References:
-        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
-        (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
-        monitoring using convolutional neural networks. In Proceedings of the 19th ACM
-        international conference on multimodal interaction (pp. 216-220).
+    References
+    ----------
+    .. [1] Um, T. T., et al. (2017).
+           "Data augmentation of wearable sensor data for parkinson's disease
+           monitoring using convolutional neural networks."
+           In Proceedings of the 19th ACM International Conference
+           on Multimodal Interaction (pp. 216-220).
 
-    Example usage (check notebooks for extended examples):
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -53,17 +57,28 @@ class TimeWarping(SemiSyntheticTransformer):
     """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
+        """Initialize time warping transformer with distortion parameters.
+
+        Parameters
+        ----------
+        sigma : float, default=0.2
+            Controls intensity of temporal distortion:
+            - Higher values create larger time shifts
+            - Lower values produce subtler variations
+
+        knot : int, default=4
+            Number of control points for cubic spline warping:
+            - More knots: More complex temporal distortions
+            - Fewer knots: Smoother time transformations
+            - Recommended range: 3-10
+            Controls smoothness of time warping.
+
+        rename_uids : bool, default=True
+            Whether to create new identifiers for warped series:
+            - True: New ids as f"TWARP_{counter}"
+            - False: Preserve original series ids
+
         """
-        :param sigma: Scaling parameter for the warping factor
-        :type sigma: float. Defaults to 0.2
-
-        :param knot: Number of knots for the CubicSpline
-        :type knot: int. Defaults to 4
-
-        :param rename_uids: whether to rename the original unique_id's
-        :type rename_uids: bool
-        """
-
         super().__init__(alias='TWARP', rename_uids=rename_uids)
 
         self.sigma = sigma

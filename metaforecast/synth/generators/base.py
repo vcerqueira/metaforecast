@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union
 
-import torch
 import numpy as np
 import pandas as pd
 
@@ -42,7 +40,7 @@ class BaseTimeSeriesGenerator(ABC):
     REQUIRES_DF: bool
 
     def __init__(self, alias: str):
-        """Initialize semi-synthetic generator with method identifier.
+        """Initialize semisynthetic generator with method identifier.
 
         Parameters
         ----------

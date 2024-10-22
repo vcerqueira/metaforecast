@@ -53,17 +53,24 @@ KERNEL_BANK = [
 
 
 class KernelSynth(PureSyntheticGenerator):
-    """ KernelSynth
+    """Generate synthetic time series using kernel-based pattern synthesis.
 
-    Synthetic data generation using KernelSynth.
+    Implementation based on the KernelSynth approach from Amazon's Chronos
+    project [1]_.
 
-    CODE BASED ON https://github.com/amazon-science/chronos-forecasting/issues/62
+    References
+    ----------
+    .. [1] Ansari, A. F., et al. (2024).
+           "Chronos: Learning the language of time series."
+           arXiv preprint arXiv:2403.07815.
 
-    References:
-        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y.
-        (2024). Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
+    Notes
+    -----
+    Code adapted from the Chronos project:
+    https://github.com/amazon-science/chronos-forecasting/issues/62
 
-    Example Usage (check notebooks for extended examples)
+    Examples
+    --------
     >>> from metaforecast.synth import KernelSynth
     >>>
     >>> tsgen = KernelSynth(max_kernels=7, freq='ME', n_obs=300)
@@ -71,16 +78,25 @@ class KernelSynth(PureSyntheticGenerator):
     """
 
     def __init__(self, max_kernels: int, n_obs: int, freq: str):
-        """
+        """Initialize KernelSynth generator with synthesis parameters.
 
-        :param max_kernels: Maximum number of kernels to draw from the kernel bank
-        :type max_kernels: int
+        Parameters
+        ----------
+        max_kernels : int
+            Maximum number of kernels to combine from kernel bank.
+            Controls complexity of generated patterns:
+            - Higher values: More complex patterns
+            - Lower values: Simpler, cleaner patterns
 
-        :param n_obs: Number of observations in each synthetic time series
-        :type n_obs: int
+        n_obs : int
+            Number of observations per series
 
-        :param freq: Time series frequency (e.g. ME, H, etc)
-        :type freq: str
+        freq : str
+            Time series frequency identifier:
+            - 'H': Hourly
+            - 'D': Daily
+            etc.
+
         """
         super().__init__(alias='KS')
 
@@ -91,6 +107,29 @@ class KernelSynth(PureSyntheticGenerator):
         self.x = np.linspace(0, 1, int(self.n_obs))
 
     def transform(self, n_series: int, **kwargs):
+        """Generate synthetic time series using kernel-based synthesis.
+
+        Creates multiple time series using kernel combinations, returning
+        a DataFrame in nixtla framework format. Each series combines
+        up to max_kernels patterns with specified length and frequency.
+
+        Parameters
+        ----------
+        n_series : int
+            Number of synthetic series to generate.
+            Must be positive.
+
+        Returns
+        -------
+        pd.DataFrame
+            Generated time series dataset with columns:
+            - unique_id: f"kernelsynth_{i}" for i in range(n_series)
+            - ds: Timestamps with specified frequency
+            - y: Generated values
+            Shape: (n_series * n_obs, 3)
+
+        """
+
         dt = pd.date_range(start=self.START,
                            periods=self.n_obs,
                            freq=self.freq)

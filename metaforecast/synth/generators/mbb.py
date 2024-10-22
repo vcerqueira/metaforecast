@@ -20,18 +20,28 @@ class _SeasonalMBB:
 
     @classmethod
     def create_bootstrap(cls, y: np.ndarray, seas_period: int, log: bool) -> np.ndarray:
-        """ create_bootstrap
+        """Create bootstrapped time series using moving blocks bootstrap.
 
-        Create a bootstrapped version of a time series using moving blocks bootstrap
+        Generates a synthetic version of the input series by resampling
+        blocks of observations while preserving temporal dependencies
+        and seasonal patterns.
 
-        :param y: univariate time series
-        :type y: np.array
+        Parameters
+        ----------
+        y : np.ndarray
+            Input time series values.
+            Shape: (n_observations,)
+            Must be 1-dimensional.
 
-        :param seas_period: Seasonal period (e.g. 12 for monthly time series)
-        :type seas_period: int
+        seas_period : int
+            Seasonal period of the time series:
+            - 12 for monthly data
+            - 4 for quarterly data
+            - 7 for daily data with weekly patterns
+            Used to determine block size and preserve seasonality.
 
-        :param log: Whether to transform the time series using the logarithm (to stabilize variance)
-        :type log: bool
+        log : bool, default=False
+            Whether to apply log transformation before bootstrapping:
         """
 
         if log:
@@ -56,17 +66,22 @@ class _SeasonalMBB:
 
 
 class SeasonalMBB(SemiSyntheticTransformer):
-    """ Seasonal Moving Blocks Bootstrap
+    """Transform time series using seasonal moving blocks bootstrap.
 
-    Transform the time series in a dataset using bootstrapping
+    Creates synthetic variations of time series by resampling blocks
+    of observations while preserving seasonal patterns and temporal
+    dependencies. Method described in Bandara et al. [1]_ shown to
+    improve forecasting accuracy through augmentation.
 
-    References:
-        Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y., & Bergmeir, C. (2021). Improving the
-        accuracy of global forecasting models using time series data augmentation.
-        Pattern Recognition, 120, 108148.
+    References
+    ----------
+    .. [1] Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y.,
+           & Bergmeir, C. (2021). "Improving the accuracy of global
+           forecasting models using time series data augmentation."
+           Pattern Recognition, 120, 108148.
 
-    Example usage (check notebooks for extended examples):
-
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -103,12 +118,19 @@ class SeasonalMBB(SemiSyntheticTransformer):
     """
 
     def __init__(self, seas_period: int, log: bool = True):
-        """
-        :param seas_period: Seasonal period (e.g. 12 for monthly time series)
-        :type seas_period: int
+        """Initialize seasonal moving blocks bootstrap transformer.
 
-        :param log: Whether to transform the time series using the logarithm (to stabilize variance)
-        :type log: bool
+        Parameters
+        ----------
+        seas_period : int
+            Seasonal period of the time series:
+            - 12 for monthly data
+            - 4 for quarterly data
+            - etc
+
+        log : bool, default=True
+            Whether to apply log transformation before bootstrapping:
+
         """
         super().__init__(alias='MBB')
 

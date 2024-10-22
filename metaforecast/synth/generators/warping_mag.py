@@ -6,17 +6,21 @@ from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
 
 class MagnitudeWarping(SemiSyntheticTransformer):
-    """ MagnitudeWarping
+    """Transform time series by applying smooth magnitude variations.
 
-    Apply magnitude warping to each time series in a dataset
+    Implements magnitude warping using random smooth functions to modify
+    series amplitudes while preserving temporal patterns.
 
-    References:
-        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
-        (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
-        monitoring using convolutional neural networks. In Proceedings of the 19th ACM
-        international conference on multimodal interaction (pp. 216-220).
+    References
+    ----------
+    .. [1] Um, T. T., et al. (2017).
+           "Data augmentation of wearable sensor data for parkinson's disease
+           monitoring using convolutional neural networks."
+           In Proceedings of the 19th ACM International Conference
+           on Multimodal Interaction (pp. 216-220).
 
-    Example usage (check notebooks for extended examples):
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -53,15 +57,28 @@ class MagnitudeWarping(SemiSyntheticTransformer):
     """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
-        """
-        :param sigma: Scaling parameter for the warping factor
-        :type sigma: float. Defaults to 0.2
+        """Initialize magnitude warping transformer with smoothing parameters.
 
-        :param knot: Number of knots for the CubicSpline
-        :type knot: int. Defaults to 4
+        Parameters
+        ----------
+        sigma : float, default=0.2
+            Controls intensity of magnitude warping:
+            - Higher values create larger variations
+            - Lower values produce subtler changes
 
-        :param rename_uids: whether to rename the original unique_id's
-        :type rename_uids: bool
+        knot : int, default=4
+            Number of control points for cubic spline warping:
+            - More knots: More flexible warping curve
+            - Fewer knots: Smoother transformations
+            - Recommended range: 3-10
+            Controls smoothness of magnitude changes.
+
+        rename_uids : bool, default=True
+            Whether to create new identifiers for warped series:
+            - True: New ids as f"MWARP_{counter}"
+            - False: Preserve original series ids
+            Useful for tracking transformations
+
         """
         super().__init__(alias='MWARP', rename_uids=rename_uids)
 

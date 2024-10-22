@@ -18,19 +18,9 @@ simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 class ForecastTrajectoryNeighbors(ABC):
     """ ForecastTrajectoryNeighbors
-
-    Forecasted Trajectory Neighbors
-
-    Improving Multi-step Forecasts with Neighbors Adjustments, especially for long horizons
-
-    References:
-        Cerqueira, Vitor, Luis Torgo, and Gianluca Bontempi. "Instance-based meta-learning for
-        conditionally dependent univariate multistep forecasting."
-        International Journal of Forecasting (2024).
-
     """
-    KNN_WEIGHTING = 'uniform'
-    EVAL_BASE_COLS = ['unique_id', 'ds', 'y', 'horizon']
+    _KNN_WEIGHTING = 'uniform'
+    _EVAL_BASE_COLS = ['unique_id', 'ds', 'y', 'horizon']
 
     def __init__(self,
                  n_neighbors: int,
@@ -39,7 +29,7 @@ class ForecastTrajectoryNeighbors(ABC):
                  apply_weighting: bool = False,
                  apply_global: bool = False,
                  ewm_smooth: float = 0.6):
-        self.base_knn = KNN(n_neighbors=n_neighbors, weights=self.KNN_WEIGHTING)
+        self.base_knn = KNN(n_neighbors=n_neighbors, weights=self._KNN_WEIGHTING)
         self.model = {}
 
         self.n_neighbors = n_neighbors
@@ -55,22 +45,10 @@ class ForecastTrajectoryNeighbors(ABC):
 
     @abstractmethod
     def fit(self, df: pd.DataFrame):
-        """ fit
-
-        Fitting in this case means indexation of training data
-        """
-
         raise NotImplementedError
 
     @abstractmethod
     def predict(self, fcst: pd.DataFrame):
-        """ predict
-
-        Correct the forecasts of a model
-
-        :param fcst: predictions in a nixtla-based structure with multistep forecasts
-        :type fcst: pd.DataFrame
-        """
         raise NotImplementedError
 
     def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
@@ -166,19 +144,45 @@ class ForecastTrajectoryNeighbors(ABC):
 
 
 class MLForecastFTN(ForecastTrajectoryNeighbors):
-    """ MLForecastFTN
+    """Improve multi-step forecasts using nearest neighbor adjustments.
 
-    FTN based on mlforecast ecosystem
+    An implementation of Forecasted Trajectory Neighbors (FTN) [1]_ for the
+    MLForecast framework. FTN is a meta-learning strategy that improves
+    long-horizon forecasts by:
+    - Finding similar forecast trajectories in training data
+    - Using these to adjust predictions
+    - Reducing error propagation across horizons
+    - Adding conditional dependency constraints
 
-    FTN (Forecasted Trajectory Neighbors) is an instance-based (good old KNN) approach for improving
-    multistep forecasts, especially for long horizons.
+    Notes
+    -----
+    Key advantages:
+    - Improves long-horizon accuracy
+    - Reduces error accumulation
+    - Maintains temporal consistency
+    - Works with any base model
+    - Computationally efficient
+    - Integration with MLForecast models
 
-    References:
-        Cerqueira, Vitor, Luis Torgo, and Gianluca Bontempi. "Instance-based meta-learning for
-        conditionally dependent univariate multistep forecasting."
-        International Journal of Forecasting (2024).
+    Method details:
+    1. Generate base model forecasts
+    2. Find similar forecast patterns in training
+    3. Average neighbor trajectories
+    4. Apply trajectory-based corrections
 
-    Example usage (CHECK NOTEBOOKS FOR MORE SERIOUS EXAMPLES):
+    References
+    ----------
+    .. [1] Cerqueira, V., Torgo, L., & Bontempi, G. (2024).
+           "Instance-based meta-learning for conditionally dependent
+           univariate multistep forecasting."
+           International Journal of Forecasting.
+
+    See Also
+    --------
+    MLForecast : Base forecasting framework
+
+    Examples
+    --------
     >>> import lightgbm as lgb
     >>> from mlforecast import MLForecast
     >>> from datasetsforecast.m3 import M3
@@ -209,9 +213,9 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
     >>> fcst_ftn = ftn.predict(fcst_mlf)
     """
 
-    BASE_PARAMS = {'models': [], 'freq': ''}
-    METADATA = ['unique_id', 'ds']
-    GLB_UID = 'glob'
+    _BASE_PARAMS = {'models': [], 'freq': ''}
+    _METADATA = ['unique_id', 'ds']
+    _GLB_UID = 'glob'
 
     def __init__(self,
                  n_neighbors: int,
@@ -221,34 +225,48 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                  apply_diff1: bool = False,
                  apply_global: bool = False,
                  ewm_smooth: float = 0.6):
-        """
-        :param n_neighbors: Number of nearest neighbors (training subsequences) used in KNN.
-        About 100 neighbors tends to work well for high frequency series. See notebooks
-        :type n_neighbors: int
+        """Initialize FTN meta-learner
 
-        :param horizon: Forecasting horizon
-        :type horizon: int
+        Parameters
+        ----------
+        n_neighbors : int
+            Number of nearest neighbors for trajectory matching:
 
-        :param apply_ewm: Whether to apply an exponential moving average to smooth the
-        time series before fitting the KNN
-        :param apply_ewm: bool
+        horizon : int
+            Number of future periods to forecast.
+            Affects computational complexity and memory usage.
+            Must be positive.
 
-        :param apply_weighting: Whether to weight the FTN predictions with the original forecasts.
-        The weights of FTN should be set using the set_alpha_weights method.
-        See notebooks for an example of how to set these using cross-validation
-        :type apply_weighting: bool
+        apply_ewm : bool, default=False
+            Whether to smooth series before neighbor matching:
+            - True: Apply exponential moving average
+            - False: Use raw values
+            Helps reduce noise influence.
 
-        :param apply_diff1: Whether to apply first differences before fitting the KNN to
-        stabilize the mean level
-        :type apply_diff1: bool
+        apply_weighting : bool, default=False
+            Whether to combine FTN with original forecasts:
+            - True: Use weighted combination
+            - False: Use pure FTN predictions
+            Weights must be set via set_alpha_weights().
 
-        :param apply_global: Whether to fit a KNN for all dataset (True) or for each time series
-        (unique_id) (False) A global approach tends to perform poorly (wip)
-        :type apply_global: bool
+        apply_diff1 : bool, default=False
+            Whether to use first differences for matching:
+            - True: Match on changes (stationary)
+            - False: Match on levels
+            Helps with non-stationary series.
 
-        :param ewm_smooth: Exponential moving average strength parameter. Defaults to 0.6.
-        See https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.ewm.html
-        :type ewm_smooth: float
+        apply_global : bool, default=False
+            Neighbor search scope (experimental):
+            - True: Search across all series
+            - False: Search within each series
+            Per-series generally performs better.
+
+        ewm_smooth : float, default=0.6
+            Smoothing factor for exponential averaging:
+            - Closer to 1: Less smoothing
+            - Closer to 0: More smoothing
+            Only used if apply_ewm=True.
+
         """
 
         super().__init__(n_neighbors=n_neighbors,
@@ -261,7 +279,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         self.apply_diff1 = apply_diff1
         self.lags = range(1, self.horizon)
 
-        self.preprocess_params = {'lags': self.lags, **self.BASE_PARAMS}
+        self.preprocess_params = {'lags': self.lags, **self._BASE_PARAMS}
 
         if self.apply_diff1:
             self.preprocess_params['target_transforms'] = [Differences([1])]
@@ -269,13 +287,20 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         self.preprocess = MLForecast(**self.preprocess_params)
 
     def fit(self, df: pd.DataFrame):
-        """ fit
+        """Fit nearest neighbor model on training trajectories.
 
-        Fitting FTN.
-        Fitting in this case means indexation of training data
+        Prepares FTN for predictions by building KNN
+        index for fast neighbor lookup
 
-        :param df: Time series dataset following a Nixtla structure (unique_id, ds, y)
-        :type df: pd.DataFrame
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Training time series data with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+            Must follow nixtla framework conventions.
+
         """
 
         self.reset_learning()
@@ -289,11 +314,11 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         lag_names = [f'lag{i}' for i in range(self.horizon)]
 
         if self.apply_global:
-            self.uid_insample_traj[self.GLB_UID] = rec_df[lag_names[::-1]].values
-            self.model[self.GLB_UID] = copy.deepcopy(self.base_knn)
-            self.model[self.GLB_UID] = \
-                self.model[self.GLB_UID].fit(self.uid_insample_traj[self.GLB_UID],
-                                             self.uid_insample_traj[self.GLB_UID][:, 0])
+            self.uid_insample_traj[self._GLB_UID] = rec_df[lag_names[::-1]].values
+            self.model[self._GLB_UID] = copy.deepcopy(self.base_knn)
+            self.model[self._GLB_UID] = \
+                self.model[self._GLB_UID].fit(self.uid_insample_traj[self._GLB_UID],
+                                              self.uid_insample_traj[self._GLB_UID][:, 0])
         else:
             for uid, df_ in tqdm(rec_df.groupby('unique_id')):
                 self.uid_insample_traj[uid] = df_[lag_names[::-1]].values
@@ -302,14 +327,28 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                                                       self.uid_insample_traj[uid][:, 0])
 
     def predict(self, fcst: pd.DataFrame):
-        """ predict
+        """Adjust forecasts using nearest neighbor trajectories.
 
-        Correcting the forecasts of a model using KNN
+        Improves base model predictions by:
+        1. Finding similar historical trajectories
+        2. Computing trajectory-based corrections
+        3. Optionally combining with original forecasts
 
-        :param fcst: predictions in a nixtla-based structure with multistep forecasts
-        :type fcst: pd.DataFrame
+        Parameters
+        ----------
+        fcst : pd.DataFrame
+            Base model forecasts with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - model_name: Predicted values by model with name model_name
+
+        Returns
+        -------
+        pd.DataFrame
+            Adjusted forecasts with same structure
+
         """
-        self.model_names = [x for x in fcst.columns if x not in self.METADATA]
+        self.model_names = [x for x in fcst.columns if x not in self._METADATA]
 
         fcst_ftn = []
         for uid, df_ in tqdm(fcst.groupby('unique_id')):
@@ -319,8 +358,8 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                 x0 = fcst_[0]
 
                 if self.apply_global:
-                    _, k_neighbors = self.model[self.GLB_UID].kneighbors(fcst_.reshape(1, -1))
-                    ftn_knn = self.uid_insample_traj[self.GLB_UID][k_neighbors[0], :]
+                    _, k_neighbors = self.model[self._GLB_UID].kneighbors(fcst_.reshape(1, -1))
+                    ftn_knn = self.uid_insample_traj[self._GLB_UID][k_neighbors[0], :]
                 else:
                     _, k_neighbors = self.model[uid].kneighbors(fcst_.reshape(1, -1))
                     ftn_knn = self.uid_insample_traj[uid][k_neighbors[0], :]
@@ -349,17 +388,36 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
     def alpha_cv_scoring(self,
                          cv: pd.DataFrame,
                          model_names: Optional[List[str]] = None):
-        """ alpha_cv_scoring
+        """Compute optimal FTN combination weights using validation data.
 
-        Computing the best FTN weights for each horizon.
-        See notebooks for an example.
+        Uses cross-validation or validation results to determine optimal
+        weights for combining FTN predictions with original forecasts at
+        each horizon. Optimizes based on forecast accuracy metrics.
 
-        :param cv: Validation or cross-validation results from a nixtla-based procedure
-        :type cv: pd.DataFrame
+        Parameters
+        ----------
+        cv : pd.DataFrame
+            Validation results with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Actual values
+            - model_name: Predicted values by a model with name model_name
 
-        :param model_names: List of model(s) to estimate the weights for.
-        If None, uses the models found during fit
-        :type model_names: Optional list of str
+        model_names : List[str], optional
+            Models to compute weights for:
+            - If None: Use all models from fitting
+            - If provided: Compute only for specified models
+            Must be subset of models used in fitting.
+
+        Notes
+        -----
+        Weight optimization:
+        1. For each horizon:
+            - Generate FTN predictions
+            - Grid search alpha weights
+            - Evaluate combined forecasts
+            - Select best performing weight
+
         """
 
         if model_names is None:
@@ -370,7 +428,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         weights = {}
         for m in models:
-            cv_ = cv[self.EVAL_BASE_COLS + [m, f'{m}(FTN)']]
+            cv_ = cv[self._EVAL_BASE_COLS + [m, f'{m}(FTN)']]
 
             eval_by_horizon = {}
             for h_, h_df in cv_.groupby('horizon'):

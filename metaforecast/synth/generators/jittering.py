@@ -5,17 +5,21 @@ from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
 
 class Jittering(SemiSyntheticTransformer):
-    """ Jittering
+    """Add controlled Gaussian noise to time series for data augmentation.
 
-    Adding Gaussian noise to time series
+    Implements time series jittering by adding random Gaussian noise
+    to original values.
 
-    References:
-        Um, T. T., Pfister, F. M., Pichler, D., Endo, S., Lang, M., Hirche, S., ... & Kulić, D.
-        (2017, November). Data augmentation of wearable sensor data for parkinson’s disease
-        monitoring using convolutional neural networks. In Proceedings of the 19th ACM
-        international conference on multimodal interaction (pp. 216-220).
+    References
+    ----------
+    .. [1] Um, T. T., et al. (2017).
+           "Data augmentation of wearable sensor data for parkinson's disease
+           monitoring using convolutional neural networks."
+           In Proceedings of the 19th ACM International Conference
+           on Multimodal Interaction (pp. 216-220).
 
-    Example usage:
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -52,12 +56,23 @@ class Jittering(SemiSyntheticTransformer):
     """
 
     def __init__(self, sigma: float = 0.03, rename_uids: bool = True):
-        """
-        :param sigma: Scaling parameter for Gaussian noise
-        :type sigma: float. Defaults to 0.03
+        """Initialize Jittering transformer with noise parameters.
 
-        :param rename_uids: whether to rename the original unique_id's
-        :type rename_uids: bool
+        Parameters
+        ----------
+        sigma : float, default=0.03
+            Standard deviation of Gaussian noise as proportion of series scale:
+            - Higher values create more variation
+            - Lower values produce subtler changes
+            - 0.03 means 3% of series scale
+            Must be positive.
+
+        rename_uids : bool, default=True
+            Whether to create new identifiers for jittered series:
+            - True: New ids as f"JITTER_{counter}"
+            - False: Preserve original series ids
+            Useful for tracking transformations
+
         """
         super().__init__(alias='JITTER', rename_uids=rename_uids)
 

@@ -7,19 +7,25 @@ from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
 class DBA(SemiSyntheticGenerator):
-    """ DBA
+    """Generate synthetic time series using DTW Barycentric Averaging.
 
-    DTW Barycentric Averaging synthetic time series generator.
+    Creates new time series by computing weighted averages of existing
+    series using Dynamic Time Warping (DTW) alignment. This method:
+    - Preserves temporal patterns while allowing variations
+    - Creates realistic interpolations between series
+    - Maintains temporal dependencies
 
-    References:
-        Forestier, G., Petitjean, F., Dau, H.A., Webb, G.I., Keogh, E.: Generating synthetic
-        time series to augment sparse datasets. In: 2017 IEEE international conference on data
-        mining (ICDM), pp. 865–870. IEEE (2017)
+    Based on the method described in [1]_.
 
-    Attributes:
-        DTW_PARAMS (Dict[str, float]) DTW configuration parameters
+    References
+    ----------
+    .. [1] Forestier, G., Petitjean, F., Dau, H.A., Webb, G.I.,
+           Keogh, E. (2017). "Generating synthetic time series to
+           augment sparse datasets." In IEEE International Conference
+           on Data Mining (ICDM), pp. 865-870.
 
-    Example usage (CHECK NOTEBOOKS FOR MORE EXTENDED EXAMPLES):
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -55,14 +61,18 @@ class DBA(SemiSyntheticGenerator):
     DTW_PARAMS = {'max_iter': 10, 'tol': 1e-3}
 
     def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
-        """
-        :param max_n_uids: Maximum number of time series (unique_id's) to use in a given generation
-        operation
-        :type max_n_uids: int
+        """Initialize DBA generator with sampling parameters.
 
-        :param dirichlet_alpha: Gamma distribution alpha parameter value for weighting the selected
-        time series.
-        :type dirichlet_alpha: float. Default = 1.0
+        Parameters
+        ----------
+        max_n_uids : int
+            Maximum number of source series to combine in each generation.
+            Must be positive.
+
+        dirichlet_alpha : float, default=1.0
+            Concentration parameter for Dirichlet distribution used in
+            generating combination weights:
+
         """
         super().__init__(alias='DBA')
 
@@ -71,19 +81,36 @@ class DBA(SemiSyntheticGenerator):
 
     # pylint: disable=unused-variable
     def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
-        """ transform
+        """Generate synthetic time series using DTW Barycentric Averaging.
 
-        Generate synthetic time series based on a source df using DBA
+        Creates new time series by computing DTW-based weighted averages
+        from randomly selected subsets of source series. Maintains the
+        nixtla framework structure throughout generation.
 
-        :param df: time series dataset with unique_id, ds, y columns following a nixtla-based
-        structure
-        :type df: pd.DataFrame
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Source time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+            Must follow nixtla framework conventions
 
-        :param n_series: Number of series to generate
-        :type n_series: int. Defaults to -1, which means creating a number of time series
-        equal to the number of time series in the source dataset
+        n_series : int, default=-1
+            Number of synthetic series to generate:
+            - If -1: Generate same number as source dataset
+            - If positive: Generate specified number
+
+        Returns
+        -------
+        pd.DataFrame
+            Generated synthetic series with same structure:
+            - New unique_ids: f"DBA_{i}" for i in range(n_series)
+            - Same temporal alignment as source
+            - Averaged y values from DBA combinations
 
         """
+
         self._assert_datatypes(df)
 
         unq_uids = df['unique_id'].unique()
@@ -111,8 +138,7 @@ class DBA(SemiSyntheticGenerator):
 
     # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        """ _create_synthetic_ts
-
+        """
         Apply DBA to a time series dataset
 
         :param df: time series dataset with a sample of unique_id's

@@ -5,15 +5,21 @@ from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
 class TSMixup(SemiSyntheticGenerator):
-    """ TSMixup
+    """Generate synthetic time series using weighted averaging of multiple series.
 
-    Synthetic time series generation based on weighted averages of several time series
+    Creates new time series by computing weighted combinations of existing
+    series, inspired by image Mixup and adapted for time series in
+    Chronos [1]_. This method preserves temporal characteristics while
+    creating diverse, realistic variations.
 
-    References:
-        Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., ... & Wang, Y.
-        (2024). Chronos: Learning the language of time series. arXiv preprint arXiv:2403.07815.
+    References
+    ----------
+    .. [1] Ansari, A. F., et al. (2024).
+           "Chronos: Learning the language of time series."
+           arXiv preprint arXiv:2403.07815.
 
-    Example usage (check notebooks for extended examples):
+    Examples
+    --------
     >>> import pandas as pd
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
@@ -53,21 +59,32 @@ class TSMixup(SemiSyntheticGenerator):
                  min_len: int,
                  max_len: int,
                  dirichlet_alpha: float = 1.5):
+        """Initialize TSMixup transformer with mixing parameters.
+
+        Parameters
+        ----------
+        max_n_uids : int
+            Maximum number of source series to combine for each synthetic series:
+            - Higher values allow more complex combinations
+            - Lower values create simpler mixtures
+            - Must be ≥ 2 to enable mixing
+            Controls diversity of generated patterns.
+
+        min_len : int
+            Minimum length of generated series in observations.
+            Must satisfy: min_len ≤ max_len
+            Useful for creating variable-length datasets.
+
+        max_len : int
+            Maximum length of generated series in observations.
+            Must satisfy: max_len ≥ min_len
+            Controls upper bound of series length.
+
+        dirichlet_alpha : float, default=1.5
+            Concentration parameter for Dirichlet distribution
+            used to generate mixing weights:
+
         """
-        :param max_n_uids: Maximum number of time series (unique_id's) to consider for
-        generating a given time series
-        :type max_n_uids: int
-
-        :param min_len: Minimum number of observations of the new synthetic time series
-        :param min_len: int
-
-        :param max_len: Maximum number of observations of the new synthetic time series
-        :param max_len: int
-
-        :param dirichlet_alpha: Alpha parameter for the Gamma distribution
-        :type dirichlet_alpha: float. Defaults to 1.5
-        """
-
         super().__init__(alias='TSMixup')
 
         self.min_len = min_len
@@ -78,6 +95,35 @@ class TSMixup(SemiSyntheticGenerator):
     # pylint: disable=arguments-differ
     # pylint: disable=unused-variable
     def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
+        """Apply TSMixup to create synthetic time series variations.
+
+        Generates new time series by computing weighted combinations of
+        existing series. Each synthetic series combines up to max_n_uids
+        source series using Dirichlet-distributed weights.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Source time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+            Must follow nixtla framework conventions
+
+        n_series : int, default=-1
+            Number of synthetic series to generate:
+            - If -1: Generate one per input series
+            - If positive: Generate specified number
+
+        Returns
+        -------
+        pd.DataFrame
+            Generated synthetic series with columns:
+            - unique_id: f"mixup_{i}" for i in range(n_series)
+            - ds: Timestamps (length between min_len and max_len)
+            - y: Mixed values from source series
+
+        """
         self._assert_datatypes(df)
 
         unq_uids = df['unique_id'].unique()

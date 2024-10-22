@@ -26,6 +26,11 @@ class OnlineDataAugmentationCallback(pl.Callback):
     --------
     - Compatible with PyTorch training loops
 
+    References
+    ----------
+    Cerqueira, V., Santos, M., Baghoussi, Y., & Soares, C. (2024). On-the-fly Data
+    Augmentation for Forecasting with Deep Learning. arXiv preprint arXiv:2404.16918.
+
     Examples
     --------
     >>> from datasetsforecast.m3 import M3
@@ -65,9 +70,11 @@ class OnlineDataAugmentationCallback(pl.Callback):
         generator : BaseTimeSeriesGenerator
             Time series generator object for data augmentation.
             Must be one of:
-            - PureSyntheticGenerator: Creates fully synthetic series without reference to a source dataset
+            - PureSyntheticGenerator: Creates fully synthetic series without reference
+            to a source dataset
             - SemiSyntheticGenerator: Modifies existing series from a source dataset
-            - SemiSyntheticTransformer: Applies transformations to series from a source dataset
+            - SemiSyntheticTransformer: Applies transformations to series from
+            a source dataset
 
         """
         super().__init__()
