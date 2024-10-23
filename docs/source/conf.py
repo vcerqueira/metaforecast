@@ -29,13 +29,14 @@ extensions = [
     'nbsphinx_link',
     'sphinx_rtd_theme',
     'sphinx.ext.autosummary',
+    'pyximport'
 ]
 
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
     'special-members': '__init__',
-    'undoc-members': True,
+    'undoc-members': False,
     'exclude-members': '__weakref__'
 }
 
