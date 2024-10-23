@@ -39,9 +39,5 @@ training. This online approach creates different augmented samples in each batch
    :undoc-members:
    :show-inheritance:
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
-
-   metaforecast.synth.DBA
-   metaforecast.synth.Jittering
+   _autosummary/metaforecast.synth.DBA.rst
+   _autosummary/metaforecast.synth.Jittering.rst

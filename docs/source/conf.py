@@ -28,6 +28,7 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx_link',
     'sphinx_rtd_theme',
+    # 'sphinx.ext.autosummary',
 ]
 
 autodoc_default_options = {
@@ -46,3 +47,6 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['source/_static']
+
+# autosummary_generate = True
+# add_module_names = False
