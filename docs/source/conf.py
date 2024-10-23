@@ -40,6 +40,13 @@ autodoc_default_options = {
     'exclude-members': '__weakref__'
 }
 
+autodoc_mock_imports = [
+    'cython',
+    'pandas',
+    'tqdm',
+    'numpy'  # might be needed
+]
+
 templates_path = ['_templates']
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
