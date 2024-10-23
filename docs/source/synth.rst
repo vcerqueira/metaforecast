@@ -37,63 +37,72 @@ training. This online approach creates different augmented samples in each batch
 
 .. module:: metaforecast.synth
 
-Module Overview
--------------
-
 .. automodule:: metaforecast.synth
    :no-members:
 
-Base Classes
+
+
+KernelSynth
 -----------
 
-.. autoclass:: BaseTimeSeriesGenerator
+.. autoclass:: metaforecast.synth.KernelSynth
    :members:
    :show-inheritance:
 
-Pure Synthetic Generation
------------------------
+DBA
+---
 
-.. autoclass:: KernelSynth
+.. autoclass:: metaforecast.synth.DBA
    :members:
    :show-inheritance:
 
-Semi-synthetic Generation
-----------------------
+TSMixup
+-------
 
-.. autoclass:: DBA
+.. autoclass:: metaforecast.synth.TSMixup
    :members:
    :show-inheritance:
 
-.. autoclass:: TSMixup
+Jittering
+---------
+
+.. autoclass:: metaforecast.synth.Jittering
    :members:
    :show-inheritance:
 
-Transformations
--------------
+Scaling
+---------
 
-.. autoclass:: Jittering
+.. autoclass:: metaforecast.synth.Scaling
    :members:
    :show-inheritance:
 
-.. autoclass:: Scaling
+MagnitudeWarping
+----------------
+
+
+.. autoclass:: metaforecast.synth.MagnitudeWarping
    :members:
    :show-inheritance:
 
-.. autoclass:: MagnitudeWarping
+TimeWarping
+----------------
+
+
+.. autoclass:: metaforecast.synth.TimeWarping
    :members:
    :show-inheritance:
 
-.. autoclass:: TimeWarping
+SeasonalMBB
+----------------
+
+.. autoclass:: metaforecast.synth.SeasonalMBB
    :members:
    :show-inheritance:
 
-.. autoclass:: SeasonalMBB
-   :members:
-   :show-inheritance:
+Callbacks
+---------
 
-Utilities
---------
-
-.. autoclass:: OnlineDataAugmentationCallback
+.. autoclass:: metaforecast.synth.OnlineDataAugmentationCallback
    :members:
    :show-inheritance:
