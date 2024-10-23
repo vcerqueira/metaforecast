@@ -34,10 +34,26 @@ training. This online approach creates different augmented samples in each batch
       parkinson's disease monitoring." ACM International Conference on Multimodal
       Interaction.
 
+
+.. currentmodule:: metaforecast.synth
+
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
+
+   DBA
+   KernelSynth
+   Jittering
+   Scaling
+   MagnitudeWarping
+   TimeWarping
+   SeasonalMBB
+
 .. automodule:: metaforecast.synth
    :members:
    :undoc-members:
    :show-inheritance:
 
-   DBA
-   Jittering
+.. toctree::
+   :maxdepth: 2
+
