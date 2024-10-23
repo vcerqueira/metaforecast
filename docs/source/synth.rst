@@ -40,7 +40,21 @@ KernelSynth
 
 .. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
    :members:
+   :toctree: generated/
    :show-inheritance:
+
+.. autoclass::
+   :members:
+   :toctree: generated/
+   :show-inheritance:
+
+   KernelSynth
+
+.. autoclass::
+   :members:
+   :show-inheritance:
+
+   KernelSynth
 
 DBA
 ---
