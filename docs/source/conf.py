@@ -61,7 +61,14 @@ autodoc_mock_imports = [
     'tslearn',
     'tslearn.barycenters',
     'scipy.interpolate',
-    'scipy.stats'
+    'scipy.stats',
+    'statsmodels',
+    'statsmodels.tsa',
+    'statsmodels.tsa.api',
+    'statsmodels.compat',
+    'statsmodels.tools',
+    'packaging',
+    'patsy'
 ]
 
 templates_path = ['_templates']
