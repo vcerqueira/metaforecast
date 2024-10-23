@@ -35,11 +35,6 @@ training. This online approach creates different augmented samples in each batch
       Interaction.
 
 
-.. module:: metaforecast.synth
-
-.. automodule:: metaforecast.synth
-   :no-members:
-
 
 
 KernelSynth
@@ -87,7 +82,6 @@ MagnitudeWarping
 
 TimeWarping
 ----------------
-
 
 .. autoclass:: metaforecast.synth.TimeWarping
    :members:

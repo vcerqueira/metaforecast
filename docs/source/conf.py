@@ -56,4 +56,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['source/_static']
 
 autosummary_generate = True
-add_module_names = False
+# add_module_names = False
