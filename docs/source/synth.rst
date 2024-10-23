@@ -35,25 +35,65 @@ training. This online approach creates different augmented samples in each batch
       Interaction.
 
 
-.. currentmodule:: metaforecast.synth
+.. module:: metaforecast.synth
 
-.. autosummary::
-   :toctree: _autosummary
-   :recursive:
-
-   DBA
-   KernelSynth
-   Jittering
-   Scaling
-   MagnitudeWarping
-   TimeWarping
-   SeasonalMBB
+Module Overview
+-------------
 
 .. automodule:: metaforecast.synth
+   :no-members:
+
+Base Classes
+-----------
+
+.. autoclass:: BaseTimeSeriesGenerator
    :members:
-   :undoc-members:
    :show-inheritance:
 
-.. toctree::
-   :maxdepth: 2
+Pure Synthetic Generation
+-----------------------
 
+.. autoclass:: KernelSynth
+   :members:
+   :show-inheritance:
+
+Semi-synthetic Generation
+----------------------
+
+.. autoclass:: DBA
+   :members:
+   :show-inheritance:
+
+.. autoclass:: TSMixup
+   :members:
+   :show-inheritance:
+
+Transformations
+-------------
+
+.. autoclass:: Jittering
+   :members:
+   :show-inheritance:
+
+.. autoclass:: Scaling
+   :members:
+   :show-inheritance:
+
+.. autoclass:: MagnitudeWarping
+   :members:
+   :show-inheritance:
+
+.. autoclass:: TimeWarping
+   :members:
+   :show-inheritance:
+
+.. autoclass:: SeasonalMBB
+   :members:
+   :show-inheritance:
+
+Utilities
+--------
+
+.. autoclass:: OnlineDataAugmentationCallback
+   :members:
+   :show-inheritance:
