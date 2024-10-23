@@ -38,30 +38,19 @@ training. This online approach creates different augmented samples in each batch
 KernelSynth
 -----------
 
-.. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
-   :members:
-   :toctree: generated/
-   :show-inheritance:
-
-.. autoclass::
-   :members:
-   :toctree: generated/
-   :show-inheritance:
-
-   KernelSynth
-
-.. autoclass::
+.. autoclass:: metaforecast.synth.KernelSynth
    :members:
    :show-inheritance:
+   :noindex:
 
-   KernelSynth
 
 DBA
----
+-------
 
 .. autoclass:: metaforecast.synth.generators.DBA
    :members:
    :show-inheritance:
+   :noindex:
 
 TSMixup
 -------
@@ -69,6 +58,8 @@ TSMixup
 .. autoclass:: metaforecast.synth.TSMixup
    :members:
    :show-inheritance:
+   :noindex:
+
 
 Jittering
 ---------
@@ -76,6 +67,7 @@ Jittering
 .. autoclass:: metaforecast.synth.Jittering
    :members:
    :show-inheritance:
+   :noindex:
 
 Scaling
 ---------
@@ -83,6 +75,7 @@ Scaling
 .. autoclass:: metaforecast.synth.Scaling
    :members:
    :show-inheritance:
+   :noindex:
 
 MagnitudeWarping
 ----------------
@@ -91,6 +84,7 @@ MagnitudeWarping
 .. autoclass:: metaforecast.synth.MagnitudeWarping
    :members:
    :show-inheritance:
+   :noindex:
 
 TimeWarping
 ----------------
@@ -98,6 +92,7 @@ TimeWarping
 .. autoclass:: metaforecast.synth.TimeWarping
    :members:
    :show-inheritance:
+   :noindex:
 
 SeasonalMBB
 ----------------
@@ -105,6 +100,7 @@ SeasonalMBB
 .. autoclass:: metaforecast.synth.SeasonalMBB
    :members:
    :show-inheritance:
+   :noindex:
 
 Callbacks
 ---------
@@ -112,3 +108,4 @@ Callbacks
 .. autoclass:: metaforecast.synth.OnlineDataAugmentationCallback
    :members:
    :show-inheritance:
+   :noindex:
