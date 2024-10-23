@@ -5,3 +5,4 @@ ipython
 jupyter
 ipykernel
 sphinx-rtd-theme
+pyximport
