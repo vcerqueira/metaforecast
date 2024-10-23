@@ -4,3 +4,4 @@ nbsphinx-link
 ipython
 jupyter
 ipykernel
+sphinx-rtd-theme
