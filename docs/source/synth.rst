@@ -35,19 +35,17 @@ training. This online approach creates different augmented samples in each batch
       Interaction.
 
 
-
-
 KernelSynth
 -----------
 
-.. autoclass:: metaforecast.synth.KernelSynth
+.. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
    :members:
    :show-inheritance:
 
 DBA
 ---
 
-.. autoclass:: metaforecast.synth.DBA
+.. autoclass:: metaforecast.synth.generators.DBA
    :members:
    :show-inheritance:
 

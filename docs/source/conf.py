@@ -21,8 +21,16 @@ release = '0.1.5'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
+    "sphinx_copybutton",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.doctest",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
+    "sphinxcontrib.bibtex",
     'sphinx.ext.viewcode',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
