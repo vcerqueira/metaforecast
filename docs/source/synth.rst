@@ -40,4 +40,4 @@ training. This online approach creates different augmented samples in each batch
    :show-inheritance:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
