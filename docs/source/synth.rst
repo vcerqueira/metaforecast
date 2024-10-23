@@ -38,6 +38,3 @@ training. This online approach creates different augmented samples in each batch
    :members:
    :undoc-members:
    :show-inheritance:
-
-   source/_autosummary/metaforecast.synth.DBA.rst
-   source/_autosummary/metaforecast.synth.Jittering.rst

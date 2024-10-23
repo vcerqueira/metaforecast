@@ -26,4 +26,4 @@ weights over time to changing patterns or across different series:
    :show-inheritance:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
