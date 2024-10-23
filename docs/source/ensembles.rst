@@ -24,3 +24,6 @@ weights over time to changing patterns or across different series:
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. toctree::
+   :maxdepth: 1

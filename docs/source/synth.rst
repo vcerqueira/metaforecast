@@ -38,3 +38,6 @@ training. This online approach creates different augmented samples in each batch
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. toctree::
+   :maxdepth: 1
