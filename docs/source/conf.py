@@ -47,10 +47,18 @@ autodoc_default_options = {
 }
 
 autodoc_mock_imports = [
-    'cython',
+    'numpy',
+    'scipy',
     'pandas',
     'tqdm',
-    'numpy'  # might be needed
+    'cython',
+    'torch',
+    'sklearn',
+    'statsforecast',
+    'mlforecast',
+    'neuralforecast',
+    'scipy.interpolate',
+    'scipy.stats',
 ]
 
 templates_path = ['_templates']
@@ -63,4 +71,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['docs/source/_static']
 
 autosummary_generate = True
-# add_module_names = False
+add_module_names = False
