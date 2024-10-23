@@ -28,16 +28,16 @@ class MLpol(Mixture):
 
     References
     ----------
-    .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
+    .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006).
            "Prediction, learning, and games."
            Cambridge University Press.
 
-    .. [2] Gaillard, P., & Goude, Y. (2015).
+    .. [opera] Gaillard, P., & Goude, Y. (2015).
            "Forecasting electricity consumption by aggregating experts."
            In Modeling and Stochastic Learning for Forecasting in High Dimensions
            (pp. 95-115). Springer, Cham.
 
-    .. [3] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    .. [cerq_ade] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
            "Arbitrage of forecasting experts."
            Machine Learning, 108, 913-944.
 
@@ -122,7 +122,7 @@ class MLpol(Mixture):
 
         References
         ----------
-        .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
+        .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006).
                "Prediction, learning, and games."
 
         """

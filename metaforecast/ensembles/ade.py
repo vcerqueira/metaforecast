@@ -133,6 +133,7 @@ class ADE(BaseADE):
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """
+
         Parameters
         ----------
         insample_fcst : pd.DataFrame
@@ -140,7 +141,6 @@ class ADE(BaseADE):
             Contains either:
                 - In-sample forecasts (predictions on training data)
                 - Cross-validation results (out-of-sample predictions)
-
             Expected columns:
                 - unique_id (or other id_col): Identifier for each series
                 - ds (or other time_col): Timestamp
@@ -149,10 +149,9 @@ class ADE(BaseADE):
 
         Returns
         -------
-        self, with a fitted self.meta_model
-
+        self
+            self, with a fitted self.meta_model
         """
-
         self._fit(insample_fcst)
 
     def _fit(self, insample_fcst):
@@ -226,7 +225,6 @@ class ADE(BaseADE):
         Notes
         -----
         Not implemented yet
-
         """
         raise NotImplementedError
 
@@ -349,7 +347,7 @@ class MLForecastADE(ADE):
 
     References
     ----------
-    .. [1] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    .. [cerq_ade] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
            "Arbitrage of forecasting experts."
            Machine Learning, 108, 913-944.
 
@@ -476,9 +474,7 @@ class MLForecastADE(ADE):
         -------
         pd.Series
             Combined ensemble predictions.
-
         """
-
         base_fcst = self.mlf.predict(h=h)
 
         if self.sf is not None:

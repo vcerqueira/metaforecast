@@ -1,5 +1,5 @@
 Dynamic Ensembles
-=================
+==================
 
 Motivated by the No Free Lunch theorem,
 which states that no single algorithm is optimal for all problems,
@@ -24,6 +24,3 @@ weights over time to changing patterns or across different series:
    :members:
    :undoc-members:
    :show-inheritance:
-
-.. toctree::
-   :maxdepth: 2

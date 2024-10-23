@@ -11,33 +11,32 @@ RowIdentifierType = typing.Union[int, typing.Hashable]
 class MLewa(Mixture):
     """ Dynamic ensemble using exponentially weighted averaging (EWA).
 
-     Implementation inspired by R's opera package, this class combines forecasts using
-     online learning with exponential weights. Weights are updated based on recent
-     performance to adapt to changing patterns.
 
-     See Also
-     --------
-     Mixture : Parent class implementing core ensemble functionality
-     opera : R package with original implementation
+    Implementation inspired by R's opera package, this class combines forecasts using
+    online learning with exponential weights. Weights are updated based on recent
+    performance to adapt to changing patterns.
 
-     Notes
-     -----
-     This implementation follows the EWA algorithm described in [1]_ and [2]_
+    See Also
+    --------
+    Mixture : Parent class implementing core ensemble functionality
+    opera : R package with original implementation
 
-     References
-     ----------
-     .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006).
-            "Prediction, learning, and games."
-            Cambridge University Press.
+    Notes
+    -----
+    This implementation follows the EWA algorithm described in [1]_ and [2]_
 
-     .. [2] Gaillard, P., & Goude, Y. (2015).
-            "Forecasting electricity consumption by aggregating experts."
-            In Modeling and Stochastic Learning for Forecasting in High Dimensions
+    References
+    ----------
+    .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006). "Prediction, learning, and games."
+     Cambridge University Press.
+
+    .. [opera] Gaillard, P., & Goude, Y. (2015).
+    "Forecasting electricity consumption by aggregating experts."
+    In Modeling and Stochastic Learning for Forecasting in High Dimensions
             (pp. 95-115). Springer, Cham.
 
-     .. [3] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
-            "Arbitrage of forecasting experts."
-            Machine Learning, 108, 913-944.
+    .. [cerq_ade] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    "Arbitrage of forecasting experts." Machine Learning, 108, 913-944.
 
     Examples
     --------
@@ -88,6 +87,7 @@ class MLewa(Mixture):
                  weight_by_uid: bool = False,
                  trim_ratio: float = 1):
         """Initialize online ensemble with exponential weighting strategy.
+
 
         Parameters
         ----------

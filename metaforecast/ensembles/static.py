@@ -189,7 +189,7 @@ class EqAverage(Windowing):
 
     References
     ----------
-    .. [1] Jose, V. R. R., & Winkler, R. L. (2008).
+    .. [trim] Jose, V. R. R., & Winkler, R. L. (2008).
            "Simple robust averages of forecasts: Some empirical results."
            International Journal of Forecasting, 24(1), 163-169.
 
@@ -263,7 +263,7 @@ class EqAverage(Windowing):
 
         References
         ----------
-        .. [1] Jose, V. R. R., & Winkler, R. L. (2008).
+        .. [trim] Jose, V. R. R., & Winkler, R. L. (2008).
                "Simple robust averages of forecasts: Some empirical results."
                International Journal of Forecasting, 24(1), 163-169.
         """

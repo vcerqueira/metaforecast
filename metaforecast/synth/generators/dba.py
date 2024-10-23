@@ -15,11 +15,11 @@ class DBA(SemiSyntheticGenerator):
     - Creates realistic interpolations between series
     - Maintains temporal dependencies
 
-    Based on the method described in [1]_.
+    Based on the method described in [dba]_.
 
     References
     ----------
-    .. [1] Forestier, G., Petitjean, F., Dau, H.A., Webb, G.I.,
+    .. [dba] Forestier, G., Petitjean, F., Dau, H.A., Webb, G.I.,
            Keogh, E. (2017). "Generating synthetic time series to
            augment sparse datasets." In IEEE International Conference
            on Data Mining (ICDM), pp. 865-870.

@@ -13,7 +13,7 @@ class MagnitudeWarping(SemiSyntheticTransformer):
 
     References
     ----------
-    .. [1] Um, T. T., et al. (2017).
+    .. [da] Um, T. T., et al. (2017).
            "Data augmentation of wearable sensor data for parkinson's disease
            monitoring using convolutional neural networks."
            In Proceedings of the 19th ACM International Conference

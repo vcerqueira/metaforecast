@@ -104,9 +104,7 @@ class ForecastingEnsemble(ABC):
                 - ds: Timestamp
                 - model_name: Predictions of model with name "model_name"
                 - y: Actual values
-
         """
-
         raise NotImplementedError
 
     def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
@@ -265,7 +263,7 @@ class Mixture(ForecastingEnsemble):
 
     References
     ----------
-    .. [1] Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction,
+    .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction,
            learning, and games.
     """
 

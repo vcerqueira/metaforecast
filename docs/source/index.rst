@@ -1,5 +1,5 @@
 metaforecast
-============
+=============
 
 metaforecast is a Python package for time series forecasting using meta-learning and data-centric techniques.
 
@@ -8,7 +8,7 @@ forecasting performance through model combination, data augmentation, and adapti
 learning, building upon Nixtla's awesome ecosystem of state-of-the-art forecasting methods.
 
 Dynamic Ensembles
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 Combines multiple forecasting models using adaptive weighting strategies:
 
 - Online learning with exponential and polynomial weights
@@ -16,7 +16,7 @@ Combines multiple forecasting models using adaptive weighting strategies:
 - Predicted weights based on meta-learning
 
 Synthetic Time Series Generation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Creates synthetic time series data for augmentation and testing:
 
 * *Pure* synthetic generation through kernel methods
@@ -25,7 +25,7 @@ Creates synthetic time series data for augmentation and testing:
 * Online augmentation during model training
 
 Long-Horizon Meta-Learning
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Improves multi-step forecasting accuracy through instance-based approaches:
 
 - Trajectory-based nearest neighbor matching

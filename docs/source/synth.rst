@@ -1,5 +1,5 @@
 Synthetic Time Series Generation
-================================
+=================================
 
 Data augmentation has been successfully used in various domains to increase the size of training
 datasets and improve model robustness. For time series, augmentation is particularly challenging
@@ -24,19 +24,17 @@ Each of these approaches follow one of three approaches:
 The module also implements a callback that applies time series augmentation techniques to each batch during model
 training. This online approach creates different augmented samples in each batch
 
-.. [1] Ansari, A. F., et al. (2024). "Chronos: Learning the language of time series."
-      arXiv preprint arXiv:2403.07815.
 
-.. [2] Forestier, G., et al. (2017). "Generating synthetic time series to augment
-      sparse datasets." IEEE International Conference on Data Mining (ICDM).
+[1] Ansari, A. F., et al. (2024). "Chronos: Learning the language of time series." arXiv preprint arXiv:2403.07815.
 
-.. [3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for
-      parkinson's disease monitoring." ACM International Conference on Multimodal
+[2] Forestier, G., et al. (2017). "Generating synthetic time series to augment sparse datasets." IEEE International Conference on Data Mining (ICDM).
+
+[3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease monitoring." ACM International Conference on Multimodal
       Interaction.
 
 
 KernelSynth
------------
+-------------
 
 .. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
    :members:
@@ -53,7 +51,7 @@ DBA
    :noindex:
 
 TSMixup
--------
+---------
 
 .. autoclass:: metaforecast.synth.generators.tsmixup.TSMixup
    :members:
@@ -61,7 +59,7 @@ TSMixup
    :noindex:
 
 Callbacks
----------
+-----------
 
 .. autoclass:: metaforecast.synth.callbacks.OnlineDataAugmentationCallback
    :members:
