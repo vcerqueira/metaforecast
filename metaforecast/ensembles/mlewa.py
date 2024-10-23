@@ -26,20 +26,20 @@ class MLewa(Mixture):
     This implementation follows the EWA algorithm described in [1]_ and [2]_
 
     References
-    ----------
-    .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006). "Prediction, learning, and games."
-     Cambridge University Press.
+    -----------
+    [1] Cesa-Bianchi, N., & Lugosi, G. (2006). "Prediction, learning, and games."
+    Cambridge University Press.
 
-    .. [opera] Gaillard, P., & Goude, Y. (2015).
+    [2] Gaillard, P., & Goude, Y. (2015).
     "Forecasting electricity consumption by aggregating experts."
     In Modeling and Stochastic Learning for Forecasting in High Dimensions
-            (pp. 95-115). Springer, Cham.
+    (pp. 95-115). Springer, Cham.
 
-    .. [cerq_ade] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    [3] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
     "Arbitrage of forecasting experts." Machine Learning, 108, 913-944.
 
     Examples
-    --------
+    ---------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP

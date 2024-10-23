@@ -172,10 +172,10 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
     References
     ----------
-    .. [ftn] Cerqueira, V., Torgo, L., & Bontempi, G. (2024).
-           "Instance-based meta-learning for conditionally dependent
-           univariate multistep forecasting."
-           International Journal of Forecasting.
+    [1] Cerqueira, V., Torgo, L., & Bontempi, G. (2024).
+    "Instance-based meta-learning for conditionally dependent
+    univariate multistep forecasting."
+    International Journal of Forecasting.
 
     See Also
     --------

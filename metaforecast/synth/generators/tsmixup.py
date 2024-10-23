@@ -9,14 +9,13 @@ class TSMixup(SemiSyntheticGenerator):
 
     Creates new time series by computing weighted combinations of existing
     series, inspired by image Mixup and adapted for time series in
-    Chronos [chronos]_. This method preserves temporal characteristics while
+    Chronos. This method preserves temporal characteristics while
     creating diverse, realistic variations.
 
     References
     ----------
-    .. [chronos] Ansari, A. F., et al. (2024).
-           "Chronos: Learning the language of time series."
-           arXiv preprint arXiv:2403.07815.
+    Ansari, A. F., et al. (2024). "Chronos: Learning the language of time series."
+    arXiv preprint arXiv:2403.07815.
 
     Examples
     --------

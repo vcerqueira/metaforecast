@@ -41,7 +41,7 @@ Improves multi-step forecasting accuracy through instance-based approaches:
    notebooks
 
    Indices and tables
-   ==================
+   =================
 
    * :ref:`genindex`
    * :ref:`modindex`

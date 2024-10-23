@@ -70,15 +70,15 @@ class SeasonalMBB(SemiSyntheticTransformer):
 
     Creates synthetic variations of time series by resampling blocks
     of observations while preserving seasonal patterns and temporal
-    dependencies. Method described in Bandara et al. [bandara]_ shown to
+    dependencies. Method described in Bandara et al. shown to
     improve forecasting accuracy through augmentation.
 
     References
     ----------
-    .. [bandara] Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y.,
-           & Bergmeir, C. (2021). "Improving the accuracy of global
-           forecasting models using time series data augmentation."
-           Pattern Recognition, 120, 108148.
+    Bandara, K., Hewamalage, H., Liu, Y. H., Kang, Y.,
+    & Bergmeir, C. (2021). "Improving the accuracy of global
+    forecasting models using time series data augmentation."
+    Pattern Recognition, 120, 108148.
 
     Examples
     --------

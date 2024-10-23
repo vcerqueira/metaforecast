@@ -56,13 +56,13 @@ class KernelSynth(PureSyntheticGenerator):
     """Generate synthetic time series using kernel-based pattern synthesis.
 
     Implementation based on the KernelSynth approach from Amazon's Chronos
-    project [chronos]_.
+    project [1].
 
     References
     ----------
-    .. [chronos] Ansari, A. F., et al. (2024).
-           "Chronos: Learning the language of time series."
-           arXiv preprint arXiv:2403.07815.
+    [1] Ansari, A. F., et al. (2024).
+    "Chronos: Learning the language of time series."
+    arXiv preprint arXiv:2403.07815.
 
     Notes
     -----

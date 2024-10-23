@@ -185,13 +185,13 @@ class EqAverage(Windowing):
 
     A robust ensemble method that equally weights retained models after
     removing poor performers. Research shows this simple approach often
-    performs competitively with more complex weighting schemes [1]_.
+    performs competitively with more complex weighting schemes.
 
     References
     ----------
-    .. [trim] Jose, V. R. R., & Winkler, R. L. (2008).
-           "Simple robust averages of forecasts: Some empirical results."
-           International Journal of Forecasting, 24(1), 163-169.
+    Jose, V. R. R., & Winkler, R. L. (2008).
+    "Simple robust averages of forecasts: Some empirical results."
+    International Journal of Forecasting, 24(1), 163-169.
 
     Examples
     --------
@@ -257,15 +257,15 @@ class EqAverage(Windowing):
         Notes
         -----
         Models are selected based on validation performance before
-        applying equal weights. As shown in [1]_, moderate trimming
+        applying equal weights. As shown in [1], moderate trimming
         often improves forecast accuracy while maintaining the
         robustness benefits of equal weighting.
 
         References
         ----------
-        .. [trim] Jose, V. R. R., & Winkler, R. L. (2008).
-               "Simple robust averages of forecasts: Some empirical results."
-               International Journal of Forecasting, 24(1), 163-169.
+        [1] Jose, V. R. R., & Winkler, R. L. (2008).
+        "Simple robust averages of forecasts: Some empirical results."
+        International Journal of Forecasting, 24(1), 163-169.
         """
         super().__init__(freq='',
                          select_best=False,

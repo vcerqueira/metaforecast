@@ -263,8 +263,7 @@ class Mixture(ForecastingEnsemble):
 
     References
     ----------
-    .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction,
-           learning, and games.
+    Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction, learning, and games.
     """
 
     def __init__(self,

@@ -7,8 +7,8 @@ due to the temporal dependencies and patterns that must be preserved.
 
 This module implements several approaches for generating synthetic time series data:
 
-* KernelSynth Creates new series using kernel-based pattern combination [1]_
-* DTW Barycentric Averaging (DBA): Creates new series by averaging existing ones [2]_
+* KernelSynth Creates new series using kernel-based pattern combination [1]
+* DTW Barycentric Averaging (DBA): Creates new series by averaging existing ones [2]
 * Jittering: Adds controlled noise variations
 * Scaling: Modifies series magnitude
 * MagnitudeWarping: Applies smooth amplitude changes
@@ -29,9 +29,8 @@ training. This online approach creates different augmented samples in each batch
 
 [2] Forestier, G., et al. (2017). "Generating synthetic time series to augment sparse datasets." IEEE International Conference on Data Mining (ICDM).
 
-[3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease monitoring." ACM International Conference on Multimodal
-      Interaction.
-
+[3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease monitoring."
+ACM International Conference on Multimodal Interaction.
 
 KernelSynth
 -------------

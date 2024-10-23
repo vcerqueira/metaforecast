@@ -44,8 +44,8 @@ class ADE(BaseADE):
 
     References
     ----------
-        Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
-        Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
+    Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    Arbitrage of forecasting experts. Machine Learning, 108, 913-944.
     
     Examples
     --------
@@ -347,9 +347,8 @@ class MLForecastADE(ADE):
 
     References
     ----------
-    .. [cerq_ade] Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
-           "Arbitrage of forecasting experts."
-           Machine Learning, 108, 913-944.
+    Cerqueira, V., Torgo, L., Pinto, F., & Soares, C. (2019).
+    "Arbitrage of forecasting experts." Machine Learning, 108, 913-944.
 
     Examples
     --------

@@ -11,21 +11,21 @@ class Windowing(ForecastingEnsemble):
     A dynamic ensemble that adapts model weights based on accuracy in
     recent time windows. This approach is particularly suited for
     non-stationary data where relative model performance changes over
-    time [1]_, [2]_.
+    time [1], [2].
 
     References
     ----------
-    .. [cerq_dets] Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017).
-           "Dynamic and heterogeneous ensembles for time series forecasting."
-           In IEEE International Conference on Data Science and Advanced
-           Analytics (DSAA) (pp. 242-251).
+    [1] Cerqueira, V., Torgo, L., Oliveira, M., & Pfahringer, B. (2017).
+    "Dynamic and heterogeneous ensembles for time series forecasting."
+    In IEEE International Conference on Data Science and Advanced
+    Analytics (DSAA) (pp. 242-251).
 
-    .. [blast] van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015).
-           "Having a blast: Meta-learning and heterogeneous ensembles for data streams."
-           In IEEE International Conference on Data Mining (pp. 1003-1008).
+    [2] van Rijn, J. N., Holmes, G., Pfahringer, B., & Vanschoren, J. (2015).
+    "Having a blast: Meta-learning and heterogeneous ensembles for data streams."
+    In IEEE International Conference on Data Mining (pp. 1003-1008).
 
     Examples
-    --------
+    ---------
     >>> from datasetsforecast.m3 import M3
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS, NBEATS, MLP

@@ -12,11 +12,10 @@ class Scaling(SemiSyntheticTransformer):
 
     References
     ----------
-    .. [da] Um, T. T., et al. (2017).
-           "Data augmentation of wearable sensor data for parkinson's disease
-           monitoring using convolutional neural networks."
-           In Proceedings of the 19th ACM International Conference
-           on Multimodal Interaction (pp. 216-220).
+    Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease
+    monitoring using convolutional neural networks."
+    In Proceedings of the 19th ACM International Conference
+    on Multimodal Interaction (pp. 216-220).
 
     Examples
     --------

@@ -122,8 +122,8 @@ class MLpol(Mixture):
 
         References
         ----------
-        .. [cesa] Cesa-Bianchi, N., & Lugosi, G. (2006).
-               "Prediction, learning, and games."
+        Cesa-Bianchi, N., & Lugosi, G. (2006).
+        "Prediction, learning, and games."
 
         """
 
