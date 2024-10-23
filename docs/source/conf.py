@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     'sphinx.ext.viewcode',
+    'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx_link',
@@ -107,8 +108,17 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['source/_static']
+html_static_path = ['_static']
 
 autosummary_generate = False
 add_module_names = False
 pickle_factory = None
+
+
+def example_func():
+    return
+
+
+sphinx_gallery_conf = {
+    'reset_modules': (example_func,),
+}
