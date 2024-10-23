@@ -146,7 +146,7 @@ class ForecastTrajectoryNeighbors(ABC):
 class MLForecastFTN(ForecastTrajectoryNeighbors):
     """Improve multi-step forecasts using nearest neighbor adjustments.
 
-    An implementation of Forecasted Trajectory Neighbors (FTN) [1]_ for the
+    An implementation of Forecasted Trajectory Neighbors (FTN) [1] for the
     MLForecast framework. FTN is a meta-learning strategy that improves
     long-horizon forecasts by:
     - Finding similar forecast trajectories in training data
@@ -417,6 +417,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                 - Grid search alpha weights
                 - Evaluate combined forecasts
                 - Select best performing weight
+
         """
 
         if model_names is None:

@@ -132,25 +132,26 @@ class ADE(BaseADE):
 
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
-        """
+        """ fit
 
         Parameters
         ----------
         insample_fcst : pd.DataFrame
             Forecast and actual values dataset formatted like mlforecast cross-validation output.
             Contains either:
-                - In-sample forecasts (predictions on training data)
-                - Cross-validation results (out-of-sample predictions)
+            - In-sample forecasts (predictions on training data)
+            - Cross-validation results (out-of-sample predictions)
             Expected columns:
-                - unique_id (or other id_col): Identifier for each series
-                - ds (or other time_col): Timestamp
-                - y (or other target_col): Actual values
-                - *model_name*: Predictions by a model with name *model_name*
+            - unique_id (or other id_col): Identifier for each series
+            - ds (or other time_col): Timestamp
+            - y (or other target_col): Actual values
+            - *model_name*: Predictions by a model with name *model_name*
 
         Returns
         -------
         self
             self, with a fitted self.meta_model
+
         """
         self._fit(insample_fcst)
 
@@ -462,9 +463,9 @@ class MLForecastADE(ADE):
         train : pd.DataFrame
             Training dataset used to compute recent lags for meta-model input.
             Expected columns:
-                - unique_id: Series identifier
-                - ds: Timestamp
-                - y: Target variable
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target variable
 
         h : int
             Forecast horizon (number of periods to predict ahead)
@@ -473,6 +474,7 @@ class MLForecastADE(ADE):
         -------
         pd.Series
             Combined ensemble predictions.
+
         """
         base_fcst = self.mlf.predict(h=h)
 

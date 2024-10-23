@@ -39,11 +39,3 @@ Improves multi-step forecasting accuracy through instance-based approaches:
    synth
    longhorizon
    notebooks
-
-   Indices and tables
-   =================
-
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
-

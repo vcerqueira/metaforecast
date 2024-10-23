@@ -100,10 +100,11 @@ class ForecastingEnsemble(ABC):
         fcst : pd.DataFrame
             Dataset containing actual values and model predictions.
             Expected columns:
-                - unique_id: Series identifier
-                - ds: Timestamp
-                - model_name: Predictions of model with name "model_name"
-                - y: Actual values
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - model_name: Predictions of model with name "model_name"
+             y: Actual values
+
         """
         raise NotImplementedError
 
@@ -234,7 +235,7 @@ class Mixture(ForecastingEnsemble):
     Parameters
     ----------
     loss_type : {'square', 'absolute', 'percentage', 'log', 'pinball'}
-        Loss function for computing model weights:
+    Loss function for computing model weights:
         - square: Mean squared error
         - absolute: Mean absolute error
         - percentage: Mean absolute percentage error

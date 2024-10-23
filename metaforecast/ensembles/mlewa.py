@@ -23,7 +23,7 @@ class MLewa(Mixture):
 
     Notes
     -----
-    This implementation follows the EWA algorithm described in [1]_ and [2]_
+    This implementation follows the EWA algorithm described in [1] and [2]
 
     References
     -----------
