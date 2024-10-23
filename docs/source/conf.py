@@ -7,8 +7,16 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+from unittest.mock import MagicMock
 
 import sphinx_rtd_theme
+
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
 
 sys.path.insert(0, os.path.abspath('../..'))
 
@@ -62,6 +70,13 @@ autodoc_mock_imports = [
     'arch',
     'lightgbm',
     'pytorch_lightning',
+    'lightning_fabric',
+    'lightning_utilities',
+    'importlib_metadata',
+    'torch.nn',
+    'torch.optim',
+    'pytorch_lightning.callbacks',
+    'pytorch_lightning.utilities',
     'tslearn',
     'tslearn.barycenters',
     'scipy.interpolate',
@@ -74,6 +89,16 @@ autodoc_mock_imports = [
     'packaging',
     'patsy'
 ]
+
+MOCK_MODULES = [
+    'numpy',
+    'scipy',
+    'torch',
+    'pytorch_lightning',
+    'lightning_fabric',
+    'lightning_utilities'
+]
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
