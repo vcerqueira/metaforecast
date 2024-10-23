@@ -61,6 +61,7 @@ autodoc_mock_imports = [
     'numba',
     'arch',
     'lightgbm',
+    'pytorch_lightning',
     'tslearn',
     'tslearn.barycenters',
     'scipy.interpolate',

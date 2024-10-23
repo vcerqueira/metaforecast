@@ -31,7 +31,8 @@ dependencies = [
     "datasetsforecast==0.0.8",
     "neuralforecast==1.7.5",
     "statsforecast==1.7.5",
-    "mlforecast==0.13.4"
+    "mlforecast==0.13.4",
+    "pytorch_lightning==2.3.3"
 ]
 
 [project.urls]
