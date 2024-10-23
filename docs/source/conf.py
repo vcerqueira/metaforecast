@@ -57,8 +57,11 @@ autodoc_mock_imports = [
     'statsforecast',
     'mlforecast',
     'neuralforecast',
+    'numba',
+    'tslearn',
+    'tslearn.barycenters',
     'scipy.interpolate',
-    'scipy.stats',
+    'scipy.stats'
 ]
 
 templates_path = ['_templates']
