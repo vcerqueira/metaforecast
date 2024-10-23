@@ -133,25 +133,30 @@ class Windowing(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst, **kwargs):
-        """
+        """Update performance statistics of ensemble members based on recent forecasts.
+
+        Used to identify and retain top-performing models for ensemble trimming.
+        Updates internal statistics tracking each model's forecast accuracy.
+
         Parameters
         ----------
         insample_fcst : pd.DataFrame
             Forecast and actual values dataset formatted like mlforecast cross-validation output.
             Contains either:
-                - In-sample forecasts (predictions on training data)
-                - Cross-validation results (out-of-sample predictions)
+            - In-sample forecasts (predictions on training data)
+            - Cross-validation results (out-of-sample predictions)
 
             Expected columns:
-                - unique_id (or other id_col): Identifier for each series
-                - ds (or other time_col): Timestamp
-                - y (or other target_col): Actual values
-                - *model_name*: Predictions by a model with name *model_name*
+            - unique_id (or other id_col): Identifier for each series
+            - ds (or other time_col): Timestamp
+            - y (or other target_col): Actual values
+            - *model_name*: Predictions by a model with name *model_name*
 
         Returns
         -------
         self
             self, with computed self.weights
+
         """
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()

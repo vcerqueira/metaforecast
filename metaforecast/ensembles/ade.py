@@ -215,13 +215,13 @@ class ADE(BaseADE):
 
         Parameters
         ----------
-        fcst : pd.DataFrame
+        fcst: pd.DataFrame
             Recent forecasts and actual values for ensemble members.
             Expected columns:
-                - unique_id: Series identifier
-                - ds: Timestamp
-                - model_name: Predictions with model with name "model_name"
-                - y: Actual values
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - model_name: Predictions with model with name "model_name"
+            - y: Actual values
 
         Notes
         -----
@@ -488,7 +488,7 @@ class MLForecastADE(ADE):
         return fcst
 
     def update_weights(self, fcst: pd.DataFrame, **kwargs):
-        """Update performance statistics of ensemble members.
+        """ Update performance statistics of ensemble members.
 
         See :meth:`ADE.update_weights` for full documentation.
         """

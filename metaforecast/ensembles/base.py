@@ -97,13 +97,13 @@ class ForecastingEnsemble(ABC):
 
         Parameters
         ----------
-        fcst : pd.DataFrame
+        fcst: pd.DataFrame
             Dataset containing actual values and model predictions.
             Expected columns:
             - unique_id: Series identifier
             - ds: Timestamp
             - model_name: Predictions of model with name "model_name"
-             y: Actual values
+            - y: Actual values
 
         """
         raise NotImplementedError

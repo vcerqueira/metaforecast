@@ -398,25 +398,25 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
         ----------
         cv : pd.DataFrame
             Validation results with required columns:
-                - unique_id: Series identifier
-                - ds: Timestamp
-                - y: Actual values
-                - model_name: Predicted values by a model with name model_name
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Actual values
+            - model_name: Predicted values by a model with name model_name
 
         model_names : List[str], optional
             Models to compute weights for:
-                - If None: Use all models from fitting
-                - If provided: Compute only for specified models
+            - If None: Use all models from fitting
+            - If provided: Compute only for specified models
             Must be subset of models used in fitting.
 
         Notes
         -----
         Weight optimization:
-            1. For each horizon:
-                - Generate FTN predictions
-                - Grid search alpha weights
-                - Evaluate combined forecasts
-                - Select best performing weight
+        1. For each horizon:
+            - Generate FTN predictions
+            - Grid search alpha weights
+            - Evaluate combined forecasts
+            - Select best performing weight
 
         """
 

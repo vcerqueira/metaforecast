@@ -4,7 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/metaforecast/badge/?version=latest)](https://metaforecast.readthedocs.io/en/latest/?badge=latest)
 [![GitHub](https://img.shields.io/github/stars/vcerqueira/metaforecast?style=social)](https://github.com/vcerqueira/metaforecast)
 ![Pylint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/vcerqueira/7ad63bc9902a43eb21993a755006f5de/raw/pylint-badge.json)
-
+[![Downloads](https://static.pepy.tech/badge/metaforecast)](https://pepy.tech/project/metaforecast)
 
 Meta-learning and data-centric techniques for time series forecasting models. 
 Built on top of Nixtla's ecosystem, leveraging its state-of-the-art forecasting methods.
