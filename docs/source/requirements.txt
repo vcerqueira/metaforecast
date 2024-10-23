@@ -6,3 +6,5 @@ jupyter
 ipykernel
 sphinx-rtd-theme
 cython
+sphinx-copybutton
+sphinxcontrib-bibtex
