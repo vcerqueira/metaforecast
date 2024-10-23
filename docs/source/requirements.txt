@@ -17,3 +17,4 @@ mlforecast==0.13.4
 scipy==1.13.1
 numpy==1.26.4
 numba==0.60.0
+statsmodels==0.14.2
