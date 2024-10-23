@@ -30,7 +30,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
-    "sphinxcontrib.bibtex",
     'sphinx.ext.viewcode',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
@@ -61,7 +60,7 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['source/_static']
+html_static_path = ['docs/source/_static']
 
 autosummary_generate = True
 # add_module_names = False
