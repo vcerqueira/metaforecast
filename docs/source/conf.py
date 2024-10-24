@@ -39,7 +39,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     'sphinx.ext.viewcode',
-    'sphinx_gallery.gen_gallery',
+    # 'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx_link',
