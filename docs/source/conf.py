@@ -118,6 +118,7 @@ pickle_factory = None
 def example_func():
     return
 
+nbsphinx_custom_formats = {}
 
 sphinx_gallery_conf = {
     'reset_modules': (example_func,),
