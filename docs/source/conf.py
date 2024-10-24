@@ -36,7 +36,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx.ext.autosummary",
+    # "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     'sphinx.ext.viewcode',
     # 'sphinx_gallery.gen_gallery',
