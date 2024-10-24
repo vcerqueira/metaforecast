@@ -126,7 +126,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
         return x_warped.squeeze()
     
 
-class DiffusionModel(torch.nn.Module):
+class ExampleDiffusionModel(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(DiffusionModel, self).__init__()
         self.input_dim = input_dim
@@ -145,7 +145,7 @@ class DiffusionModel(torch.nn.Module):
         x = self.linear3(x)
         return x
     
-class DiffusionGenerator(SemiSyntheticGenerator):
+class Diffusion(SemiSyntheticGenerator):
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
         """Initialize diffusion model generator with parameters.
@@ -160,13 +160,13 @@ class DiffusionGenerator(SemiSyntheticGenerator):
             Whether to rename the unique identifiers of the synthetic series.
 
         """
-        super().__init__(alias='DiffusionGenerator')
+        super().__init__(alias='Diffusion')
         self.sigma = sigma
         self.knot = knot
         self.rename_uids = rename_uids
         self.gaussian_diffusion = GaussianDiffusion(sigma, knot, rename_uids)
   
-    def train(self, df: pd.DataFrame, **kwargs):
+    def train(self, df: pd.DataFrame, epochs=1, learning_rate=0.01, diffusion_model=None, **kwargs):
         """Train the diffusion model.
 
         Parameters
@@ -176,13 +176,18 @@ class DiffusionGenerator(SemiSyntheticGenerator):
             - unique_id: Series identifier
             - ds: Timestamp
             - y: Target values
+        epochs : int
+            Number of training epochs.
+        learning_rate : float
+            Learning rate for the optimizer.
+        diffusion_model : torch.nn.Module
+            Diffusion model to train.
         kwargs : dict
             Additional keyword arguments.
-
         """
-
-        self.model = DiffusionModel(df.shape[0], df.shape[0])
-        epochs = 1
+        if not diffusion_model:
+            diffusion_model = ExampleDiffusionModel(df.shape[0], df.shape[0])
+        self.model = diffusion_model
         for _ in range(epochs):
             synthetic_df = self.gaussian_diffusion.transform(df, 1)
             real_noise = synthetic_df['y'].values - df['y'].values
@@ -193,7 +198,7 @@ class DiffusionGenerator(SemiSyntheticGenerator):
 
             self.model.zero_grad()
             loss.backward()
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=0.01)
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
             optimizer.step()
 
     def transform(self, df: pd.DataFrame, n_series: int, **kwargs):
@@ -222,6 +227,7 @@ class DiffusionGenerator(SemiSyntheticGenerator):
 
         """
         self._assert_datatypes(df)
+        self._assert_model_trained()
 
         dataset = []
         for _ in range(n_series):
@@ -232,6 +238,21 @@ class DiffusionGenerator(SemiSyntheticGenerator):
             self.counter += 1
 
         return pd.concat(dataset)
+    
+    def _assert_model_trained(self):
+        """
+        Assert that the diffusion model has been trained.
+
+        Raises
+        ------
+        ValueError
+            If the model has not been trained.
+
+        """
+        if not hasattr(self, 'model'):
+            raise ValueError("""Diffusion model must be trained before generating synthetic series.
+            Use the `train` method to train the model.""")
+                             
 
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """

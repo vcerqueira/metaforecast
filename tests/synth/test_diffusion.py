@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from metaforecast.synth.generators.diffusion import GaussianDiffusion
-from metaforecast.synth.generators.diffusion import DiffusionGenerator
+from metaforecast.synth.generators.diffusion import Diffusion
 
 @pytest.mark.parametrize('df', [
     pd.DataFrame({
@@ -44,7 +44,7 @@ def test_diffusion_generator(sigma, df):
     assert synth_df.shape[0] == 10
     assert synth_df['unique_id'].nunique() == 1
 
-    diffusion_model = DiffusionGenerator(sigma=sigma, knot=4, rename_uids=True)
+    diffusion_model = Diffusion(sigma=sigma, knot=4, rename_uids=True)
     diffusion_model.train(df)
     synth_df = diffusion_model.transform(df, n_series=1)
     assert synth_df.shape[0] == 10
