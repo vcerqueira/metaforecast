@@ -115,11 +115,14 @@ add_module_names = False
 pickle_factory = None
 
 
-def example_func():
-    return
+# def example_func():
+#     return
+#
+# nbsphinx_custom_formats = {}
+#
+# sphinx_gallery_conf = {
+#     'reset_modules': (example_func,),
+# }
 
-nbsphinx_custom_formats = {}
-
-sphinx_gallery_conf = {
-    'reset_modules': (example_func,),
-}
+nbsphinx_execute = 'never'
+nbsphinx_allow_errors = True
