@@ -1,6 +1,7 @@
 sphinx
 nbsphinx
 nbsphinx-link
+sphinx-gallery
 ipython
 jupyter
 ipykernel
