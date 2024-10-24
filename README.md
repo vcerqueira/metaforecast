@@ -7,7 +7,6 @@
 [![Downloads](https://static.pepy.tech/badge/metaforecast)](https://pepy.tech/project/metaforecast)
 
 
-
 metaforecast is a Python package for time series forecasting using meta-learning and data-centric techniques.
 
 This package implements various techniques to improve forecasting accuracy 
@@ -27,21 +26,20 @@ Includes a special callback for online data augmentation.
 
 You can install metaforecast using pip:
 
-```
+```bash
 pip install metaforecast
 ```
 
 ## Documentation
 
-TDA
+Check the [documentation](https://metaforecast.readthedocs.io/en/latest/index.html) for 
+the API reference and module descriptions. 
+You can get started with a few [tutorials](https://metaforecast.readthedocs.io/en/latest/notebooks.html).
 
-## Examples
+----
 
-Check out the `notebooks` folder for example usage and tutorials. 
+### **⚠️ WARNING**
 
-
-> **⚠️ WARNING**
->
 > metaforecast is in the early stages of development. 
 > The codebase may undergo significant changes. 
 > If you encounter any issues, please report

@@ -32,35 +32,7 @@ training. This online approach creates different augmented samples in each batch
 [3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease monitoring."
 ACM International Conference on Multimodal Interaction.
 
-KernelSynth
--------------
-
-.. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
+.. automodule:: metaforecast.synth
    :members:
+   :undoc-members:
    :show-inheritance:
-   :noindex:
-
-
-DBA
--------
-
-.. autoclass:: metaforecast.synth.generators.dba.DBA
-   :members:
-   :show-inheritance:
-   :noindex:
-
-TSMixup
----------
-
-.. autoclass:: metaforecast.synth.generators.tsmixup.TSMixup
-   :members:
-   :show-inheritance:
-   :noindex:
-
-Callbacks
------------
-
-.. autoclass:: metaforecast.synth.callbacks.OnlineDataAugmentationCallback
-   :members:
-   :show-inheritance:
-   :noindex:

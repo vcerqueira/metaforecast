@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'metaforecast'
 copyright = '2024, Vitor Cerqueira'
 author = 'Vitor Cerqueira'
-release = '0.1.5'
+release = '0.1.6'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -39,7 +39,6 @@ extensions = [
     # "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     'sphinx.ext.viewcode',
-    # 'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx_link',
@@ -113,16 +112,6 @@ html_static_path = ['_static']
 autosummary_generate = False
 add_module_names = False
 pickle_factory = None
-
-
-# def example_func():
-#     return
-#
-# nbsphinx_custom_formats = {}
-#
-# sphinx_gallery_conf = {
-#     'reset_modules': (example_func,),
-# }
 
 nbsphinx_execute = 'never'
 nbsphinx_allow_errors = True
