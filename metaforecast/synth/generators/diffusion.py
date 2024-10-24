@@ -24,7 +24,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
             Whether to rename the unique identifiers of the synthetic series.
 
         """
-        super().__init__(alias='Diffusion')
+        super().__init__(alias='GaussianDiffusion')
         self.sigma = sigma
         self.knot = knot
         self.rename_uids = rename_uids
@@ -128,7 +128,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
 class ExampleDiffusionModel(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim):
-        super(DiffusionModel, self).__init__()
+        super(ExampleDiffusionModel, self).__init__()
         self.input_dim = input_dim
         self.linear1 = torch.nn.Linear(input_dim, hidden_dim)
         self.relu = torch.nn.ReLU()
