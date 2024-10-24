@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-
+import torch
 from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
-class Diffusion(SemiSyntheticGenerator):
+class GaussianDiffusion(SemiSyntheticGenerator):
     """Generate synthetic time series using diffusion.
 
     Incoporates Gaussian noise to the time series to generate synthetic data.
@@ -124,4 +124,163 @@ class Diffusion(SemiSyntheticGenerator):
             x_warped[:, i] = np.interp(time_warp[:, i], orig_steps, x[:, i])
 
         return x_warped.squeeze()
+    
+
+class DiffusionModel(torch.nn.Module):
+    def __init__(self, input_dim, hidden_dim):
+        super(DiffusionModel, self).__init__()
+        self.input_dim = input_dim
+        self.linear1 = torch.nn.Linear(input_dim, hidden_dim)
+        self.relu = torch.nn.ReLU()
+        self.linear2 = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.linear3 = torch.nn.Linear(hidden_dim, input_dim)
+
+        
+    def forward(self, x):
+        x = x.view(-1, self.input_dim)
+        x = self.linear1(x)
+        x = self.relu(x)
+        x = self.linear2(x)
+        x = self.relu(x)
+        x = self.linear3(x)
+        return x
+    
+class DiffusionGenerator(SemiSyntheticGenerator):
+
+    def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
+        """Initialize diffusion model generator with parameters.
+
+        Parameters
+        ----------
+        sigma : float
+            Standard deviation of the Gaussian noise added to the time series.
+        knot : int
+            Number of knots used to generate the diffusion path.
+        rename_uids : bool
+            Whether to rename the unique identifiers of the synthetic series.
+
+        """
+        super().__init__(alias='DiffusionGenerator')
+        self.sigma = sigma
+        self.knot = knot
+        self.rename_uids = rename_uids
+        self.gaussian_diffusion = GaussianDiffusion(sigma, knot, rename_uids)
+  
+    def train(self, df: pd.DataFrame, **kwargs):
+        """Train the diffusion model.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+        kwargs : dict
+            Additional keyword arguments.
+
+        """
+
+        self.model = DiffusionModel(df.shape[0], df.shape[0])
+        epochs = 1
+        for _ in range(epochs):
+            synthetic_df = self.gaussian_diffusion.transform(df, 1)
+            real_noise = synthetic_df['y'].values - df['y'].values
+
+            predicted_noise = self.model(torch.tensor(synthetic_df['y'].values, dtype=torch.float32).unsqueeze(1))
+
+            loss = torch.nn.functional.mse_loss(predicted_noise, torch.tensor(real_noise, dtype=torch.float32).unsqueeze(1))
+
+            self.model.zero_grad()
+            loss.backward()
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=0.01)
+            optimizer.step()
+
+    def transform(self, df: pd.DataFrame, n_series: int, **kwargs):
+        """Generate synthetic time series using diffusion model.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Source time series dataset with required columns:
+            - unique_id: Series identifier
+            - ds: Timestamp
+            - y: Target values
+            Must follow nixtla framework conventions
+        n_series : int
+            Number of synthetic series to generate.
+        kwargs : dict
+            Additional keyword arguments.
+            
+        Returns
+        -------
+        pd.DataFrame
+            Generated synthetic series with the same structure:
+            - New unique_ids: f"Diffusion_{i}" for i in range(n_series)
+            - Same temporal alignment as the source
+            - y values generated using diffusion model
+
+        """
+        self._assert_datatypes(df)
+
+        dataset = []
+        for _ in range(n_series):
+            uid = f'Diffusion_{self.counter}' if self.rename_uids else df['unique_id'].sample(1).values[0]
+            ts = self._create_synthetic_ts(df)
+            ts['unique_id'] = uid
+            dataset.append(ts)
+            self.counter += 1
+
+        return pd.concat(dataset)
+
+    def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+        """
+        Apply diffusion model to a time series.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Time series values.
+
+        Returns
+        -------
+        np.ndarray
+            Time series values after applying diffusion model.
+
+        """
+
+        # Receives a noisy time series and predicts the noise to be removed.
+        x = df['y'].values
+        x = x.reshape(-1, 1)
+        x = torch.tensor(x, dtype=torch.float32).unsqueeze(1)
+        predicted_noise = self.model(x)
+        x = x.squeeze()
+        predicted_noise = predicted_noise.squeeze().detach().numpy()
+        x = x.numpy()
+        x = x - predicted_noise
+        return pd.DataFrame({'ds': df['ds'], 'y': x})
+    
+
+if __name__ == '__main__':
+    df = pd.DataFrame({
+        'unique_id': ['A'] * 10,
+        'ds': pd.date_range(start='2020-01-01',
+                            periods=10,
+                            freq='D'),
+        'y': np.random.normal(0, 1, 10)
+    })
+
+    diffusion = GaussianDiffusion(sigma=0.2, knot=4, rename_uids=True)
+    synth_df = diffusion.transform(df, n_series=1)
+
+    assert synth_df.shape[0] == 10
+    assert synth_df['unique_id'].nunique() == 1
+
+    diffusion_model = DiffusionGenerator(sigma=0.2, knot=4, rename_uids=True)
+    diffusion_model.train(df)
+    synth_df = diffusion_model.transform(df, n_series=1)
+    assert synth_df.shape[0] == 10
+    assert synth_df['unique_id'].nunique() == 1
+
+    print('All tests passed!')
     
