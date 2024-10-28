@@ -7,8 +7,12 @@ from metaforecast.synth.generators.base import SemiSyntheticGenerator
 class GaussianDiffusion(SemiSyntheticGenerator):
     """Generate synthetic time series using diffusion.
 
-    Incoporates Gaussian noise to the time series to generate synthetic data.
-    The diffusion path is created by adding Gaussian noise to the time series.
+    Forward phase referred to as diffusion.
+    Injects Gaussian noise across a set of training samples.
+
+    References
+    ----------
+    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time series and spatio-temporal data." 
     """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
@@ -146,6 +150,16 @@ class ExampleDiffusionModel(torch.nn.Module):
         return x
     
 class Diffusion(SemiSyntheticGenerator):
+    """
+
+    Implements diffusion model that undergoes a two-step process involving the injection of Gaussian noise and 
+    the subsequent removal of that noise. By training the model to predict the noise added during the diffusion process,
+    the models learns to generate synthetic time series samples.
+
+    References
+    ----------
+    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time series and spatio-temporal data." 
+    """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
         """Initialize diffusion model generator with parameters.
