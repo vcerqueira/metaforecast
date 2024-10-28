@@ -1,9 +1,10 @@
 import numpy as np
-
-from tslearn.barycenters import (euclidean_barycenter,
-                                 dtw_barycenter_averaging,
-                                 dtw_barycenter_averaging_subgradient,
-                                 softdtw_barycenter)
+from tslearn.barycenters import (
+    dtw_barycenter_averaging,
+    dtw_barycenter_averaging_subgradient,
+    euclidean_barycenter,
+    softdtw_barycenter,
+)
 
 
 class BarycentricAveraging:
@@ -21,23 +22,24 @@ class BarycentricAveraging:
     >>> # print(x_avg)
 
     """
+
     BARYCENTERS = {
-        'euclidean': euclidean_barycenter,
-        'dtw': dtw_barycenter_averaging,
-        'dtw_subgradient': dtw_barycenter_averaging_subgradient,
-        'softdtw': softdtw_barycenter,
+        "euclidean": euclidean_barycenter,
+        "dtw": dtw_barycenter_averaging,
+        "dtw_subgradient": dtw_barycenter_averaging_subgradient,
+        "softdtw": softdtw_barycenter,
     }
 
     BARYCENTER_PARAMS = {
-        'euclidean': {},
-        'dtw': {'max_iter': 5, 'tol': 1e-3},
-        'dtw_subgradient': {'max_iter': 5, 'tol': 1e-3},
-        'softdtw': {'gamma': .1, 'max_iter': 5, 'tol': 1e-3},
+        "euclidean": {},
+        "dtw": {"max_iter": 5, "tol": 1e-3},
+        "dtw_subgradient": {"max_iter": 5, "tol": 1e-3},
+        "softdtw": {"gamma": 0.1, "max_iter": 5, "tol": 1e-3},
     }
 
     @classmethod
     def calc_average(cls, fcst: np.ndarray, barycenter: str):
-        """ calc_average
+        """calc_average
 
         Compute the barycentric averaging of a set of time series subsequences (or forecasts)
 
@@ -50,10 +52,11 @@ class BarycentricAveraging:
 
         :return: averaged subsequences as np.ndarray
         """
-        assert barycenter in [*cls.BARYCENTERS], 'Unknown barycenter'
+        assert barycenter in [*cls.BARYCENTERS], "Unknown barycenter"
 
-        fcst_arr = cls.BARYCENTERS[barycenter](X=fcst,
-                                               **cls.BARYCENTER_PARAMS[barycenter])
+        fcst_arr = cls.BARYCENTERS[barycenter](
+            X=fcst, **cls.BARYCENTER_PARAMS[barycenter]
+        )
 
         fcst_arr = fcst_arr.flatten()
 

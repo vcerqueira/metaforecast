@@ -1,7 +1,7 @@
 from .ade import ADE, MLForecastADE
 from .mlewa import MLewa
 from .mlpol import MLpol
-from .static import LossOnTrain, BestOnTrain, EqAverage
+from .static import BestOnTrain, EqAverage, LossOnTrain
 from .windowing import Windowing
 
 __all__ = [

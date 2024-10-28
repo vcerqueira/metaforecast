@@ -1,0 +1,12 @@
+[DESIGN]
+max-attributes = 15
+max-args = 15
+max-locals = 20
+
+[MESSAGES CONTROL]
+disable = missing-module-docstring,
+          missing-class-docstring,
+          missing-function-docstring,
+          too-few-public-methods,
+          R0801,
+          R0917

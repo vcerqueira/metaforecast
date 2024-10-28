@@ -1,8 +1,8 @@
 import copy
 import typing
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from metaforecast.ensembles.base import Mixture
 
@@ -80,12 +80,13 @@ class MLpol(Mixture):
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
     """
 
-    def __init__(self,
-                 loss_type: str,
-                 gradient: bool,
-                 weight_by_uid: bool = False,
-                 trim_ratio: float = 1):
-
+    def __init__(
+        self,
+        loss_type: str,
+        gradient: bool,
+        weight_by_uid: bool = False,
+        trim_ratio: float = 1,
+    ):
         """Initialize online ensemble with polynomial weighting strategy.
 
         Parameters
@@ -124,38 +125,44 @@ class MLpol(Mixture):
 
         """
 
-        super().__init__(loss_type=loss_type,
-                         gradient=gradient,
-                         trim_ratio=trim_ratio,
-                         weight_by_uid=weight_by_uid)
+        super().__init__(
+            loss_type=loss_type,
+            gradient=gradient,
+            trim_ratio=trim_ratio,
+            weight_by_uid=weight_by_uid,
+        )
 
-        self.alias = 'MLpol'
+        self.alias = "MLpol"
 
         self.b = None
 
     def _update_mixture(self, fcst: pd.DataFrame, y: np.ndarray, **kwargs):
-        """ _update_mixture
+        """_update_mixture
 
-         Updating the weights of the ensemble
+        Updating the weights of the ensemble
 
-         :param fcst: predictions of the ensemble members (columns) in different time steps (rows)
-         :type fcst: pd.DataFrame
+        :param fcst: predictions of the ensemble members (columns) in different time steps (rows)
+        :type fcst: pd.DataFrame
 
-         :param y: actual values of the time series
-         :type y: np.ndarray
+        :param y: actual values of the time series
+        :type y: np.ndarray
 
-         :return: self
-         """
+        :return: self
+        """
 
         for i, fc in fcst.iterrows():
             w = self._weights_from_regret(iteration=i)
 
             self.weights[i], self.ensemble_fcst[i] = self._calc_ensemble_fcst(fc, w)
 
-            loss_experts = self._calc_loss(fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i])
-            loss_mixture = self._calc_loss(fcst=self.ensemble_fcst[i],
-                                           y=y[i],
-                                           fcst_c=self.ensemble_fcst[i])
+            loss_experts = self._calc_loss(
+                fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i]
+            )
+            loss_mixture = self._calc_loss(
+                fcst=self.ensemble_fcst[i],
+                y=y[i],
+                fcst_c=self.ensemble_fcst[i],
+            )
 
             regret_i = loss_mixture - loss_experts
 
@@ -164,9 +171,11 @@ class MLpol(Mixture):
                 self.regret[mod] += regret_i[mod]
 
             # update learning rate
-            b_iter = np.max([self.b, np.max(regret_i ** 2)])
+            b_iter = np.max([self.b, np.max(regret_i**2)])
 
-            self.eta[int(str(i)) + 1] = 1 / (1 / self.eta[i] + regret_i ** 2 + b_iter - self.b)
+            self.eta[int(str(i)) + 1] = 1 / (
+                1 / self.eta[i] + regret_i**2 + b_iter - self.b
+            )
 
             self.b = copy.deepcopy(b_iter)
 
@@ -184,7 +193,6 @@ class MLpol(Mixture):
         return w
 
     def _initialize_params(self, fcst: pd.DataFrame):
-
         n_row, n_col = fcst.shape[0], len(self.model_names)
 
         self.eta = np.full(shape=(n_row + 1, n_col), fill_value=np.exp(100))

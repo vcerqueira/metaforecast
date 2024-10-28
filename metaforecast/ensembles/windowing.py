@@ -68,12 +68,14 @@ class Windowing(ForecastingEnsemble):
 
     """
 
-    def __init__(self,
-                 freq: str,
-                 select_best: bool = False,
-                 trim_ratio: float = 1,
-                 weight_by_uid: bool = False,
-                 window_size: Optional[int] = None):
+    def __init__(
+        self,
+        freq: str,
+        select_best: bool = False,
+        trim_ratio: float = 1,
+        weight_by_uid: bool = False,
+        window_size: Optional[int] = None,
+    ):
         """Initialize window-based dynamic ensemble.
 
         Parameters
@@ -110,7 +112,7 @@ class Windowing(ForecastingEnsemble):
 
         super().__init__()
 
-        self.alias = 'Windowing'
+        self.alias = "Windowing"
         self.frequency = freq
 
         if window_size is None:
@@ -121,7 +123,7 @@ class Windowing(ForecastingEnsemble):
         self.select_best = select_best
         if self.select_best:
             self.trim_ratio = 1e-10
-            self.alias = 'BLAST'
+            self.alias = "BLAST"
         else:
             self.trim_ratio = trim_ratio
 
@@ -160,18 +162,21 @@ class Windowing(ForecastingEnsemble):
         """
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [x for x in self.model_names if x not in self.METADATA + ['h']]
+            self.model_names = [
+                x for x in self.model_names if x not in self.METADATA + ["h"]
+            ]
 
         self._set_n_models()
 
-        self.insample_scores = self.evaluate_base_fcst(insample_fcst=insample_fcst,
-                                                       use_window=self.use_window)
+        self.insample_scores = self.evaluate_base_fcst(
+            insample_fcst=insample_fcst, use_window=self.use_window
+        )
 
         self.weights = self._weights_by_uid()
 
     # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
-        """ Combine ensemble member forecasts based on recent performance.
+        """Combine ensemble member forecasts based on recent performance.
 
         Parameters
         ----------
@@ -195,7 +200,7 @@ class Windowing(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
-        """ Updating the combination weights
+        """Updating the combination weights
 
 
         Not implemented yet
@@ -225,6 +230,6 @@ class Windowing(ForecastingEnsemble):
             uid_weights[uid] = weights
 
         weights_df = pd.DataFrame(uid_weights).T
-        weights_df.index.name = 'unique_id'
+        weights_df.index.name = "unique_id"
 
         return weights_df

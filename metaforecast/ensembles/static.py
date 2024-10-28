@@ -71,12 +71,14 @@ class BestOnTrain(Windowing):
 
         """
 
-        super().__init__(freq='',
-                         select_best=True,
-                         trim_ratio=1,
-                         weight_by_uid=select_by_uid)
+        super().__init__(
+            freq="",
+            select_best=True,
+            trim_ratio=1,
+            weight_by_uid=select_by_uid,
+        )
 
-        self.alias = 'BestOnTrain'
+        self.alias = "BestOnTrain"
 
         self.use_window = False
         self.select_by_uid = select_by_uid
@@ -167,12 +169,14 @@ class LossOnTrain(Windowing):
         4. Normalize weights to sum to 1
 
         """
-        super().__init__(freq='',
-                         select_best=False,
-                         trim_ratio=trim_ratio,
-                         weight_by_uid=weight_by_uid)
+        super().__init__(
+            freq="",
+            select_best=False,
+            trim_ratio=trim_ratio,
+            weight_by_uid=weight_by_uid,
+        )
 
-        self.alias = 'LossOnTrain'
+        self.alias = "LossOnTrain"
 
         self.use_window = False
 
@@ -267,12 +271,14 @@ class EqAverage(Windowing):
         "Simple robust averages of forecasts: Some empirical results."
         International Journal of Forecasting, 24(1), 163-169.
         """
-        super().__init__(freq='',
-                         select_best=False,
-                         trim_ratio=trim_ratio,
-                         weight_by_uid=select_by_uid)
+        super().__init__(
+            freq="",
+            select_best=False,
+            trim_ratio=trim_ratio,
+            weight_by_uid=select_by_uid,
+        )
 
-        self.alias = 'EqAverage'
+        self.alias = "EqAverage"
 
         self.use_window = False
 

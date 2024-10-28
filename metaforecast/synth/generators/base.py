@@ -7,33 +7,33 @@ import pandas as pd
 class BaseTimeSeriesGenerator(ABC):
     """Abstract base class for synthetic time series generators.
 
-     Attributes
-     ----------
-     REQUIRED_COLUMNS : List[str]
-         Columns that must be present in input/output datasets:
-         - unique_id: Series identifier
-         - ds: Timestamp
-         - y: Target values
+    Attributes
+    ----------
+    REQUIRED_COLUMNS : List[str]
+        Columns that must be present in input/output datasets:
+        - unique_id: Series identifier
+        - ds: Timestamp
+        - y: Target values
 
-     START : pd.Timestamp
-         Reference start time for synthetic series
+    START : pd.Timestamp
+        Reference start time for synthetic series
 
-     END : pd.Timestamp
-         Reference end time for synthetic series
+    END : pd.Timestamp
+        Reference end time for synthetic series
 
-     REQUIRES_N : bool
-         Whether generator needs explicit number of series:
-         - True: Pure synthetic generation
-         - False: Modification of existing series
+    REQUIRES_N : bool
+        Whether generator needs explicit number of series:
+        - True: Pure synthetic generation
+        - False: Modification of existing series
 
-     REQUIRES_DF : bool
-         Whether generator needs source dataset:
-         - True: Semi-synthetic/transformation approaches
-         - False: Pure synthetic generation
+    REQUIRES_DF : bool
+        Whether generator needs source dataset:
+        - True: Semi-synthetic/transformation approaches
+        - False: Pure synthetic generation
 
-     """
+    """
 
-    REQUIRED_COLUMNS = ['unique_id', 'ds', 'y']
+    REQUIRED_COLUMNS = ["unique_id", "ds", "y"]
     START: pd.Timestamp
     END: pd.Timestamp
     REQUIRES_N: bool
@@ -110,7 +110,9 @@ class BaseTimeSeriesGenerator(ABC):
             assert col in df.columns, f"Column '{col}' is missing from the DataFrame"
 
         # Assert unique_id is of type string
-        assert df["unique_id"].dtype == "object", "Column 'unique_id' must be of type string"
+        assert (
+            df["unique_id"].dtype == "object"
+        ), "Column 'unique_id' must be of type string"
 
         # Assert ds is of type pd.Timestamp
         # assert pd.api.types.is_datetime64_any_dtype(df["ds"]),
@@ -131,8 +133,9 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
     - Creating benchmark datasets
 
     """
-    START = pd.Timestamp('2000-01-01 00:00:00')
-    END = pd.Timestamp('2024-01-01 00:00:00')
+
+    START = pd.Timestamp("2000-01-01 00:00:00")
+    END = pd.Timestamp("2024-01-01 00:00:00")
     REQUIRES_N = True
     REQUIRES_DF = False
 
@@ -184,6 +187,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
     variations that maintain core patterns while modifying specific properties.
 
     """
+
     REQUIRES_N = False
     REQUIRES_DF = True
 
@@ -245,11 +249,12 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
         self._assert_datatypes(df)
 
         df_t_list = []
-        for _, uid_df in df.groupby('unique_id'):
+        for _, uid_df in df.groupby("unique_id"):
             ts_df = self._create_synthetic_ts(uid_df)
             if self.rename_uids:
-                ts_df['unique_id'] = \
-                    ts_df['unique_id'].apply(lambda x: f'{x}_{self.alias}{self.counter}')
+                ts_df["unique_id"] = ts_df["unique_id"].apply(
+                    lambda x: f"{x}_{self.alias}{self.counter}"
+                )
 
             self.counter += 1
 
@@ -261,7 +266,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
     @abstractmethod
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs):
-        """ _create_synthetic_ts
+        """_create_synthetic_ts
 
         Transforming a given time series
 
