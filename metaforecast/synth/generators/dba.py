@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 from tslearn.barycenters import dtw_barycenter_averaging_subgradient as dtw
 
 from metaforecast.synth.generators.base import SemiSyntheticGenerator
@@ -58,7 +57,7 @@ class DBA(SemiSyntheticGenerator):
     >>> fcst = nf.predict(df=train)
     """
 
-    DTW_PARAMS = {'max_iter': 10, 'tol': 1e-3}
+    DTW_PARAMS = {"max_iter": 10, "tol": 1e-3}
 
     def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
         """Initialize DBA generator with sampling parameters.
@@ -74,7 +73,7 @@ class DBA(SemiSyntheticGenerator):
             generating combination weights:
 
         """
-        super().__init__(alias='DBA')
+        super().__init__(alias="DBA")
 
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
@@ -113,7 +112,7 @@ class DBA(SemiSyntheticGenerator):
 
         self._assert_datatypes(df)
 
-        unq_uids = df['unique_id'].unique()
+        unq_uids = df["unique_id"].unique()
 
         if n_series < 0:
             n_series = len(unq_uids)
@@ -124,10 +123,10 @@ class DBA(SemiSyntheticGenerator):
 
             selected_uids = np.random.choice(unq_uids, n_uids, replace=False).tolist()
 
-            df_uids = df.query('unique_id == @selected_uids')
+            df_uids = df.query("unique_id == @selected_uids")
 
             ts_df = self._create_synthetic_ts(df_uids)
-            ts_df['unique_id'] = f'{self.alias}_{self.counter}'
+            ts_df["unique_id"] = f"{self.alias}_{self.counter}"
             self.counter += 1
 
             dataset.append(ts_df)
@@ -144,16 +143,16 @@ class DBA(SemiSyntheticGenerator):
         :param df: time series dataset with a sample of unique_id's
         :return: pd.DataFrame with synthetic time series
         """
-        y_list = [y['y'].values for _, y in df.groupby('unique_id')]
-        uid_size = df['unique_id'].value_counts()
+        y_list = [y["y"].values for _, y in df.groupby("unique_id")]
+        uid_size = df["unique_id"].value_counts()
 
-        ds = df.query(f'unique_id=="{uid_size.index[0]}"')['ds'].values
+        ds = df.query(f'unique_id=="{uid_size.index[0]}"')["ds"].values
 
         w = self.sample_weights_dirichlet(1, len(y_list))
 
         synth_y = dtw(X=y_list, weights=w, **self.DTW_PARAMS)
         synth_y = synth_y.flatten()
 
-        synth_df = pd.DataFrame({'ds': ds[:len(synth_y)], 'y': synth_y})
+        synth_df = pd.DataFrame({"ds": ds[: len(synth_y)], "y": synth_y})
 
         return synth_df

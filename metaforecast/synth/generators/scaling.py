@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
@@ -72,7 +72,7 @@ class Scaling(SemiSyntheticTransformer):
             Useful for tracking transformations
 
         """
-        super().__init__(alias='SCALE', rename_uids=rename_uids)
+        super().__init__(alias="SCALE", rename_uids=rename_uids)
 
         self.sigma = sigma
 
@@ -81,6 +81,6 @@ class Scaling(SemiSyntheticTransformer):
 
         factor = np.random.normal(loc=1.0, scale=self.sigma, size=df_.shape[0])
 
-        df_.loc[:, 'y'] *= factor
+        df_.loc[:, "y"] *= factor
 
         return df_

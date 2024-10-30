@@ -2,45 +2,47 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import numpy as np
-from neuralforecast.losses.numpy import smape
 import pandas as pd
+from neuralforecast.losses.numpy import smape
 
+from metaforecast.ensembles.expert_loss import (
+    AbsoluteLoss,
+    LogLoss,
+    PercentageLoss,
+    PinballLoss,
+    SquaredLoss,
+)
 from metaforecast.utils.normalization import Normalizations
-from metaforecast.ensembles.expert_loss import (SquaredLoss,
-                                                PinballLoss,
-                                                PercentageLoss,
-                                                AbsoluteLoss,
-                                                LogLoss)
 
 EXPERT_LOSS = {
-    'square': SquaredLoss,
-    'pinball': PinballLoss,
-    'percentage': PercentageLoss,
-    'absolute': AbsoluteLoss,
-    'log': LogLoss,
+    "square": SquaredLoss,
+    "pinball": PinballLoss,
+    "percentage": PercentageLoss,
+    "absolute": AbsoluteLoss,
+    "log": LogLoss,
 }
 
 
 class ForecastingEnsemble(ABC):
-    """ ForecastingEnsemble
+    """ForecastingEnsemble
 
     Abstract class for a forecasting ensemble method
     """
 
-    METADATA = ['unique_id', 'ds', 'y']
-    METADATA_NO_T = ['unique_id', 'ds']
+    METADATA = ["unique_id", "ds", "y"]
+    METADATA_NO_T = ["unique_id", "ds"]
 
     WINDOW_SIZE_BY_FREQ = {
-        'H': 48,
-        'D': 14,
-        'W': 16,
-        'M': 12,
-        'ME': 12,
-        'MS': 12,
-        'Q': 4,
-        'QS': 4,
-        'Y': 6,
-        '': -1,
+        "H": 48,
+        "D": 14,
+        "W": 16,
+        "M": 12,
+        "ME": 12,
+        "MS": 12,
+        "Q": 4,
+        "QS": 4,
+        "Y": 6,
+        "": -1,
     }
 
     def __init__(self):
@@ -56,7 +58,7 @@ class ForecastingEnsemble(ABC):
 
     @abstractmethod
     def fit(self, **kwargs):
-        """ fit
+        """fit
 
         Fits the ensemble combination rule
 
@@ -75,7 +77,7 @@ class ForecastingEnsemble(ABC):
 
     @abstractmethod
     def predict(self, **kwargs):
-        """ predict
+        """predict
 
         Predicts the weights of ensemble combination rule
 
@@ -108,7 +110,9 @@ class ForecastingEnsemble(ABC):
         """
         raise NotImplementedError
 
-    def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
+    def evaluate_base_fcst(
+        self, insample_fcst: pd.DataFrame, use_window: bool
+    ) -> pd.DataFrame:
         """Evaluate ensemble members' accuracy by series using SMAPE.
 
         Computes Symmetric Mean Absolute Percentage Error (SMAPE) for each base model
@@ -137,15 +141,16 @@ class ForecastingEnsemble(ABC):
         """
 
         all_scores, window_scores = {}, {}
-        in_sample_loss_g = insample_fcst.groupby('unique_id')
+        in_sample_loss_g = insample_fcst.groupby("unique_id")
         for uid, uid_df in in_sample_loss_g:
-
             uid_a_loss, uid_w_loss = {}, {}
             for m in self.model_names:
-                uid_a_loss[m] = smape(y=uid_df['y'], y_hat=uid_df[m])
+                uid_a_loss[m] = smape(y=uid_df["y"], y_hat=uid_df[m])
                 try:
-                    uid_w_loss[m] = smape(y=uid_df.tail(self.window_size)['y'],
-                                          y_hat=uid_df.tail(self.window_size)[m])
+                    uid_w_loss[m] = smape(
+                        y=uid_df.tail(self.window_size)["y"],
+                        y_hat=uid_df.tail(self.window_size)[m],
+                    )
                 except AssertionError:
                     uid_w_loss[m] = np.nan
 
@@ -165,7 +170,7 @@ class ForecastingEnsemble(ABC):
         raise NotImplementedError
 
     def _set_n_models(self):
-        """ _set_n_models
+        """_set_n_models
 
         Setting the number of models to be used based on the trim ratio
         """
@@ -177,7 +182,7 @@ class ForecastingEnsemble(ABC):
         self.n_poor_models = self.tot_n_models - self.n_models
 
     def _get_top_k(self, scores: pd.Series) -> List[str]:
-        """ _get_top_k
+        """_get_top_k
 
         Get the top k models based on loss scores
 
@@ -185,11 +190,11 @@ class ForecastingEnsemble(ABC):
 
         :return List[str] of the top k models
         """
-        return scores.sort_values().index.tolist()[:self.n_models]
+        return scores.sort_values().index.tolist()[: self.n_models]
 
     @staticmethod
     def _weights_from_errors(scores: pd.Series) -> pd.Series:
-        """ _weights_from_errors
+        """_weights_from_errors
 
         Transforming error scores into convex weights
 
@@ -204,7 +209,7 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _weighted_average(pred: pd.Series, weights: pd.DataFrame):
-        """ _weighted_average
+        """_weighted_average
 
         Compute a weighted average of a prediction based on models' weights
 
@@ -214,7 +219,7 @@ class ForecastingEnsemble(ABC):
         :return: ensemble weighted forecast
         """
 
-        w = weights.loc[pred['unique_id']]
+        w = weights.loc[pred["unique_id"]]
 
         wa = (pred[w.index] * w).sum()
 
@@ -222,8 +227,9 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _assert_fcst(fcst: pd.DataFrame):
-        assert 'unique_id' in fcst.columns, \
-            '"unique_id" should be included in the predictions object'
+        assert (
+            "unique_id" in fcst.columns
+        ), '"unique_id" should be included in the predictions object'
 
 
 class Mixture(ForecastingEnsemble):
@@ -267,13 +273,14 @@ class Mixture(ForecastingEnsemble):
     Cesa-Bianchi, N., & Lugosi, G. (2006). Prediction, learning, and games.
     """
 
-    def __init__(self,
-                 loss_type: str,
-                 gradient: bool,
-                 trim_ratio: float,
-                 weight_by_uid: bool):
-
-        self.alias = 'Mixture'
+    def __init__(
+        self,
+        loss_type: str,
+        gradient: bool,
+        trim_ratio: float,
+        weight_by_uid: bool,
+    ):
+        self.alias = "Mixture"
 
         super().__init__()
 
@@ -294,7 +301,7 @@ class Mixture(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame):
-        """ Fitting the dynamic combination rule
+        """Fitting the dynamic combination rule
 
         Parameters
         ----------
@@ -318,7 +325,9 @@ class Mixture(ForecastingEnsemble):
 
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [x for x in self.model_names if x not in self.METADATA + ['h']]
+            self.model_names = [
+                x for x in self.model_names if x not in self.METADATA + ["h"]
+            ]
 
         self._initialize_params(insample_fcst)
         self._set_n_models()
@@ -329,16 +338,15 @@ class Mixture(ForecastingEnsemble):
             self._fit_all(insample_fcst)
 
     def _fit_by_uid(self, insample_fcst: pd.DataFrame):
-        grouped_fcst = insample_fcst.groupby('unique_id')
+        grouped_fcst = insample_fcst.groupby("unique_id")
 
         for uid, fcst_uid in grouped_fcst:
-
-            y = fcst_uid['y'].values
+            y = fcst_uid["y"].values
 
             fcst_uid = fcst_uid.reset_index(drop=True)
             fcst_uid = fcst_uid.drop(columns=self.METADATA)
-            if 'h' in fcst_uid.columns:
-                fcst_uid = fcst_uid.drop(columns='h')
+            if "h" in fcst_uid.columns:
+                fcst_uid = fcst_uid.drop(columns="h")
 
             self._initialize_params(fcst_uid)
 
@@ -357,16 +365,16 @@ class Mixture(ForecastingEnsemble):
         :param insample_fcst: forecasts
         """
 
-        insample_fcst_ = insample_fcst.sort_values('ds')
+        insample_fcst_ = insample_fcst.sort_values("ds")
 
-        uid_list = insample_fcst_['unique_id'].unique().tolist()
+        uid_list = insample_fcst_["unique_id"].unique().tolist()
 
-        y = insample_fcst_['y'].values
+        y = insample_fcst_["y"].values
 
         fcst = insample_fcst_.reset_index(drop=True)
         fcst = fcst.drop(columns=self.METADATA)
-        if 'h' in fcst.columns:
-            fcst = fcst.drop(columns='h')
+        if "h" in fcst.columns:
+            fcst = fcst.drop(columns="h")
 
         self._update_mixture(fcst, y)
         self.weights = pd.DataFrame(self.weights, columns=self.model_names)
@@ -377,7 +385,7 @@ class Mixture(ForecastingEnsemble):
 
     # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
-        """ Combine ensemble member forecasts using the mixture.
+        """Combine ensemble member forecasts using the mixture.
 
         Parameters
         ----------
@@ -446,13 +454,12 @@ class Mixture(ForecastingEnsemble):
 
         weights_df = pd.DataFrame(uid_weights).T
         weights_df.sum()
-        weights_df.index.name = 'unique_id'
+        weights_df.index.name = "unique_id"
 
         return weights_df
 
     @staticmethod
     def _calc_ensemble_fcst(fcst: pd.Series, weight: pd.Series):
-
         # form the mixture and the prediction
         mixture = weight / np.sum(weight)
 
@@ -469,11 +476,13 @@ class BaseADE(ForecastingEnsemble):
 
     """
 
-    def __init__(self,
-                 window_size: int,
-                 trim_ratio: float,
-                 trim_by_uid: bool,
-                 meta_model):
+    def __init__(
+        self,
+        window_size: int,
+        trim_ratio: float,
+        trim_by_uid: bool,
+        meta_model,
+    ):
         super().__init__()
 
         self.window_size = window_size
@@ -481,7 +490,7 @@ class BaseADE(ForecastingEnsemble):
         self.trim_by_uid = trim_by_uid
         self.meta_model = meta_model
 
-        self.alias = 'ADE'
+        self.alias = "ADE"
 
     def fit(self, **kwargs):
         raise NotImplementedError

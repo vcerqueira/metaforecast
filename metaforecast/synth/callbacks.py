@@ -1,17 +1,21 @@
 import copy
 from typing import Union
 
-import pandas as pd
 import numpy as np
-import torch
+import pandas as pd
 import pytorch_lightning as pl
+import torch
 
-from metaforecast.synth.generators.base import (PureSyntheticGenerator,
-                                                SemiSyntheticGenerator,
-                                                SemiSyntheticTransformer)
+from metaforecast.synth.generators.base import (
+    PureSyntheticGenerator,
+    SemiSyntheticGenerator,
+    SemiSyntheticTransformer,
+)
 
 # pylint: disable=invalid-name
-TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
+TSGenerator = Union[
+    PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer
+]
 
 
 class OnlineDataAugmentationCallback(pl.Callback):
@@ -85,7 +89,7 @@ class OnlineDataAugmentationCallback(pl.Callback):
         """
         Applying data augmentation after getting a batch of time series for training
         """
-        temporal = batch['temporal']
+        temporal = batch["temporal"]
 
         df_ = self.temporal_to_df(temporal)
 
@@ -96,9 +100,9 @@ class OnlineDataAugmentationCallback(pl.Callback):
         temporal_aug = self.df_to_tensor(df_aug)
 
         if isinstance(temporal, torch.mps.Tensor):
-            temporal_aug = temporal_aug.to('mps')
+            temporal_aug = temporal_aug.to("mps")
 
-        batch['temporal'] = temporal_aug
+        batch["temporal"] = temporal_aug
 
         return batch
 
@@ -134,20 +138,20 @@ class OnlineDataAugmentationCallback(pl.Callback):
             arr_t = arr.cpu().numpy().T
 
             arr_df = pd.DataFrame(arr_t).copy()
-            arr_df.columns = ['y', 'y_mask']
-            arr_df['ds'] = np.arange(arr_df.shape[0])
-            arr_df['unique_id'] = f'ID{i}'
+            arr_df.columns = ["y", "y_mask"]
+            arr_df["ds"] = np.arange(arr_df.shape[0])
+            arr_df["unique_id"] = f"ID{i}"
 
             arr_list.append(arr_df)
 
         df = pd.concat(arr_list)
-        df = df.query('y_mask>0').drop(columns=['y_mask']).reset_index(drop=True)
+        df = df.query("y_mask>0").drop(columns=["y_mask"]).reset_index(drop=True)
 
         return df
 
     @staticmethod
     def create_mask(df) -> pd.DataFrame:
-        """ Create masked time series datasets
+        """Create masked time series datasets
 
         Transforms variable-length time series into fixed-length format by:
         1. Finding maximum series length
@@ -171,20 +175,20 @@ class OnlineDataAugmentationCallback(pl.Callback):
             All series padded to same length
 
         """
-        uids = df['unique_id'].unique()
-        all_ds = np.arange(0, df['ds'].max() + 1)
+        uids = df["unique_id"].unique()
+        all_ds = np.arange(0, df["ds"].max() + 1)
 
-        df_extended = pd.DataFrame([(uid, ds)
-                                    for uid in uids
-                                    for ds in all_ds],
-                                   columns=['unique_id', 'ds'])
+        df_extended = pd.DataFrame(
+            [(uid, ds) for uid in uids for ds in all_ds],
+            columns=["unique_id", "ds"],
+        )
 
-        result = pd.merge(df_extended, df, on=['unique_id', 'ds'], how='left')
+        result = pd.merge(df_extended, df, on=["unique_id", "ds"], how="left")
 
-        result['y_mask'] = (~result['y'].isna()).astype(int)
-        result['y'] = result['y'].fillna(0)
+        result["y_mask"] = (~result["y"].isna()).astype(int)
+        result["y"] = result["y"].fillna(0)
 
-        result = result.sort_values(['unique_id', 'ds'])
+        result = result.sort_values(["unique_id", "ds"])
         result = result.reset_index(drop=True)
 
         return result
@@ -210,8 +214,8 @@ class OnlineDataAugmentationCallback(pl.Callback):
         df_ = cls.create_mask(df).copy()
 
         arr_list = []
-        for _, uid_df in df_.groupby('unique_id'):
-            arr_list.append(uid_df[['y', 'y_mask']].values.T)
+        for _, uid_df in df_.groupby("unique_id"):
+            arr_list.append(uid_df[["y", "y_mask"]].values.T)
 
         arr = np.stack(arr_list, axis=0)
 

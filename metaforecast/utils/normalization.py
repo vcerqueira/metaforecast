@@ -3,7 +3,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class Normalizations:
-
     @staticmethod
     def min_max_norm_vector(x: pd.Series) -> pd.Series:
         if not isinstance(x, pd.Series):
@@ -17,8 +16,7 @@ class Normalizations:
 
     @classmethod
     def normalize_and_proportion(cls, x):
-        """ Min max normalization followed by proportion
-        """
+        """Min max normalization followed by proportion"""
         nx = cls.min_max_norm_vector(x)
         out = nx / nx.sum()
 

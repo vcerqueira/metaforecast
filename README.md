@@ -30,6 +30,17 @@ You can install metaforecast using pip:
 pip install metaforecast
 ```
 
+### [Optional] Installtion from source
+
+To install metaforecast from source, clone the repository and run the following command:
+
+```bash
+git clone https://github.com/vcerqueira/metaforecast
+pip install -e metaforecast
+cd metaforecast
+pre-commit install
+```
+
 ## Documentation
 
 Check the [documentation](https://metaforecast.readthedocs.io/en/latest/index.html) for 

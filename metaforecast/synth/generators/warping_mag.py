@@ -1,6 +1,6 @@
-from scipy.interpolate import CubicSpline
-import pandas as pd
 import numpy as np
+import pandas as pd
+from scipy.interpolate import CubicSpline
 
 from metaforecast.synth.generators.base import SemiSyntheticTransformer
 
@@ -79,7 +79,7 @@ class MagnitudeWarping(SemiSyntheticTransformer):
             Useful for tracking transformations
 
         """
-        super().__init__(alias='MWARP', rename_uids=rename_uids)
+        super().__init__(alias="MWARP", rename_uids=rename_uids)
 
         self.sigma = sigma
         self.knot = knot
@@ -87,9 +87,9 @@ class MagnitudeWarping(SemiSyntheticTransformer):
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
-        warper = self.get_warper(df_.loc[:, 'y'].values)
+        warper = self.get_warper(df_.loc[:, "y"].values)
 
-        df_.loc[:, 'y'] *= warper
+        df_.loc[:, "y"] *= warper
 
         return df_
 

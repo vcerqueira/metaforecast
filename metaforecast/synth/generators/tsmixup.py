@@ -53,11 +53,13 @@ class TSMixup(SemiSyntheticGenerator):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self,
-                 max_n_uids: int,
-                 min_len: int,
-                 max_len: int,
-                 dirichlet_alpha: float = 1.5):
+    def __init__(
+        self,
+        max_n_uids: int,
+        min_len: int,
+        max_len: int,
+        dirichlet_alpha: float = 1.5,
+    ):
         """Initialize TSMixup transformer with mixing parameters.
 
         Parameters
@@ -84,7 +86,7 @@ class TSMixup(SemiSyntheticGenerator):
             used to generate mixing weights:
 
         """
-        super().__init__(alias='TSMixup')
+        super().__init__(alias="TSMixup")
 
         self.min_len = min_len
         self.max_len = max_len
@@ -125,7 +127,7 @@ class TSMixup(SemiSyntheticGenerator):
         """
         self._assert_datatypes(df)
 
-        unq_uids = df['unique_id'].unique()
+        unq_uids = df["unique_id"].unique()
 
         if n_series < 0:
             n_series = len(unq_uids)
@@ -136,10 +138,10 @@ class TSMixup(SemiSyntheticGenerator):
 
             selected_uids = np.random.choice(unq_uids, n_uids, replace=False).tolist()
 
-            df_uids = df.query('unique_id == @selected_uids')
+            df_uids = df.query("unique_id == @selected_uids")
 
             ts_df = self._create_synthetic_ts(df_uids)
-            ts_df['unique_id'] = f'{self.alias}_{self.counter}'
+            ts_df["unique_id"] = f"{self.alias}_{self.counter}"
             self.counter += 1
 
             dataset.append(ts_df)
@@ -154,9 +156,9 @@ class TSMixup(SemiSyntheticGenerator):
         Should the parts be de-meaned?
 
         """
-        uids = df['unique_id'].unique()
+        uids = df["unique_id"].unique()
 
-        smallest_n = df['unique_id'].value_counts().min()
+        smallest_n = df["unique_id"].value_counts().min()
 
         if smallest_n < self.max_len:
             max_len_ = smallest_n
@@ -170,7 +172,7 @@ class TSMixup(SemiSyntheticGenerator):
 
         w = self.sample_weights_dirichlet(self.dirichlet_alpha, len(uids))
 
-        ds = df.query(f'unique_id=="{uids[0]}"').head(n_obs)['ds'].values
+        ds = df.query(f'unique_id=="{uids[0]}"').head(n_obs)["ds"].values
 
         mixup = []
         for j, k in enumerate(uids):
@@ -178,9 +180,9 @@ class TSMixup(SemiSyntheticGenerator):
 
             start_idx = np.random.randint(0, df_j.shape[0] - n_obs + 1)
 
-            uid_df = df_j.iloc[start_idx: start_idx + n_obs]
+            uid_df = df_j.iloc[start_idx : start_idx + n_obs]
 
-            uid_y = uid_df['y'].reset_index(drop=True)
+            uid_y = uid_df["y"].reset_index(drop=True)
 
             # uid_y /= uid_y.mean()
             uid_y *= w[j]
@@ -189,6 +191,11 @@ class TSMixup(SemiSyntheticGenerator):
 
         y = pd.concat(mixup, axis=1).sum(axis=1).values
 
-        synth_df = pd.DataFrame({'ds': ds, 'y': y, })
+        synth_df = pd.DataFrame(
+            {
+                "ds": ds,
+                "y": y,
+            }
+        )
 
         return synth_df

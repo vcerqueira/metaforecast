@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
+
 from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 
@@ -12,7 +13,8 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
     References
     ----------
-    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time series and spatio-temporal data." 
+    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time
+    series and spatio-temporal data."
     """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
@@ -28,7 +30,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
             Whether to rename the unique identifiers of the synthetic series.
 
         """
-        super().__init__(alias='GaussianDiffusion')
+        super().__init__(alias="GaussianDiffusion")
         self.sigma = sigma
         self.knot = knot
         self.rename_uids = rename_uids
@@ -48,8 +50,8 @@ class GaussianDiffusion(SemiSyntheticGenerator):
             Number of synthetic series to generate.
         kwargs : dict
             Additional keyword arguments.
-            
-        Returns 
+
+        Returns
         -------
         pd.DataFrame
             Generated synthetic series with the same structure:
@@ -62,14 +64,19 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
         dataset = []
         for _ in range(n_series):
-            uid = f'Diffusion_{self.counter}' if self.rename_uids else df['unique_id'].sample(1).values[0]
+            uid = (
+                f"Diffusion_{self.counter}"
+                if self.rename_uids
+                else df["unique_id"].sample(1).values[0]
+            )
             ts = self._create_synthetic_ts(df)
-            ts['unique_id'] = uid
+            ts["unique_id"] = uid
             dataset.append(ts)
             self.counter += 1
 
         return pd.concat(dataset)
-    
+
+    # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         Apply diffusion to a time series dataset.
@@ -83,7 +90,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
             - y: Target values
         kwargs : dict
             Additional keyword arguments.
-        
+
         Returns
         -------
         pd.DataFrame
@@ -94,9 +101,9 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
         """
         df_ = df.copy()
-        df_['y'] = self._apply_diffusion(df_['y'].values)
+        df_["y"] = self._apply_diffusion(df_["y"].values)
         return df_
-    
+
     def _apply_diffusion(self, x: np.ndarray) -> np.ndarray:
         """
         Apply diffusion to a time series.
@@ -115,7 +122,9 @@ class GaussianDiffusion(SemiSyntheticGenerator):
         x = x.reshape(-1, 1)
         orig_steps = np.arange(x.shape[0])
         # Adds 2 extra knots to the diffusion path for boundary conditions: start and end.
-        random_warps = np.random.normal(loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1]))
+        random_warps = np.random.normal(
+            loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1])
+        )
         # Computes evenly spaced knots for the diffusion path.
         warp_steps = np.linspace(0, x.shape[0] - 1.0, num=self.knot + 2)
         time_warp = np.zeros((x.shape[0], x.shape[1]))
@@ -123,23 +132,24 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
         for i in range(x.shape[1]):
             # Finds the new time steps after applying the diffusion path.
-            time_warp[:, i] = np.interp(orig_steps, warp_steps, warp_steps * random_warps[:, i])
+            time_warp[:, i] = np.interp(
+                orig_steps, warp_steps, warp_steps * random_warps[:, i]
+            )
             # Finds the new values after applying the diffusion path.
             x_warped[:, i] = np.interp(time_warp[:, i], orig_steps, x[:, i])
 
         return x_warped.squeeze()
-    
+
 
 class ExampleDiffusionModel(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim):
-        super(ExampleDiffusionModel, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.linear1 = torch.nn.Linear(input_dim, hidden_dim)
         self.relu = torch.nn.ReLU()
         self.linear2 = torch.nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = torch.nn.Linear(hidden_dim, input_dim)
 
-        
     def forward(self, x):
         x = x.view(-1, self.input_dim)
         x = self.linear1(x)
@@ -148,17 +158,20 @@ class ExampleDiffusionModel(torch.nn.Module):
         x = self.relu(x)
         x = self.linear3(x)
         return x
-    
+
+
 class Diffusion(SemiSyntheticGenerator):
     """
 
-    Implements diffusion model that undergoes a two-step process involving the injection of Gaussian noise and 
-    the subsequent removal of that noise. By training the model to predict the noise added during the diffusion process,
-    the models learns to generate synthetic time series samples.
+    Implements diffusion model that undergoes a two-step process involving the injection of
+    Gaussian noise and the subsequent removal of that noise. By training the model to predict
+    the noise added during the diffusion process, the models learns to generate synthetic
+    time series samples.
 
     References
     ----------
-    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time series and spatio-temporal data." 
+    Yang, Yiyuan, et al. (2024) "A survey on diffusion models for time series and
+    spatio-temporal data."
     """
 
     def __init__(self, sigma: float = 0.2, knot=4, rename_uids: bool = True):
@@ -174,13 +187,19 @@ class Diffusion(SemiSyntheticGenerator):
             Whether to rename the unique identifiers of the synthetic series.
 
         """
-        super().__init__(alias='Diffusion')
+        super().__init__(alias="Diffusion")
         self.sigma = sigma
         self.knot = knot
         self.rename_uids = rename_uids
         self.gaussian_diffusion = GaussianDiffusion(sigma, knot, rename_uids)
-  
-    def train(self, df: pd.DataFrame, epochs=1, learning_rate=0.01, diffusion_model=None, **kwargs):
+
+    def train(
+        self,
+        df: pd.DataFrame,
+        epochs=1,
+        learning_rate=0.01,
+        diffusion_model=None,
+    ):
         """Train the diffusion model.
 
         Parameters
@@ -196,19 +215,24 @@ class Diffusion(SemiSyntheticGenerator):
             Learning rate for the optimizer.
         diffusion_model : torch.nn.Module
             Diffusion model to train.
-        kwargs : dict
-            Additional keyword arguments.
         """
         if not diffusion_model:
             diffusion_model = ExampleDiffusionModel(df.shape[0], df.shape[0])
+        # pylint: disable=attribute-defined-outside-init
+        # TODO(Rui/Vítor): Once we better define trainable models, we can remove this pylint.
         self.model = diffusion_model
         for _ in range(epochs):
             synthetic_df = self.gaussian_diffusion.transform(df, 1)
-            real_noise = synthetic_df['y'].values - df['y'].values
+            real_noise = synthetic_df["y"].values - df["y"].values
 
-            predicted_noise = self.model(torch.tensor(synthetic_df['y'].values, dtype=torch.float32).unsqueeze(1))
+            predicted_noise = self.model(
+                torch.tensor(synthetic_df["y"].values, dtype=torch.float32).unsqueeze(1)
+            )
 
-            loss = torch.nn.functional.mse_loss(predicted_noise, torch.tensor(real_noise, dtype=torch.float32).unsqueeze(1))
+            loss = torch.nn.functional.mse_loss(
+                predicted_noise,
+                torch.tensor(real_noise, dtype=torch.float32).unsqueeze(1),
+            )
 
             self.model.zero_grad()
             loss.backward()
@@ -230,7 +254,7 @@ class Diffusion(SemiSyntheticGenerator):
             Number of synthetic series to generate.
         kwargs : dict
             Additional keyword arguments.
-            
+
         Returns
         -------
         pd.DataFrame
@@ -245,14 +269,18 @@ class Diffusion(SemiSyntheticGenerator):
 
         dataset = []
         for _ in range(n_series):
-            uid = f'Diffusion_{self.counter}' if self.rename_uids else df['unique_id'].sample(1).values[0]
+            uid = (
+                f"Diffusion_{self.counter}"
+                if self.rename_uids
+                else df["unique_id"].sample(1).values[0]
+            )
             ts = self._create_synthetic_ts(df)
-            ts['unique_id'] = uid
+            ts["unique_id"] = uid
             dataset.append(ts)
             self.counter += 1
 
         return pd.concat(dataset)
-    
+
     def _assert_model_trained(self):
         """
         Assert that the diffusion model has been trained.
@@ -263,11 +291,13 @@ class Diffusion(SemiSyntheticGenerator):
             If the model has not been trained.
 
         """
-        if not hasattr(self, 'model'):
-            raise ValueError("""Diffusion model must be trained before generating synthetic series.
-            Use the `train` method to train the model.""")
-                             
+        if not hasattr(self, "model"):
+            raise ValueError(
+                """Diffusion model must be trained before generating synthetic series.
+            Use the `train` method to train the model."""
+            )
 
+    # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         Apply diffusion model to a time series.
@@ -285,7 +315,7 @@ class Diffusion(SemiSyntheticGenerator):
         """
 
         # Receives a noisy time series and predicts the noise to be removed.
-        x = df['y'].values
+        x = df["y"].values
         x = x.reshape(-1, 1)
         x = torch.tensor(x, dtype=torch.float32).unsqueeze(1)
         predicted_noise = self.model(x)
@@ -293,5 +323,4 @@ class Diffusion(SemiSyntheticGenerator):
         predicted_noise = predicted_noise.squeeze().detach().numpy()
         x = x.numpy()
         x = x - predicted_noise
-        return pd.DataFrame({'ds': df['ds'], 'y': x})
-    
+        return pd.DataFrame({"ds": df["ds"], "y": x})

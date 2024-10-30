@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class LossFunctions(ABC):
-    """ LossFunctions
+    """LossFunctions
 
     Abstract class for loss functions and respective gradient.
 
@@ -36,7 +36,6 @@ class LossFunctions(ABC):
 
 
 class SquaredLoss(LossFunctions):
-
     @staticmethod
     def loss(fcst: pd.Series, y: float) -> pd.Series:
         return (fcst - y) ** 2
@@ -47,7 +46,6 @@ class SquaredLoss(LossFunctions):
 
 
 class AbsoluteLoss(LossFunctions):
-
     @staticmethod
     def loss(fcst: pd.Series, y: float) -> pd.Series:
         return np.abs(fcst - y)
@@ -58,7 +56,6 @@ class AbsoluteLoss(LossFunctions):
 
 
 class PercentageLoss(LossFunctions):
-
     @staticmethod
     def loss(fcst: pd.Series, y: float) -> pd.Series:
         return (np.abs(fcst - y)) / y
@@ -69,18 +66,16 @@ class PercentageLoss(LossFunctions):
 
 
 class LogLoss(LossFunctions):
-
     @staticmethod
     def loss(fcst: pd.Series, y: float) -> pd.Series:
         return -np.log(fcst)
 
     @staticmethod
     def gradient(fcst: pd.Series, y: float, fcst_c: float) -> pd.Series:
-        return - (fcst / fcst_c)
+        return -(fcst / fcst_c)
 
 
 class PinballLoss(LossFunctions):
-
     @staticmethod
     def loss(fcst: pd.Series, y: float, tau: float = 0.5) -> pd.Series:
         sign_loss = (y < fcst).astype(int)
@@ -89,5 +84,7 @@ class PinballLoss(LossFunctions):
         return loss
 
     @staticmethod
-    def gradient(fcst: pd.Series, y: float, fcst_c: float, tau: float = 0.5) -> pd.Series:
+    def gradient(
+        fcst: pd.Series, y: float, fcst_c: float, tau: float = 0.5
+    ) -> pd.Series:
         return (int(y < fcst_c) - tau) * fcst

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.api import STL
 from arch.bootstrap import MovingBlockBootstrap
+from statsmodels.tsa.api import STL
 
 from metaforecast.synth.generators.base import SemiSyntheticTransformer
 from metaforecast.utils.log import LogTransformation
@@ -14,7 +14,7 @@ class _SeasonalMBB:
 
         xt = mbb.bootstrap(n_samples)
         xt = list(xt)
-        mbb_series = xt[0][1]['x']
+        mbb_series = xt[0][1]["x"]
 
         return mbb_series
 
@@ -53,7 +53,9 @@ class _SeasonalMBB:
             try:
                 synth_res = cls.get_mbb(stl.resid, seas_period)
             except ValueError:
-                synth_res = pd.Series(stl.resid).sample(len(stl.resid), replace=True).values
+                synth_res = (
+                    pd.Series(stl.resid).sample(len(stl.resid), replace=True).values
+                )
 
             synth_ts = stl.trend + stl.seasonal + synth_res
         except ValueError:
@@ -132,16 +134,18 @@ class SeasonalMBB(SemiSyntheticTransformer):
             Whether to apply log transformation before bootstrapping:
 
         """
-        super().__init__(alias='MBB')
+        super().__init__(alias="MBB")
 
         self.log = log
         self.seas_period = seas_period
 
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        ts = df['y'].copy().values
+        ts = df["y"].copy().values
 
-        synth_ts = _SeasonalMBB.create_bootstrap(ts, seas_period=self.seas_period, log=self.log)
+        synth_ts = _SeasonalMBB.create_bootstrap(
+            ts, seas_period=self.seas_period, log=self.log
+        )
 
-        df['y'] = synth_ts
+        df["y"] = synth_ts
 
         return df

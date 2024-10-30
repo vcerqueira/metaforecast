@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import (
+    RBF,
+    ConstantKernel,
     DotProduct,
     ExpSineSquared,
-    RBF,
     RationalQuadratic,
     WhiteKernel,
-    ConstantKernel,
 )
 
 from metaforecast.synth.generators.base import PureSyntheticGenerator
@@ -98,7 +98,7 @@ class KernelSynth(PureSyntheticGenerator):
             etc.
 
         """
-        super().__init__(alias='KS')
+        super().__init__(alias="KS")
 
         self.kernels = KERNEL_BANK
         self.max_kernels = max_kernels
@@ -130,18 +130,16 @@ class KernelSynth(PureSyntheticGenerator):
 
         """
 
-        dt = pd.date_range(start=self.START,
-                           periods=self.n_obs,
-                           freq=self.freq)
+        dt = pd.date_range(start=self.START, periods=self.n_obs, freq=self.freq)
 
         dataset = []
         for _ in range(n_series):
             ts = self._create_synthetic_ts()
 
             ts_df = {
-                'unique_id': f'KS_UID{self.counter}',
-                'ds': dt,
-                'y': ts,
+                "unique_id": f"KS_UID{self.counter}",
+                "ds": dt,
+                "y": ts,
             }
 
             self.counter += 1
@@ -154,7 +152,9 @@ class KernelSynth(PureSyntheticGenerator):
 
     def _create_synthetic_ts(self, **kwargs):
         selected_kernels = np.random.choice(
-            self.kernels, np.random.randint(1, self.max_kernels + 1), replace=True
+            self.kernels,
+            np.random.randint(1, self.max_kernels + 1),
+            replace=True,
         )
         kernel = functools.reduce(self.random_binary_map, selected_kernels)
 
