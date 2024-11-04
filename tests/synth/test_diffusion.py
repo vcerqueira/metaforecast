@@ -6,7 +6,7 @@ from metaforecast.synth.generators.diffusion import Diffusion, GaussianDiffusion
 
 
 @pytest.fixture
-def sample_df():
+def df():
     return pd.DataFrame(
         {
             "unique_id": ["A"] * 10,
@@ -17,21 +17,21 @@ def sample_df():
 
 
 @pytest.fixture(params=[0.1, 0.2, 0.3])
-def sigma_param():
+def sigma(request):
     return request.param
 
 
-def test_gaussian_diffusion(sample_df):
+def test_gaussian_diffusion(df):
     diffusion = GaussianDiffusion(sigma=0.2, knot=4, rename_uids=True)
-    synth_df = diffusion.transform(sample_df, n_series=1)
+    synth_df = diffusion.transform(df, n_series=1)
 
     assert synth_df.shape[0] == 10
     assert synth_df["unique_id"].nunique() == 1
 
 
-def test_diffusion_generator(sigma_param, sample_df):
-    diffusion_model = Diffusion(sigma=sigma_param, knot=4, rename_uids=True)
-    diffusion_model.train(sample_df)
-    synth_df = diffusion_model.transform(sample_df, n_series=1)
+def test_diffusion_generator(sigma, df):
+    diffusion_model = Diffusion(sigma=sigma, knot=4, rename_uids=True)
+    diffusion_model.train(df)
+    synth_df = diffusion_model.transform(df, n_series=1)
     assert synth_df.shape[0] == 10
     assert synth_df["unique_id"].nunique() == 1
