@@ -31,6 +31,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
         """
         super().__init__(alias="GaussianDiffusion")
+
         self.sigma = sigma
         self.knot = knot
         self.rename_uids = rename_uids
@@ -62,7 +63,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
         """
         self._assert_datatypes(df)
 
-        dataset = []
+        ts_list = []
         for _ in range(n_series):
             uid = (
                 f"Diffusion_{self.counter}"
@@ -71,10 +72,12 @@ class GaussianDiffusion(SemiSyntheticGenerator):
             )
             ts = self._create_synthetic_ts(df)
             ts["unique_id"] = uid
-            dataset.append(ts)
+            ts_list.append(ts)
             self.counter += 1
 
-        return pd.concat(dataset)
+        dataset = pd.concat(ts_list)
+
+        return dataset
 
     # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
@@ -194,11 +197,11 @@ class Diffusion(SemiSyntheticGenerator):
         self.gaussian_diffusion = GaussianDiffusion(sigma, knot, rename_uids)
 
     def train(
-        self,
-        df: pd.DataFrame,
-        epochs=1,
-        learning_rate=0.01,
-        diffusion_model=None,
+            self,
+            df: pd.DataFrame,
+            epochs=1,
+            learning_rate=0.01,
+            diffusion_model=None,
     ):
         """Train the diffusion model.
 
