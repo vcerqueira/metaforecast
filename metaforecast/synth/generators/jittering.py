@@ -54,7 +54,7 @@ class Jittering(SemiSyntheticTransformer):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self, sigma: float = 0.1, rename_uids: bool = True):
+    def __init__(self, sigma: float = 0.03, rename_uids: bool = True):
         """Initialize Jittering transformer with noise parameters.
 
         Parameters
@@ -82,8 +82,10 @@ class Jittering(SemiSyntheticTransformer):
 
         sig = self.sigma * df_["y"].std()
 
-        synth_values = df_['y'].values + np.random.normal(loc=0.0, scale=sig, size=df_.shape[0])
+        jitter_ = np.random.normal(loc=0.0, scale=sig, size=df_.shape[0])
 
-        df_.loc[:, 'y'] = synth_values
+        synth_values = df_['y'].values + jitter_
+
+        df_.loc[:, 'y'] = synth_values.astype(df_['y'].dtype)
 
         return df_

@@ -83,6 +83,6 @@ class Scaling(SemiSyntheticTransformer):
 
         synth_values = df_['y'].values * factor
 
-        df_.loc[:, 'y'] = synth_values
+        df_.loc[:, 'y'] = synth_values.astype(df_['y'].dtype)
 
         return df_
