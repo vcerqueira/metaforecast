@@ -89,7 +89,9 @@ class MagnitudeWarping(SemiSyntheticTransformer):
 
         warper = self.get_warper(df_.loc[:, "y"].values)
 
-        df_.loc[:, 'y'] = df_['y'] * warper
+        synth_values = df_['y'].values * warper
+
+        df_.loc[:, 'y'] = synth_values
 
         return df_
 
