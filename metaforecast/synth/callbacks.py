@@ -84,11 +84,14 @@ class OnlineDataAugmentationCallback(pl.Callback):
         super().__init__()
 
         self.generator = copy.deepcopy(generator)
+        self.batch_counter = 0
 
     def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
         """
         Applying data augmentation after getting a batch of time series for training
         """
+        self.batch_counter += 1
+
         temporal = batch["temporal"]
 
         df_ = self.temporal_to_df(temporal)
