@@ -81,6 +81,6 @@ class Scaling(SemiSyntheticTransformer):
 
         factor = np.random.normal(loc=1.0, scale=self.sigma, size=df_.shape[0])
 
-        df_.loc[:, "y"] *= factor
+        df_.loc[:, 'y'] = df_['y'] * factor
 
         return df_

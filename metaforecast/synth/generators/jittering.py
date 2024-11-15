@@ -82,6 +82,6 @@ class Jittering(SemiSyntheticTransformer):
 
         sig = self.sigma * df_["y"].std()
 
-        df_.loc[:, "y"] += np.random.normal(loc=0.0, scale=sig, size=df_.shape[0])
+        df_.loc[:, 'y'] = df_['y'] + np.random.normal(loc=0.0, scale=sig, size=df_.shape[0])
 
         return df_

@@ -83,7 +83,7 @@ class OnlineDataAugmentationCallback(pl.Callback):
         """
         super().__init__()
 
-        self.generator = generator
+        self.generator = copy.deepcopy(generator)
 
     def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
         """
