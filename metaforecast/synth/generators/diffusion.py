@@ -36,7 +36,7 @@ class GaussianDiffusion(SemiSyntheticGenerator):
         self.knot = knot
         self.rename_uids = rename_uids
 
-    def transform(self, df: pd.DataFrame, n_series: int, **kwargs):
+    def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
         """Generate synthetic time series using diffusion.
 
         Parameters
@@ -62,6 +62,9 @@ class GaussianDiffusion(SemiSyntheticGenerator):
 
         """
         self._assert_datatypes(df)
+
+        if n_series < 0:
+            n_series = df["unique_id"].nunique()
 
         ts_list = []
         for _ in range(n_series):

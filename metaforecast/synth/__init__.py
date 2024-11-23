@@ -1,4 +1,4 @@
-from .callbacks import OnlineDataAugmentationCallback
+from .callbacks import OnlineDataAugmentation
 from .generators.dba import DBA
 from .generators.diffusion import Diffusion, GaussianDiffusion
 from .generators.jittering import Jittering
@@ -18,7 +18,7 @@ __all__ = [
     "DBA",
     "KernelSynth",
     "TSMixup",
-    "OnlineDataAugmentationCallback",
+    "OnlineDataAugmentation",
     "GaussianDiffusion",
     "Diffusion",
 ]
