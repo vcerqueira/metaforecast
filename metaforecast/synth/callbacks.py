@@ -1,5 +1,6 @@
 import copy
-from typing import Union
+import random
+from typing import Union, List
 
 import numpy as np
 import pandas as pd
@@ -13,99 +14,11 @@ from metaforecast.synth.generators.base import (
 )
 
 # pylint: disable=invalid-name
-TSGenerator = Union[
-    PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer
-]
+TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
+TSGeneratorList = List[TSGenerator]
 
 
-class OnlineDataAugmentationCallback(pl.Callback):
-    """Perform data augmentation during training
-
-    A callback that applies time series augmentation techniques to each batch
-    during model training. This online approach:
-    - Creates different augmented samples in each batch
-    - Enables dynamic augmentation strategies
-
-    Features
-    --------
-    - Compatible with PyTorch training loops
-
-    References
-    ----------
-    Cerqueira, V., Santos, M., Baghoussi, Y., & Soares, C. (2024). On-the-fly Data
-    Augmentation for Forecasting with Deep Learning. arXiv preprint arXiv:2404.16918.
-
-    Examples
-    --------
-    >>> from datasetsforecast.m3 import M3
-    >>> from neuralforecast import NeuralForecast
-    >>> from neuralforecast.models import NHITS
-    >>>
-    >>> from metaforecast.utils.data import DataUtils
-    >>> from metaforecast.synth import SeasonalMBB
-    >>> from metaforecast.synth.callbacks import OnlineDataAugmentationCallback
-    >>>
-    >>> augmentation_cb = OnlineDataAugmentationCallback(generator=SeasonalMBB(seas_period=12))
-    >>>
-    >>> df, *_ = M3.load('.', group='Monthly')
-    >>>
-    >>> horizon = 24
-    >>>
-    >>> train, test = DataUtils.train_test_split(df, horizon)
-    >>>
-    >>> models = [NHITS(input_size=horizon,
-    >>>                 h=horizon,
-    >>>                 start_padding_enabled=True,
-    >>>                 callbacks=[augmentation_cb])]
-    >>>
-    >>> nf = NeuralForecast(models=models, freq='M')
-    >>>
-    >>> nf.fit(df=train)
-    >>>
-    >>> fcst = nf.predict()
-
-    """
-
-    def __init__(self, generator):
-        """Initialize online data augmentation callback.
-
-        Parameters
-        ----------
-        generator : BaseTimeSeriesGenerator
-            Time series generator object for data augmentation.
-            Must be one of:
-            - PureSyntheticGenerator: Creates fully synthetic series without reference
-            to a source dataset
-            - SemiSyntheticGenerator: Modifies existing series from a source dataset
-            - SemiSyntheticTransformer: Applies transformations to series from
-            a source dataset
-
-        """
-        super().__init__()
-
-        self.generator = copy.deepcopy(generator)
-
-    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
-        """
-        Applying data augmentation after getting a batch of time series for training
-        """
-        temporal = batch["temporal"]
-
-        df_ = self.temporal_to_df(temporal)
-
-        df_synth = self.generator.transform(df_)
-
-        df_aug = pd.concat([df_, df_synth])
-
-        temporal_aug = self.df_to_tensor(df_aug)
-
-        if isinstance(temporal, torch.mps.Tensor):
-            temporal_aug = temporal_aug.to("mps")
-
-        batch["temporal"] = temporal_aug
-
-        return batch
-
+class BaseDataAugmentation:
     @staticmethod
     def temporal_to_df(temporal: torch.Tensor) -> pd.DataFrame:
         """Convert batch of time series tensors to DataFrame format.
@@ -222,3 +135,111 @@ class OnlineDataAugmentationCallback(pl.Callback):
         t = torch.tensor(arr, dtype=torch.float32)
 
         return t
+
+
+class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
+    """Perform data augmentation during training
+
+    A callback that applies time series augmentation techniques to each batch
+    during model training. This online approach:
+    - Creates different augmented samples in each batch
+    - Enables dynamic augmentation strategies
+
+    Features
+    --------
+    - Compatible with PyTorch training loops
+
+    References
+    ----------
+    Cerqueira, V., Santos, M., Baghoussi, Y., & Soares, C. (2024). On-the-fly Data
+    Augmentation for Forecasting with Deep Learning. arXiv preprint arXiv:2404.16918.
+
+    Examples
+    --------
+    >>> from datasetsforecast.m3 import M3
+    >>> from neuralforecast import NeuralForecast
+    >>> from neuralforecast.models import NHITS
+    >>>
+    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.synth import SeasonalMBB
+    >>> from metaforecast.synth.callbacks import OnlineDataAugmentation
+    >>>
+    >>> augmentation_cb = OnlineDataAugmentation(generator=SeasonalMBB(seas_period=12))
+    >>>
+    >>> df, *_ = M3.load('.', group='Monthly')
+    >>>
+    >>> horizon = 24
+    >>>
+    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>>
+    >>> models = [NHITS(input_size=horizon,
+    >>>                 h=horizon,
+    >>>                 start_padding_enabled=True,
+    >>>                 callbacks=[augmentation_cb])]
+    >>>
+    >>> nf = NeuralForecast(models=models, freq='M')
+    >>>
+    >>> nf.fit(df=train)
+    >>>
+    >>> fcst = nf.predict()
+
+    """
+
+    def __init__(self,
+                 generator: Union[TSGenerator, TSGeneratorList],
+                 augment_on_valid: bool = False):
+        """Initialize online data augmentation callback.
+
+        Parameters
+        ----------
+        generator : BaseTimeSeriesGenerator
+            Time series generator object for data augmentation.
+            Must be one of:
+            - PureSyntheticGenerator: Creates fully synthetic series without reference
+            to a source dataset
+            - SemiSyntheticGenerator: Modifies existing series from a source dataset
+            - SemiSyntheticTransformer: Applies transformations to series from
+            a source dataset
+
+        """
+        super().__init__()
+
+        self.generator = copy.deepcopy(generator)
+        self.augment_on_valid = augment_on_valid
+
+    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
+        """
+        Applying data augmentation after getting a batch of time series for training
+        """
+        temporal = batch["temporal"]
+
+        batch["temporal"] = self._augment_temporal(temporal)
+
+        return batch
+
+    def on_validation_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx=0):
+        if not self.augment_on_valid:
+            return batch
+
+        temporal = batch["temporal"]
+
+        batch["temporal"] = self._augment_temporal(temporal)
+
+        return batch
+
+    def _augment_temporal(self, temporal: torch.Tensor) -> torch.Tensor:
+        df_ = self.temporal_to_df(temporal)
+
+        if isinstance(self.generator, list):
+            df_synth = random.choice(self.generator).transform(df_)
+        else:
+            df_synth = self.generator.transform(df_)
+
+        df_aug = pd.concat([df_, df_synth])
+
+        temporal_aug = self.df_to_tensor(df_aug)
+
+        if isinstance(temporal, torch.mps.Tensor):
+            temporal_aug = temporal_aug.to("mps")
+
+        return temporal_aug
