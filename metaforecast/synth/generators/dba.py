@@ -57,9 +57,7 @@ class DBA(SemiSyntheticGenerator):
     >>> fcst = nf.predict(df=train)
     """
 
-    DTW_PARAMS = {"max_iter": 10, "tol": 1e-3}
-
-    def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0):
+    def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0, max_iter: int = 10, tol: float = 1e-3):
         """Initialize DBA generator with sampling parameters.
 
         Parameters
@@ -77,6 +75,8 @@ class DBA(SemiSyntheticGenerator):
 
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
+        self.max_iter = max_iter
+        self.tol = tol
 
     # pylint: disable=unused-variable
     def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
@@ -121,7 +121,7 @@ class DBA(SemiSyntheticGenerator):
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
 
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=False).tolist()
+            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()
 
             df_uids = df.query("unique_id == @selected_uids")
 
@@ -150,7 +150,7 @@ class DBA(SemiSyntheticGenerator):
 
         w = self.sample_weights_dirichlet(1, len(y_list))
 
-        synth_y = dtw(X=y_list, weights=w, **self.DTW_PARAMS)
+        synth_y = dtw(X=y_list, weights=w, max_iter=self.max_iter, tol=self.tol)
         synth_y = synth_y.flatten()
 
         synth_df = pd.DataFrame({"ds": ds[: len(synth_y)], "y": synth_y})

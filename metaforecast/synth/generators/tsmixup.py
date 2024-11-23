@@ -86,7 +86,7 @@ class TSMixup(SemiSyntheticGenerator):
             used to generate mixing weights:
 
         """
-        super().__init__(alias="TSMixup")
+        super().__init__(alias='TSMixup')
 
         self.min_len = min_len
         self.max_len = max_len
@@ -127,7 +127,7 @@ class TSMixup(SemiSyntheticGenerator):
         """
         self._assert_datatypes(df)
 
-        unq_uids = df["unique_id"].unique()
+        unq_uids = df['unique_id'].unique()
 
         if n_series < 0:
             n_series = len(unq_uids)
@@ -136,12 +136,12 @@ class TSMixup(SemiSyntheticGenerator):
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
 
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=False).tolist()
+            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()
 
-            df_uids = df.query("unique_id == @selected_uids")
+            df_uids = df.query('unique_id == @selected_uids')
 
             ts_df = self._create_synthetic_ts(df_uids)
-            ts_df["unique_id"] = f"{self.alias}_{self.counter}"
+            ts_df['unique_id'] = f"{self.alias}_{self.counter}"
             self.counter += 1
 
             dataset.append(ts_df)
@@ -152,27 +152,24 @@ class TSMixup(SemiSyntheticGenerator):
 
     # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        """
-        Should the parts be de-meaned?
 
-        """
-        uids = df["unique_id"].unique()
+        uids = df['unique_id'].unique()
 
-        smallest_n = df["unique_id"].value_counts().min()
+        smallest_n = df['unique_id'].value_counts().min()
 
-        if smallest_n < self.max_len:
-            max_len_ = smallest_n
-        else:
-            max_len_ = self.max_len
+        max_len_ = smallest_n if smallest_n < self.max_len else self.max_len
+        min_len_ = smallest_n if smallest_n < self.min_len else self.min_len
 
         if self.min_len == self.max_len:
-            n_obs = self.min_len
+            n_obs = min_len_
+        elif max_len_ < min_len_:
+            n_obs = max_len_
         else:
-            n_obs = np.random.randint(self.min_len, max_len_ + 1)
+            n_obs = np.random.randint(min_len_, max_len_ + 1)
 
         w = self.sample_weights_dirichlet(self.dirichlet_alpha, len(uids))
 
-        ds = df.query(f'unique_id=="{uids[0]}"').head(n_obs)["ds"].values
+        ds = df.query(f'unique_id=="{uids[0]}"').head(n_obs)['ds'].values
 
         mixup = []
         for j, k in enumerate(uids):
@@ -182,9 +179,8 @@ class TSMixup(SemiSyntheticGenerator):
 
             uid_df = df_j.iloc[start_idx : start_idx + n_obs]
 
-            uid_y = uid_df["y"].reset_index(drop=True)
+            uid_y = uid_df['y'].reset_index(drop=True)
 
-            # uid_y /= uid_y.mean()
             uid_y *= w[j]
 
             mixup.append(uid_y)
@@ -193,8 +189,8 @@ class TSMixup(SemiSyntheticGenerator):
 
         synth_df = pd.DataFrame(
             {
-                "ds": ds,
-                "y": y,
+                'ds': ds,
+                'y': y,
             }
         )
 

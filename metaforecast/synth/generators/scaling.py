@@ -72,7 +72,7 @@ class Scaling(SemiSyntheticTransformer):
             Useful for tracking transformations
 
         """
-        super().__init__(alias="SCALE", rename_uids=rename_uids)
+        super().__init__(alias='SCALE', rename_uids=rename_uids)
 
         self.sigma = sigma
 
