@@ -1,8 +1,13 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 from tslearn.barycenters import dtw_barycenter_averaging_subgradient as dtw
+from tslearn.barycenters.dba import ConvergenceWarning
 
 from metaforecast.synth.generators.base import SemiSyntheticGenerator
+
+warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 
 class DBA(SemiSyntheticGenerator):

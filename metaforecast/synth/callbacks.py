@@ -239,7 +239,7 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
 
         temporal_aug = self.df_to_tensor(df_aug)
 
-        if isinstance(temporal, torch.mps.Tensor):
-            temporal_aug = temporal_aug.to("mps")
+        if temporal.device.type == 'mps':
+            temporal_aug = temporal_aug.to('mps')
 
         return temporal_aug
