@@ -30,7 +30,7 @@ You can install metaforecast using pip:
 pip install metaforecast
 ```
 
-### [Optional] Installtion from source
+### [Optional] Installation from source
 
 To install metaforecast from source, clone the repository and run the following command:
 
