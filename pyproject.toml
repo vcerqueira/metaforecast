@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 
 name = "metaforecast"
-version = "0.1.7"
+version = "0.1.8"
 authors = [
     { name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
 ]
@@ -33,7 +33,6 @@ dependencies = [
     "statsforecast==1.7.5",
     "mlforecast==0.13.4",
     "pytorch_lightning==2.3.3",
-    "pytest==8.3.3",
     "pre-commit==4.0.1",
 ]
 
