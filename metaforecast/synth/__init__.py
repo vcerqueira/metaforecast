@@ -1,6 +1,5 @@
 from .callbacks import OnlineDataAugmentation
 from .generators.dba import DBA
-from .generators.diffusion import Diffusion, GaussianDiffusion
 from .generators.jittering import Jittering
 from .generators.kernelsynth import KernelSynth
 from .generators.mbb import SeasonalMBB
@@ -19,6 +18,4 @@ __all__ = [
     "KernelSynth",
     "TSMixup",
     "OnlineDataAugmentation",
-    "GaussianDiffusion",
-    "Diffusion",
 ]

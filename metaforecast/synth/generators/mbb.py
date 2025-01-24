@@ -70,6 +70,8 @@ class _SeasonalMBB:
 class SeasonalMBB(SemiSyntheticTransformer):
     """Transform time series using seasonal moving blocks bootstrap.
 
+    todo add seed
+
     Creates synthetic variations of time series by resampling blocks
     of observations while preserving seasonal patterns and temporal
     dependencies. Method described in Bandara et al. shown to
