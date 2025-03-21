@@ -148,6 +148,7 @@ class MLewa(Mixture):
             loss_experts = self._calc_loss(
                 fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i]
             )
+
             loss_mixture = self._calc_loss(
                 fcst=self.ensemble_fcst[i],
                 y=y[i],

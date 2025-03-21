@@ -108,7 +108,7 @@ class BaseDataAugmentation:
 
     @classmethod
     def df_to_tensor(cls, df: pd.DataFrame) -> torch.Tensor:
-        """Convert DataFrame of time series data to PyTorch tensor.
+        """ Convert DataFrame of time series data to PyTorch tensor.
 
         Transforms a time series DataFrame following neuralforecast's format
         into a PyTorch tensor for model training. Handles masked values and
