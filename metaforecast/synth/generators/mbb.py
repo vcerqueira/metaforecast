@@ -159,13 +159,13 @@ class SeasonalMBB(SemiSyntheticTransformer):
 
             mbb_chunks = []
             for df_chk in df_chunks:
-                ts_ = df_chk['y'].copy().values
+                ts_ = df_chk[self.target_col].copy().values
 
                 synth_tsc = _SeasonalMBB.create_bootstrap(
                     ts_, self.seas_period, log=self.log
                 )
 
-                df_chk['y'] = synth_tsc
+                df_chk[self.target_col] = synth_tsc
 
                 mbb_chunks.append(df_chk)
 
@@ -174,13 +174,13 @@ class SeasonalMBB(SemiSyntheticTransformer):
 
             df = mbb_df.copy()
         else:
-            ts = df['y'].copy().values
+            ts = df[self.target_col].copy().values
 
             synth_ts = _SeasonalMBB.create_bootstrap(
                 ts, seas_period=self.seas_period, log=self.log
             )
 
-            df["y"] = synth_ts
+            df[self.target_col] = synth_ts
 
         return df
 

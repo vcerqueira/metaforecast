@@ -87,11 +87,11 @@ class MagnitudeWarping(SemiSyntheticTransformer):
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
-        warper = self.get_warper(df_.loc[:, "y"].values)
+        warper = self.get_warper(df_.loc[:, self.target_col].values)
 
-        synth_values = df_['y'].values * warper
+        synth_values = df_[self.target_col].values * warper
 
-        df_.loc[:, 'y'] = synth_values.astype(df_['y'].dtype)
+        df_.loc[:, self.target_col] = synth_values.astype(df_[self.target_col].dtype)
 
         return df_
 

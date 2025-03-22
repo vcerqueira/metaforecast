@@ -127,7 +127,7 @@ class TSMixup(SemiSyntheticGenerator):
         """
         self._assert_datatypes(df)
 
-        unq_uids = df['unique_id'].unique()
+        unq_uids = df[self.id_col].unique()
 
         if n_series < 0:
             n_series = len(unq_uids)
@@ -141,7 +141,7 @@ class TSMixup(SemiSyntheticGenerator):
             df_uids = df.query('unique_id == @selected_uids')
 
             ts_df = self._create_synthetic_ts(df_uids)
-            ts_df['unique_id'] = f"{self.alias}_{self.counter}"
+            ts_df[self.id_col] = f"{self.alias}_{self.counter}"
             self.counter += 1
 
             dataset.append(ts_df)
@@ -153,9 +153,9 @@ class TSMixup(SemiSyntheticGenerator):
     # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
-        uids = df['unique_id'].unique()
+        uids = df[self.id_col].unique()
 
-        smallest_n = df['unique_id'].value_counts().min()
+        smallest_n = df[self.id_col].value_counts().min()
 
         max_len_ = smallest_n if smallest_n < self.max_len else self.max_len
         min_len_ = smallest_n if smallest_n < self.min_len else self.min_len
@@ -169,17 +169,17 @@ class TSMixup(SemiSyntheticGenerator):
 
         w = self.sample_weights_dirichlet(self.dirichlet_alpha, len(uids))
 
-        ds = df.query(f'unique_id=="{uids[0]}"').head(n_obs)['ds'].values
+        ds = df.query(f'{self.id_col}=="{uids[0]}"').head(n_obs)[self.time_col].values
 
         mixup = []
         for j, k in enumerate(uids):
-            df_j = df.query(f'unique_id=="{k}"')
+            df_j = df.query(f'{self.id_col}=="{k}"')
 
             start_idx = np.random.randint(0, df_j.shape[0] - n_obs + 1)
 
             uid_df = df_j.iloc[start_idx : start_idx + n_obs]
 
-            uid_y = uid_df['y'].reset_index(drop=True)
+            uid_y = uid_df[self.target_col].reset_index(drop=True)
 
             uid_y *= w[j]
 
@@ -189,8 +189,8 @@ class TSMixup(SemiSyntheticGenerator):
 
         synth_df = pd.DataFrame(
             {
-                'ds': ds,
-                'y': y,
+                self.time_col: ds,
+                self.target_col: y,
             }
         )
 

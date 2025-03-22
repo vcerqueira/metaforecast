@@ -137,9 +137,9 @@ class KernelSynth(PureSyntheticGenerator):
             ts = self._create_synthetic_ts()
 
             ts_df = {
-                "unique_id": f"KS_UID{self.counter}",
-                "ds": dt,
-                "y": ts,
+                self.id_col: f"KS_UID{self.counter}",
+                self.time_col: dt,
+                self.target_col: ts,
             }
 
             self.counter += 1

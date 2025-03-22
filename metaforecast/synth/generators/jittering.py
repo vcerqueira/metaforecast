@@ -80,12 +80,12 @@ class Jittering(SemiSyntheticTransformer):
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         df_ = df.copy()
 
-        sig = self.sigma * df_["y"].std()
+        sig = self.sigma * df_[self.target_col].std()
 
         jitter_ = np.random.normal(loc=0.0, scale=sig, size=df_.shape[0])
 
-        synth_values = df_['y'].values + jitter_
+        synth_values = df_[self.target_col].values + jitter_
 
-        df_.loc[:, 'y'] = synth_values.astype(df_['y'].dtype)
+        df_.loc[:, self.target_col] = synth_values.astype(df_[self.target_col].dtype)
 
         return df_

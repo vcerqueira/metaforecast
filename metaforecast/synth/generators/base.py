@@ -33,13 +33,15 @@ class BaseTimeSeriesGenerator(ABC):
 
     """
 
-    REQUIRED_COLUMNS = ["unique_id", "ds", "y"]
     START: pd.Timestamp
     END: pd.Timestamp
     REQUIRES_N: bool
     REQUIRES_DF: bool
 
-    def __init__(self, alias: str):
+    def __init__(self, alias: str,
+                 id_col: str = 'unique_id',
+                 time_col: str = 'ds',
+                 target_col: str = 'y'):
         """Initialize semisynthetic generator with method identifier.
 
         Parameters
@@ -47,6 +49,16 @@ class BaseTimeSeriesGenerator(ABC):
         alias : str
             Name of the generation method being used.
             Used to track and identify different generation approaches.
+
+        id_col : str, default='unique_id'
+            Column name for the series identifier.
+
+        time_col : str, default='ds'
+            Column name for the timestamp.
+
+        target_col : str, default='y'
+            Column name for the target values.
+
 
         Attributes
         ----------
@@ -60,6 +72,10 @@ class BaseTimeSeriesGenerator(ABC):
 
         """
         self.alias = alias
+        self.id_col = id_col
+        self.time_col = time_col
+        self.target_col = target_col
+
         self.counter = 0
 
     @abstractmethod
@@ -69,6 +85,22 @@ class BaseTimeSeriesGenerator(ABC):
     @abstractmethod
     def _create_synthetic_ts(self, **kwargs):
         raise NotImplementedError
+
+    def _assert_datatypes(self, df: pd.DataFrame):
+        """
+        :param df: time series dataset with a nixtla-based structure
+        """
+
+        assert (
+                df[self.id_col].dtype == "object"
+        ), f"Column {self.id_col} must be of type string"
+
+        # assert pd.api.types.is_datetime64_any_dtype(df["ds"]),
+        # "Column 'ds' must be of type pd.Timestamp"
+
+        # Assert y is numeric
+        assert np.issubdtype(df[self.target_col].dtype, np.number), \
+            f"Column {self.target_col} must be numeric"
 
     @staticmethod
     def sample_weights_dirichlet(alpha, k):
@@ -100,27 +132,6 @@ class BaseTimeSeriesGenerator(ABC):
 
         return weights
 
-    @classmethod
-    def _assert_datatypes(cls, df: pd.DataFrame):
-        """
-        :param df: time series dataset with a nixtla-based structure
-        """
-        # Check if required columns exist
-        for col in cls.REQUIRED_COLUMNS:
-            assert col in df.columns, f"Column '{col}' is missing from the DataFrame"
-
-        # Assert unique_id is of type string
-        assert (
-            df["unique_id"].dtype == "object"
-        ), "Column 'unique_id' must be of type string"
-
-        # Assert ds is of type pd.Timestamp
-        # assert pd.api.types.is_datetime64_any_dtype(df["ds"]),
-        # "Column 'ds' must be of type pd.Timestamp"
-
-        # Assert y is numeric
-        assert np.issubdtype(df["y"].dtype, np.number), "Column 'y' must be numeric"
-
 
 class PureSyntheticGenerator(BaseTimeSeriesGenerator):
     """Generate synthetic time series from scratch without source data.
@@ -135,7 +146,7 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
     """
 
     START = pd.Timestamp("2000-01-01 00:00:00")
-    END = pd.Timestamp("2024-01-01 00:00:00")
+    END = pd.Timestamp("2025-01-01 00:00:00")
     REQUIRES_N = True
     REQUIRES_DF = False
 
@@ -191,7 +202,12 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
     REQUIRES_N = False
     REQUIRES_DF = True
 
-    def __init__(self, alias: str, rename_uids: bool = True):
+    def __init__(self,
+                 alias: str,
+                 rename_uids: bool = True,
+                 id_col: str = 'unique_id',
+                 time_col: str = 'ds',
+                 target_col: str = 'y'):
         """Initialize transformer with method identifier and naming preferences.
 
         Parameters
@@ -215,7 +231,10 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
             Automatically increments with each transformation.
 
         """
-        super().__init__(alias=alias)
+        super().__init__(alias=alias,
+                         id_col=id_col,
+                         time_col=time_col,
+                         target_col=target_col)
 
         self.rename_uids = rename_uids
 
@@ -249,10 +268,10 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
         self._assert_datatypes(df)
 
         df_t_list = []
-        for _, uid_df in df.groupby("unique_id"):
+        for _, uid_df in df.groupby(self.id_col):
             ts_df = self._create_synthetic_ts(uid_df)
             if self.rename_uids:
-                ts_df["unique_id"] = ts_df["unique_id"].apply(
+                ts_df[self.id_col] = ts_df[self.id_col].apply(
                     lambda x: f"{x}_{self.alias}{self.counter}"
                 )
 

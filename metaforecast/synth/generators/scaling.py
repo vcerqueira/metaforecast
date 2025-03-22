@@ -81,8 +81,8 @@ class Scaling(SemiSyntheticTransformer):
 
         factor = np.random.normal(loc=1.0, scale=self.sigma, size=df_.shape[0])
 
-        synth_values = df_['y'].values * factor
+        synth_values = df_[self.target_col].values * factor
 
-        df_.loc[:, 'y'] = synth_values.astype(df_['y'].dtype)
+        df_.loc[:, self.target_col] = synth_values.astype(df_['y'].dtype)
 
         return df_

@@ -76,7 +76,7 @@ class DBA(SemiSyntheticGenerator):
             generating combination weights:
 
         """
-        super().__init__(alias="DBA")
+        super().__init__(alias='DBA')
 
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
@@ -117,7 +117,7 @@ class DBA(SemiSyntheticGenerator):
 
         self._assert_datatypes(df)
 
-        unq_uids = df["unique_id"].unique()
+        unq_uids = df[self.id_col].unique()
 
         if n_series < 0:
             n_series = len(unq_uids)
@@ -131,7 +131,7 @@ class DBA(SemiSyntheticGenerator):
             df_uids = df.query("unique_id == @selected_uids")
 
             ts_df = self._create_synthetic_ts(df_uids)
-            ts_df["unique_id"] = f"{self.alias}_{self.counter}"
+            ts_df[self.id_col] = f"{self.alias}_{self.counter}"
             self.counter += 1
 
             dataset.append(ts_df)
@@ -148,16 +148,16 @@ class DBA(SemiSyntheticGenerator):
         :param df: time series dataset with a sample of unique_id's
         :return: pd.DataFrame with synthetic time series
         """
-        y_list = [y["y"].values for _, y in df.groupby("unique_id")]
-        uid_size = df["unique_id"].value_counts()
+        y_list = [y[self.target_col].values for _, y in df.groupby(self.id_col)]
+        uid_size = df[self.id_col].value_counts()
 
-        ds = df.query(f'unique_id=="{uid_size.index[0]}"')["ds"].values
+        ds = df.query(f'{self.id_col}=="{uid_size.index[0]}"')[self.time_col].values
 
         w = self.sample_weights_dirichlet(1, len(y_list))
 
         synth_y = dtw(X=y_list, weights=w, max_iter=self.max_iter, tol=self.tol)
         synth_y = synth_y.flatten()
 
-        synth_df = pd.DataFrame({"ds": ds[: len(synth_y)], "y": synth_y})
+        synth_df = pd.DataFrame({self.time_col: ds[: len(synth_y)], self.target_col: synth_y})
 
         return synth_df
