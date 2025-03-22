@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 
 name = "metaforecast"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
     { name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
 ]
