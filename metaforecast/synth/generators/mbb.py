@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from arch.bootstrap import MovingBlockBootstrap
@@ -121,7 +123,10 @@ class SeasonalMBB(SemiSyntheticTransformer):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self, seas_period: int, log: bool = True):
+    def __init__(self,
+                 seas_period: int,
+                 log: bool = True,
+                 max_samples_in_stl: Optional[int] = None):
         """Initialize seasonal moving blocks bootstrap transformer.
 
         Parameters
@@ -135,19 +140,64 @@ class SeasonalMBB(SemiSyntheticTransformer):
         log : bool, default=True
             Whether to apply log transformation before bootstrapping:
 
+        max_samples_in_stl: int, Optional, default=None
+            Whether to break down the MBB process into different chunks with size max_samples_in_stl.
+            This can be useful for large time series where STL apparently struggles
+            If None (default behaviour), chunking is not done.
+
         """
         super().__init__(alias='MBB')
 
         self.log = log
         self.seas_period = seas_period
+        self.max_samples_in_stl = max_samples_in_stl
 
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        ts = df['y'].copy().values
 
-        synth_ts = _SeasonalMBB.create_bootstrap(
-            ts, seas_period=self.seas_period, log=self.log
-        )
+        if self.max_samples_in_stl is not None:
+            df_chunks = self._chunk_dataframe(df, self.max_samples_in_stl)
 
-        df["y"] = synth_ts
+            mbb_chunks = []
+            for df_chk in df_chunks:
+                ts_ = df_chk['y'].copy().values
+
+                synth_tsc = _SeasonalMBB.create_bootstrap(
+                    ts_, self.seas_period, log=self.log
+                )
+
+                df_chk['y'] = synth_tsc
+
+                mbb_chunks.append(df_chk)
+
+            mbb_df = pd.concat(mbb_chunks)
+            mbb_df.index = df.index
+
+            df = mbb_df.copy()
+        else:
+            ts = df['y'].copy().values
+
+            synth_ts = _SeasonalMBB.create_bootstrap(
+                ts, seas_period=self.seas_period, log=self.log
+            )
+
+            df["y"] = synth_ts
 
         return df
+
+    @staticmethod
+    def _chunk_dataframe(df: pd.DataFrame, chunk_size: int):
+        total_rows = df.shape[0]
+
+        if total_rows <= chunk_size:
+            return [df]
+
+        n_full_chunks = total_rows // chunk_size
+        last_chunk_size = total_rows % chunk_size
+
+        if last_chunk_size > 0:
+            chunks = [df.iloc[i * chunk_size:(i + 1) * chunk_size] for i in range(n_full_chunks - 1)]
+            chunks.append(df.iloc[(n_full_chunks - 1) * chunk_size:])
+        else:
+            chunks = [df.iloc[i * chunk_size:(i + 1) * chunk_size] for i in range(n_full_chunks)]
+
+        return chunks
