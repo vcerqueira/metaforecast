@@ -3,36 +3,43 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 
+# Generator type constants
+PURE_SYNTHETIC = "PURE_SYNTHETIC"
+SEMI_SYNTHETIC = "SEMI_SYNTHETIC"
+TRANSFORMER = "TRANSFORMER"
+
 
 class BaseTimeSeriesGenerator(ABC):
     """Abstract base class for synthetic time series generators.
 
     Attributes
     ----------
-    REQUIRED_COLUMNS : List[str]
-        Columns that must be present in input/output datasets:
-        - unique_id: Series identifier
-        - ds: Timestamp
-        - y: Target values
+    GENERATOR_TYPE : str
+        Category of generator:
 
-    START : pd.Timestamp
-        Reference start time for synthetic series
-
-    END : pd.Timestamp
-        Reference end time for synthetic series
+        - ``"PURE_SYNTHETIC"`` — creates series from scratch without source data
+        - ``"SEMI_SYNTHETIC"`` — generates new series referencing a source dataset
+        - ``"TRANSFORMER"`` — transforms existing series in place
 
     REQUIRES_N : bool
         Whether generator needs explicit number of series:
-        - True: Pure synthetic generation
-        - False: Modification of existing series
+        - True: Pure synthetic or semi-synthetic generation
+        - False: Transformation of existing series
 
     REQUIRES_DF : bool
         Whether generator needs source dataset:
-        - True: Semi-synthetic/transformation approaches
+        - True: Semi-synthetic or transformer approaches
         - False: Pure synthetic generation
+
+    START : pd.Timestamp
+        Reference start time for synthetic series (pure generators only).
+
+    END : pd.Timestamp
+        Reference end time for synthetic series (pure generators only).
 
     """
 
+    GENERATOR_TYPE: str
     START: pd.Timestamp
     END: pd.Timestamp
     REQUIRES_N: bool
@@ -143,6 +150,7 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
 
     """
 
+    GENERATOR_TYPE = PURE_SYNTHETIC
     START = pd.Timestamp("2000-01-01 00:00:00")
     END = pd.Timestamp("2025-01-01 00:00:00")
     REQUIRES_N = True
@@ -166,6 +174,7 @@ class SemiSyntheticGenerator(BaseTimeSeriesGenerator):
 
     """
 
+    GENERATOR_TYPE = SEMI_SYNTHETIC
     REQUIRES_N = True
     REQUIRES_DF = True
 
@@ -197,6 +206,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
     """
 
+    GENERATOR_TYPE = TRANSFORMER
     REQUIRES_N = False
     REQUIRES_DF = True
 

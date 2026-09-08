@@ -11,6 +11,10 @@ into three categories:
 **Pure synthetic generation** — generate time series from scratch without any source data:
 
 - :class:`~metaforecast.synth.KernelSynth`: Kernel-based pattern combination [1]
+- :class:`~metaforecast.synth.SeasonalTrend`: Fourier seasonality + trend + AR residual [5]
+- :class:`~metaforecast.synth.NonstationaryRegime`: Markov-switching regime changes [5]
+- :class:`~metaforecast.synth.LongMemory`: ARFIMA / fractional Brownian motion [5]
+- :class:`~metaforecast.synth.VolatilityEvents`: GARCH + Hawkes self-exciting spikes [5]
 
 **Semi-synthetic generation** — generate new series with reference to a source dataset:
 
@@ -24,6 +28,9 @@ into three categories:
 - :class:`~metaforecast.synth.MagnitudeWarping`: Smooth magnitude variations [3]
 - :class:`~metaforecast.synth.TimeWarping`: Non-linear temporal distortions [3]
 - :class:`~metaforecast.synth.SeasonalMBB`: Seasonal Moving Block Bootstrap
+- :class:`~metaforecast.synth.AmplitudeModulation`: Piecewise-linear trend modulation [6]
+- :class:`~metaforecast.synth.CensorAugmentation`: Quantile-based signal clipping [6]
+- :class:`~metaforecast.synth.SpikeInjection`: Structured periodic spike injection [6]
 
 **Online augmentation** — augment data during model training:
 
@@ -44,6 +51,13 @@ disease monitoring." ACM International Conference on Multimodal Interaction.
 
 [4] Cerqueira, V., Santos, M., Baghoussi, Y., & Soares, C. (2024). "On-the-fly Data
 Augmentation for Forecasting with Deep Learning." arXiv preprint arXiv:2404.16918.
+
+[5] Cazaux, H., Ásgeirsson, E. I., & Stefánsson, H. (2026). "Does Synthetic Data Help?
+Empirical Evidence from Deep Learning Time Series Forecasters." arXiv preprint arXiv:2605.06032.
+
+[6] Auer, A., Bock, S., Podest, P., Klambauer, G., Klotz, D., & Hochreiter, S. (2025).
+"TiRex: Zero-Shot Forecasting Across Long and Short Horizons with Enhanced In-Context
+Learning." arXiv preprint arXiv:2505.23719.
 
 
 Base Classes
@@ -75,6 +89,26 @@ Pure Synthetic Generators
 -------------------------
 
 .. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.seasonal_trend.SeasonalTrend
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.nonstationary_regime.NonstationaryRegime
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.long_memory.LongMemory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.volatility_events.VolatilityEvents
    :members:
    :undoc-members:
    :show-inheritance:
@@ -118,6 +152,21 @@ Transformers
    :show-inheritance:
 
 .. autoclass:: metaforecast.synth.generators.mbb.SeasonalMBB
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.amplitude_modulation.AmplitudeModulation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.censor.CensorAugmentation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.spike_injection.SpikeInjection
    :members:
    :undoc-members:
    :show-inheritance:
