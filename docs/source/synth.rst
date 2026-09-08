@@ -31,6 +31,8 @@ into three categories:
 - :class:`~metaforecast.synth.AmplitudeModulation`: Piecewise-linear trend modulation [6]
 - :class:`~metaforecast.synth.CensorAugmentation`: Quantile-based signal clipping [6]
 - :class:`~metaforecast.synth.SpikeInjection`: Structured periodic spike injection [6]
+- :class:`~metaforecast.synth.DominantShuffle`: Shuffle dominant frequency components [7]
+- :class:`~metaforecast.synth.HomomorphicAugmentation`: Homomorphic-controlled spectral augmentation [8]
 
 **Online augmentation** — augment data during model training:
 
@@ -58,6 +60,12 @@ Empirical Evidence from Deep Learning Time Series Forecasters." arXiv preprint a
 [6] Auer, A., Bock, S., Podest, P., Klambauer, G., Klotz, D., & Hochreiter, S. (2025).
 "TiRex: Zero-Shot Forecasting Across Long and Short Horizons with Enhanced In-Context
 Learning." arXiv preprint arXiv:2505.23719.
+
+[7] Zhao, K., He, Z., Hung, A., & Zeng, D. (2024). "Dominant Shuffle: A Simple Yet
+Powerful Data Augmentation for Time-series Prediction." arXiv preprint arXiv:2405.16456.
+
+[8] Li, H., Cheng, L., Liu, X., Liu, Z., Long, L., Zhang, Y., & Dai, F. (2026).
+"Homomorphic-Controlled Augmentation for Time Series Forecasting." ICASSP 2026.
 
 
 Base Classes
@@ -167,6 +175,16 @@ Transformers
    :show-inheritance:
 
 .. autoclass:: metaforecast.synth.generators.spike_injection.SpikeInjection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.dominant_shuffle.DominantShuffle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.homomorphic.HomomorphicAugmentation
    :members:
    :undoc-members:
    :show-inheritance:
