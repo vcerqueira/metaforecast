@@ -29,7 +29,7 @@ dependencies = [
     "lightgbm==4.6.0",
     "tslearn==0.9.0",
     "utilsforecast==0.2.16",
-    "neuralforecast==3.2.1",
+    "neuralforecast==3.1.2",
     "statsforecast==2.1.1",
     "mlforecast==1.0.2",
     "pytorch_lightning==2.5.6",
