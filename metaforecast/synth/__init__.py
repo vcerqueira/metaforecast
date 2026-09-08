@@ -1,6 +1,6 @@
 from .callbacks import OnlineDataAugmentation
-from .generators.base import PURE_SYNTHETIC, SEMI_SYNTHETIC, TRANSFORMER
 from .generators.amplitude_modulation import AmplitudeModulation
+from .generators.base import PURE_SYNTHETIC, SEMI_SYNTHETIC, TRANSFORMER
 from .generators.censor import CensorAugmentation
 from .generators.dba import DBA
 from .generators.jittering import Jittering
@@ -17,10 +17,10 @@ from .generators.warping_mag import MagnitudeWarping
 from .generators.warping_time import TimeWarping
 
 __all__ = [
+    "DBA",
     "PURE_SYNTHETIC",
     "SEMI_SYNTHETIC",
     "TRANSFORMER",
-    "DBA",
     "AmplitudeModulation",
     "CensorAugmentation",
     "Jittering",

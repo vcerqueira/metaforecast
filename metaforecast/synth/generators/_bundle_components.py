@@ -152,7 +152,6 @@ def sample_difficulty(rng: np.random.Generator, mode: str = "default") -> float:
     return trunc_normal(rng, 0.80, 0.08, 0.65, 1.00)
 
 
-
 def gen_fourier(
     rng: np.random.Generator,
     T: int,

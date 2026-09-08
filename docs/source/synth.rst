@@ -66,7 +66,7 @@ Base Classes
 .. autoclass:: metaforecast.synth.generators.base.BaseTimeSeriesGenerator
    :members:
    :show-inheritance:
-   :exclude-members: START, END, REQUIRES_N, REQUIRES_DF
+   :exclude-members: START, END, REQUIRES_N, REQUIRES_DF, GENERATOR_TYPE
 
 .. autoclass:: metaforecast.synth.generators.base.PureSyntheticGenerator
    :members:
