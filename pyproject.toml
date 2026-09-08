@@ -17,7 +17,7 @@ keywords = [
 ]
 description = "Meta-learning and Data-centric Forecasting"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -33,7 +33,22 @@ dependencies = [
     "statsforecast==1.7.5",
     "mlforecast==0.13.4",
     "pytorch_lightning==2.3.3",
-    "pre-commit==4.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pre-commit",
+    "bump2version",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-copybutton",
+    "nbsphinx",
+    "nbsphinx-link",
+    "IPython",
 ]
 
 [project.urls]
@@ -43,17 +58,66 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["metaforecast"]
 
-[tool.pylint.design]
-max-attributes = 15
-max-args = 15
-max-locals = 20
+# ---------- Ruff (replaces isort + black + pylint) ----------
 
-[tool.pylint.messages_control]
-disable = [
-    "missing-module-docstring",
-    "missing-class-docstring",
-    "missing-function-docstring",
-    "too-few-public-methods",
-    "R0801",
-    "R0917"
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "docs/build",
+    "dist",
+    "*.egg-info",
 ]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",   # line length (handled by formatter)
+    "B905",   # zip without strict= (py3.9 compat)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["metaforecast"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# ---------- pytest ----------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+]
+
+# ---------- bump2version ----------
+
+[tool.bumpversion]
+current_version = "0.2.2"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "metaforecast/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'

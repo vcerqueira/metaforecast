@@ -1,15 +1,10 @@
-repos: 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
     hooks:
-    - id: isort
-      args: ["--profile", "black"]
-
-  - repo: https://github.com/ambv/black
-    rev: 23.3.0
-    hooks:
-    - id: black
-      language_version: python3.9
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
 
   - repo: local
     hooks:
@@ -17,3 +12,5 @@ repos:
         name: Run pytest
         entry: sh -c 'pytest'
         language: system
+        pass_filenames: false
+        always_run: true
