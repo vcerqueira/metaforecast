@@ -6,11 +6,11 @@ from .windowing import Windowing
 
 __all__ = [
     "ADE",
+    "BestOnTrain",
+    "EqAverage",
+    "LossOnTrain",
     "MLForecastADE",
     "MLewa",
     "MLpol",
-    "LossOnTrain",
-    "BestOnTrain",
-    "EqAverage",
     "Windowing",
 ]

@@ -95,17 +95,13 @@ class TimeWarping(SemiSyntheticTransformer):
 
         orig_steps = np.arange(x.shape[0])
 
-        random_warps = np.random.normal(
-            loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1])
-        )
+        random_warps = np.random.normal(loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1]))
         warp_steps = np.linspace(0, x.shape[0] - 1.0, num=self.knot + 2)
         time_warp = np.zeros((x.shape[0], x.shape[1]))
         x_warped = np.zeros((x.shape[0], x.shape[1]))
 
         for i in range(x.shape[1]):
-            time_warp[:, i] = CubicSpline(warp_steps, warp_steps * random_warps[:, i])(
-                orig_steps
-            )
+            time_warp[:, i] = CubicSpline(warp_steps, warp_steps * random_warps[:, i])(orig_steps)
             x_warped[:, i] = np.interp(orig_steps, time_warp[:, i], x[:, i])
 
         x_warped = x_warped.squeeze()

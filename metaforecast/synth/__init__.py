@@ -9,13 +9,13 @@ from .generators.warping_mag import MagnitudeWarping
 from .generators.warping_time import TimeWarping
 
 __all__ = [
-    "Jittering",
-    "Scaling",
-    "MagnitudeWarping",
-    "TimeWarping",
-    "SeasonalMBB",
     "DBA",
+    "Jittering",
     "KernelSynth",
-    "TSMixup",
+    "MagnitudeWarping",
     "OnlineDataAugmentation",
+    "Scaling",
+    "SeasonalMBB",
+    "TSMixup",
+    "TimeWarping",
 ]

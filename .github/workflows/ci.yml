@@ -46,11 +46,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install dependencies
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Install docs dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,docs]"
+          pip install "sphinx>=7,<8" sphinx-rtd-theme sphinx-copybutton nbsphinx nbsphinx-link IPython
       - name: Build documentation
-        run: |
-          cd docs
-          make html
+        run: sphinx-build -W -b html docs/source docs/build/html

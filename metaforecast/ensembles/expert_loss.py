@@ -84,7 +84,5 @@ class PinballLoss(LossFunctions):
         return loss
 
     @staticmethod
-    def gradient(
-        fcst: pd.Series, y: float, fcst_c: float, tau: float = 0.5
-    ) -> pd.Series:
+    def gradient(fcst: pd.Series, y: float, fcst_c: float, tau: float = 0.5) -> pd.Series:
         return (int(y < fcst_c) - tau) * fcst

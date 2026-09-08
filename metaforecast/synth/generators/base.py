@@ -38,10 +38,9 @@ class BaseTimeSeriesGenerator(ABC):
     REQUIRES_N: bool
     REQUIRES_DF: bool
 
-    def __init__(self, alias: str,
-                 id_col: str = 'unique_id',
-                 time_col: str = 'ds',
-                 target_col: str = 'y'):
+    def __init__(
+        self, alias: str, id_col: str = "unique_id", time_col: str = "ds", target_col: str = "y"
+    ):
         """Initialize semisynthetic generator with method identifier.
 
         Parameters
@@ -91,16 +90,15 @@ class BaseTimeSeriesGenerator(ABC):
         :param df: time series dataset with a nixtla-based structure
         """
 
-        assert (
-                df[self.id_col].dtype == "object"
-        ), f"Column {self.id_col} must be of type string"
+        assert df[self.id_col].dtype == "object", f"Column {self.id_col} must be of type string"
 
         # assert pd.api.types.is_datetime64_any_dtype(df["ds"]),
         # "Column 'ds' must be of type pd.Timestamp"
 
         # Assert y is numeric
-        assert np.issubdtype(df[self.target_col].dtype, np.number), \
+        assert np.issubdtype(df[self.target_col].dtype, np.number), (
             f"Column {self.target_col} must be numeric"
+        )
 
     @staticmethod
     def sample_weights_dirichlet(alpha, k):
@@ -202,12 +200,14 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
     REQUIRES_N = False
     REQUIRES_DF = True
 
-    def __init__(self,
-                 alias: str,
-                 rename_uids: bool = True,
-                 id_col: str = 'unique_id',
-                 time_col: str = 'ds',
-                 target_col: str = 'y'):
+    def __init__(
+        self,
+        alias: str,
+        rename_uids: bool = True,
+        id_col: str = "unique_id",
+        time_col: str = "ds",
+        target_col: str = "y",
+    ):
         """Initialize transformer with method identifier and naming preferences.
 
         Parameters
@@ -231,10 +231,7 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
             Automatically increments with each transformation.
 
         """
-        super().__init__(alias=alias,
-                         id_col=id_col,
-                         time_col=time_col,
-                         target_col=target_col)
+        super().__init__(alias=alias, id_col=id_col, time_col=time_col, target_col=target_col)
 
         self.rename_uids = rename_uids
 

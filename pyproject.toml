@@ -70,6 +70,7 @@ exclude = [
     "docs/build",
     "dist",
     "*.egg-info",
+    "notebooks",
 ]
 
 [tool.ruff.lint]
@@ -84,8 +85,13 @@ select = [
     "RUF",  # ruff-specific rules
 ]
 ignore = [
-    "E501",   # line length (handled by formatter)
-    "B905",   # zip without strict= (py3.9 compat)
+    "E501",    # line length (handled by formatter)
+    "B905",    # zip without strict= (py3.9 compat)
+    "B008",    # function calls in default args (common in ML APIs)
+    "RUF012",  # mutable class-level defaults (ubiquitous in data science code)
+    "RUF001",  # ambiguous unicode characters (false positive on en-dash in copyright)
+    "UP006",   # deprecated typing generics — keep py3.9 compat
+    "UP035",   # deprecated typing imports — keep py3.9 compat
 ]
 
 [tool.ruff.lint.isort]

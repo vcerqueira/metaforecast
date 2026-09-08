@@ -155,9 +155,7 @@ class MLpol(Mixture):
 
             self.weights[i], self.ensemble_fcst[i] = self._calc_ensemble_fcst(fc, w)
 
-            loss_experts = self._calc_loss(
-                fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i]
-            )
+            loss_experts = self._calc_loss(fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i])
 
             loss_mixture = self._calc_loss(
                 fcst=self.ensemble_fcst[i],
@@ -174,9 +172,7 @@ class MLpol(Mixture):
             # update learning rate
             b_iter = np.max([self.b, np.max(regret_i**2)])
 
-            self.eta[int(str(i)) + 1] = 1 / (
-                1 / self.eta[i] + regret_i**2 + b_iter - self.b
-            )
+            self.eta[int(str(i)) + 1] = 1 / (1 / self.eta[i] + regret_i**2 + b_iter - self.b)
 
             self.b = copy.deepcopy(b_iter)
 

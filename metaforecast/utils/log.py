@@ -2,7 +2,6 @@ import numpy as np
 
 
 class LogTransformation:
-
     @staticmethod
     def transform(x):
         xt = np.sign(x) * np.log(np.abs(x) + 1)

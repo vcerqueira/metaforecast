@@ -5,13 +5,13 @@ from warnings import simplefilter
 
 import numpy as np
 import pandas as pd
-from utilsforecast.evaluation import evaluate
-from utilsforecast.losses import smape
 from mlforecast import MLForecast
 from mlforecast.target_transforms import Differences
 from scipy.special import softmax
 from sklearn.neighbors import KNeighborsRegressor as KNN
 from tqdm import tqdm
+from utilsforecast.evaluation import evaluate
+from utilsforecast.losses import smape
 
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
@@ -56,7 +56,7 @@ class ForecastTrajectoryNeighbors(ABC):
     def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
         """Set the blending weights between FTN-corrected and original forecasts.
 
-        Each weight should be in a 0–1 range, where 1 means the final prediction
+        Each weight should be in a 0-1 range, where 1 means the final prediction
         only considers the FTN correction and 0 keeps the original forecast.
 
         Parameters
@@ -368,9 +368,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                 x0 = fcst_[0]
 
                 if self.apply_global:
-                    _, k_neighbors = self.model[self._GLB_UID].kneighbors(
-                        fcst_.reshape(1, -1)
-                    )
+                    _, k_neighbors = self.model[self._GLB_UID].kneighbors(fcst_.reshape(1, -1))
                     ftn_knn = self.uid_insample_traj[self._GLB_UID][k_neighbors[0], :]
                 else:
                     _, k_neighbors = self.model[uid].kneighbors(fcst_.reshape(1, -1))
@@ -382,12 +380,11 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
                     ftn_fcst = np.r_[x0, ftn_fcst[1:]].cumsum()
 
                 name_ = f"{m}(FTN)"
-                if self.apply_weighting:
-                    if m in self.alpha_weights:
-                        w = self.alpha_weights[m]
+                if self.apply_weighting and m in self.alpha_weights:
+                    w = self.alpha_weights[m]
 
-                        ftn_fcst = ftn_fcst * w + fcst_ * (1 - w)
-                        name_ = f"{m}(WFTN)"
+                    ftn_fcst = ftn_fcst * w + fcst_ * (1 - w)
+                    name_ = f"{m}(WFTN)"
 
                 ftn_df[name_] = ftn_fcst
 
@@ -397,9 +394,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         return fcst_ftn_df
 
-    def alpha_cv_scoring(
-        self, cv: pd.DataFrame, model_names: Optional[List[str]] = None
-    ):
+    def alpha_cv_scoring(self, cv: pd.DataFrame, model_names: Optional[List[str]] = None):
         """Compute optimal FTN combination weights using validation data.
 
         Uses cross-validation or validation results to determine optimal
@@ -428,7 +423,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         weights = {}
         for m in models:
-            cv_ = cv[self._EVAL_BASE_COLS + [m, f"{m}(FTN)"]]
+            cv_ = cv[[*self._EVAL_BASE_COLS, m, f"{m}(FTN)"]]
 
             eval_by_horizon = {}
             for h_, h_df in cv_.groupby("horizon"):

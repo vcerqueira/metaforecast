@@ -156,9 +156,7 @@ class ADE(BaseADE):
     def _fit(self, insample_fcst):
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [
-                x for x in self.model_names if x not in self.METADATA + ["h"]
-            ]
+            self.model_names = [x for x in self.model_names if x not in [*self.METADATA, "h"]]
 
         self._set_n_models()
 
@@ -273,9 +271,7 @@ class ADE(BaseADE):
         return in_sample_loss_df
 
     # pylint: disable=invalid-name
-    def _process_meta_data(
-        self, meta_data: pd.DataFrame, return_X_y: bool = True
-    ) -> DataFrameLike:
+    def _process_meta_data(self, meta_data: pd.DataFrame, return_X_y: bool = True) -> DataFrameLike:
         lag_locs = meta_data.columns.str.startswith("lag")
         lag_cols = meta_data.columns[lag_locs].to_list()
 
@@ -328,9 +324,7 @@ class ADE(BaseADE):
     def _weights_from_errors(meta_predictions: pd.DataFrame) -> pd.Series:
         e_hat = meta_predictions.abs()
 
-        weights = e_hat.apply(
-            func=lambda x: Normalizations.normalize_and_proportion(-x), axis=1
-        )
+        weights = e_hat.apply(func=lambda x: Normalizations.normalize_and_proportion(-x), axis=1)
 
         weight_s = weights.iloc[0]
 

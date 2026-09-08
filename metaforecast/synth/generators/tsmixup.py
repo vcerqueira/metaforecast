@@ -86,7 +86,7 @@ class TSMixup(SemiSyntheticGenerator):
             used to generate mixing weights:
 
         """
-        super().__init__(alias='TSMixup')
+        super().__init__(alias="TSMixup")
 
         self.min_len = min_len
         self.max_len = max_len
@@ -136,9 +136,9 @@ class TSMixup(SemiSyntheticGenerator):
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
 
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()
+            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()  # noqa: F841 (used via @selected_uids in query)
 
-            df_uids = df.query('unique_id == @selected_uids')
+            df_uids = df.query("unique_id == @selected_uids")
 
             ts_df = self._create_synthetic_ts(df_uids)
             ts_df[self.id_col] = f"{self.alias}_{self.counter}"

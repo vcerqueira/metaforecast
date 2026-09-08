@@ -100,17 +100,13 @@ class MagnitudeWarping(SemiSyntheticTransformer):
 
         orig_steps = np.arange(x.shape[0])
 
-        random_warps = np.random.normal(
-            loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1])
-        )
+        random_warps = np.random.normal(loc=1.0, scale=self.sigma, size=(self.knot + 2, x.shape[1]))
 
         warp_steps = np.linspace(0, x.shape[0] - 1.0, num=self.knot + 2)
         warper = np.zeros((x.shape[0], x.shape[1]))
 
         for i in range(x.shape[1]):
-            warper[:, i] = np.array(
-                [CubicSpline(warp_steps, random_warps[:, i])(orig_steps)]
-            )
+            warper[:, i] = np.array([CubicSpline(warp_steps, random_warps[:, i])(orig_steps)])
 
         warper = warper.squeeze()
 

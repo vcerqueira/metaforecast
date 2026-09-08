@@ -110,9 +110,7 @@ class ForecastingEnsemble(ABC):
         """
         raise NotImplementedError
 
-    def evaluate_base_fcst(
-        self, insample_fcst: pd.DataFrame, use_window: bool
-    ) -> pd.DataFrame:
+    def evaluate_base_fcst(self, insample_fcst: pd.DataFrame, use_window: bool) -> pd.DataFrame:
         """Evaluate ensemble members' accuracy by series using SMAPE.
 
         Computes Symmetric Mean Absolute Percentage Error (SMAPE) for each base model
@@ -227,9 +225,9 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _assert_fcst(fcst: pd.DataFrame):
-        assert (
-            "unique_id" in fcst.columns
-        ), '"unique_id" should be included in the predictions object'
+        assert "unique_id" in fcst.columns, (
+            '"unique_id" should be included in the predictions object'
+        )
 
 
 class Mixture(ForecastingEnsemble):
@@ -325,9 +323,7 @@ class Mixture(ForecastingEnsemble):
 
         if self.model_names is None:
             self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [
-                x for x in self.model_names if x not in self.METADATA + ["h"]
-            ]
+            self.model_names = [x for x in self.model_names if x not in [*self.METADATA, "h"]]
 
         self._initialize_params(insample_fcst)
         self._set_n_models()

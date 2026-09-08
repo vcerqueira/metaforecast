@@ -55,9 +55,7 @@ class _SeasonalMBB:
             try:
                 synth_res = cls.get_mbb(stl.resid, seas_period)
             except ValueError:
-                synth_res = (
-                    pd.Series(stl.resid).sample(len(stl.resid), replace=True).values
-                )
+                synth_res = pd.Series(stl.resid).sample(len(stl.resid), replace=True).values
 
             synth_ts = stl.trend + stl.seasonal + synth_res
         except ValueError:
@@ -123,10 +121,9 @@ class SeasonalMBB(SemiSyntheticTransformer):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self,
-                 seas_period: int,
-                 log: bool = True,
-                 max_samples_in_stl: Optional[int] = None):
+    def __init__(
+        self, seas_period: int, log: bool = True, max_samples_in_stl: Optional[int] = None
+    ):
         """Initialize seasonal moving blocks bootstrap transformer.
 
         Parameters
@@ -146,7 +143,7 @@ class SeasonalMBB(SemiSyntheticTransformer):
             If None (default behaviour), chunking is not done.
 
         """
-        super().__init__(alias='MBB')
+        super().__init__(alias="MBB")
 
         self.log = log
         self.seas_period = seas_period
@@ -161,9 +158,7 @@ class SeasonalMBB(SemiSyntheticTransformer):
             for df_chk in df_chunks:
                 ts_ = df_chk[self.target_col].copy().values
 
-                synth_tsc = _SeasonalMBB.create_bootstrap(
-                    ts_, self.seas_period, log=self.log
-                )
+                synth_tsc = _SeasonalMBB.create_bootstrap(ts_, self.seas_period, log=self.log)
 
                 df_chk[self.target_col] = synth_tsc
 
@@ -176,9 +171,7 @@ class SeasonalMBB(SemiSyntheticTransformer):
         else:
             ts = df[self.target_col].copy().values
 
-            synth_ts = _SeasonalMBB.create_bootstrap(
-                ts, seas_period=self.seas_period, log=self.log
-            )
+            synth_ts = _SeasonalMBB.create_bootstrap(ts, seas_period=self.seas_period, log=self.log)
 
             df[self.target_col] = synth_ts
 
@@ -195,9 +188,11 @@ class SeasonalMBB(SemiSyntheticTransformer):
         last_chunk_size = total_rows % chunk_size
 
         if last_chunk_size > 0:
-            chunks = [df.iloc[i * chunk_size:(i + 1) * chunk_size] for i in range(n_full_chunks - 1)]
-            chunks.append(df.iloc[(n_full_chunks - 1) * chunk_size:])
+            chunks = [
+                df.iloc[i * chunk_size : (i + 1) * chunk_size] for i in range(n_full_chunks - 1)
+            ]
+            chunks.append(df.iloc[(n_full_chunks - 1) * chunk_size :])
         else:
-            chunks = [df.iloc[i * chunk_size:(i + 1) * chunk_size] for i in range(n_full_chunks)]
+            chunks = [df.iloc[i * chunk_size : (i + 1) * chunk_size] for i in range(n_full_chunks)]
 
         return chunks

@@ -72,7 +72,7 @@ class Scaling(SemiSyntheticTransformer):
             Useful for tracking transformations
 
         """
-        super().__init__(alias='SCALE', rename_uids=rename_uids)
+        super().__init__(alias="SCALE", rename_uids=rename_uids)
 
         self.sigma = sigma
 
@@ -83,6 +83,6 @@ class Scaling(SemiSyntheticTransformer):
 
         synth_values = df_[self.target_col].values * factor
 
-        df_.loc[:, self.target_col] = synth_values.astype(df_['y'].dtype)
+        df_.loc[:, self.target_col] = synth_values.astype(df_["y"].dtype)
 
         return df_

@@ -8,7 +8,8 @@ from metaforecast.synth.generators.base import SemiSyntheticGenerator
 
 try:
     from tslearn.barycenters.dba import ConvergenceWarning
-    warnings.filterwarnings('ignore', category=ConvergenceWarning)
+
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
 except (ImportError, TypeError, AssertionError):
     pass
 
@@ -65,7 +66,9 @@ class DBA(SemiSyntheticGenerator):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(self, max_n_uids: int, dirichlet_alpha: float = 1.0, max_iter: int = 10, tol: float = 1e-3):
+    def __init__(
+        self, max_n_uids: int, dirichlet_alpha: float = 1.0, max_iter: int = 10, tol: float = 1e-3
+    ):
         """Initialize DBA generator with sampling parameters.
 
         Parameters
@@ -79,7 +82,7 @@ class DBA(SemiSyntheticGenerator):
             generating combination weights:
 
         """
-        super().__init__(alias='DBA')
+        super().__init__(alias="DBA")
 
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
@@ -129,7 +132,7 @@ class DBA(SemiSyntheticGenerator):
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
 
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()
+            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()  # noqa: F841 (used via @selected_uids in query)
 
             df_uids = df.query("unique_id == @selected_uids")
 

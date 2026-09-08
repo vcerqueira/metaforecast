@@ -145,9 +145,7 @@ class MLewa(Mixture):
 
             self.weights[i], self.ensemble_fcst[i] = self._calc_ensemble_fcst(fc, w)
 
-            loss_experts = self._calc_loss(
-                fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i]
-            )
+            loss_experts = self._calc_loss(fcst=fc, y=y[i], fcst_c=self.ensemble_fcst[i])
 
             loss_mixture = self._calc_loss(
                 fcst=self.ensemble_fcst[i],
@@ -163,9 +161,7 @@ class MLewa(Mixture):
 
             n = len(self.model_names)
 
-            eta_update = np.sqrt(
-                np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i**2)
-            )
+            eta_update = np.sqrt(np.log(n) / (np.log(n) / self.eta[i] ** 2 + regret_i**2))
             self.eta[int(str(i)) + 1] = eta_update
 
     def _weights_from_regret(self, iteration: RowIdentifierType = -1, **kwargs):

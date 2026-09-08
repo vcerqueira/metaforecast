@@ -54,9 +54,7 @@ class BarycentricAveraging:
         """
         assert barycenter in [*cls.BARYCENTERS], "Unknown barycenter"
 
-        fcst_arr = cls.BARYCENTERS[barycenter](
-            X=fcst, **cls.BARYCENTER_PARAMS[barycenter]
-        )
+        fcst_arr = cls.BARYCENTERS[barycenter](X=fcst, **cls.BARYCENTER_PARAMS[barycenter])
 
         fcst_arr = fcst_arr.flatten()
 

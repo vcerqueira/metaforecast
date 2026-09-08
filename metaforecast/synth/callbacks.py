@@ -1,6 +1,6 @@
 import copy
 import random
-from typing import Union, List
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -108,7 +108,7 @@ class BaseDataAugmentation:
 
     @classmethod
     def df_to_tensor(cls, df: pd.DataFrame) -> torch.Tensor:
-        """ Convert DataFrame of time series data to PyTorch tensor.
+        """Convert DataFrame of time series data to PyTorch tensor.
 
         Transforms a time series DataFrame following neuralforecast's format
         into a PyTorch tensor for model training. Handles masked values and
@@ -185,9 +185,9 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
 
     """
 
-    def __init__(self,
-                 generator: Union[TSGenerator, TSGeneratorList],
-                 augment_on_valid: bool = False):
+    def __init__(
+        self, generator: Union[TSGenerator, TSGeneratorList], augment_on_valid: bool = False
+    ):
         """Initialize online data augmentation callback.
 
         Parameters
@@ -239,7 +239,7 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
 
         temporal_aug = self.df_to_tensor(df_aug)
 
-        if temporal.device.type == 'mps':
-            temporal_aug = temporal_aug.to('mps')
+        if temporal.device.type == "mps":
+            temporal_aug = temporal_aug.to("mps")
 
         return temporal_aug
