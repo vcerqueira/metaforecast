@@ -5,34 +5,128 @@ Data augmentation has been successfully used in various domains to increase the 
 datasets and improve model robustness. For time series, augmentation is particularly challenging
 due to the temporal dependencies and patterns that must be preserved.
 
-This module implements several approaches for generating synthetic time series data:
+This module implements several approaches for generating synthetic time series data, organized
+into three categories:
 
-* KernelSynth Creates new series using kernel-based pattern combination [1]
-* DTW Barycentric Averaging (DBA): Creates new series by averaging existing ones [2]
-* Jittering: Adds controlled noise variations
-* Scaling: Modifies series magnitude
-* MagnitudeWarping: Applies smooth amplitude changes
-* TimeWarping: Creates temporal distortions
-* Moving Blocks Bootstrap: Resamples temporal blocks
+**Pure synthetic generation** — generate time series from scratch without any source data:
 
-Each of these approaches follow one of three approaches:
+- :class:`~metaforecast.synth.KernelSynth`: Kernel-based pattern combination [1]
 
-* **Pure synthetic generation**: Generate synthetic time series from scratch without any source data.
-* **Semi-synthetic generation**: Generate synthetic time series with reference to a source dataset.
-* **Semi-synthetic transformation**: Transform time series using specific operations while preserving structure.
+**Semi-synthetic generation** — generate new series with reference to a source dataset:
 
-The module also implements a callback that applies time series augmentation techniques to each batch during model
-training. This online approach creates different augmented samples in each batch
+- :class:`~metaforecast.synth.TSMixup`: Weighted averaging of multiple series [1]
+- :class:`~metaforecast.synth.DBA`: DTW Barycentric Averaging [2]
+
+**Semi-synthetic transformation** — transform existing series while preserving structure:
+
+- :class:`~metaforecast.synth.Jittering`: Controlled Gaussian noise injection [3]
+- :class:`~metaforecast.synth.Scaling`: Amplitude scaling [3]
+- :class:`~metaforecast.synth.MagnitudeWarping`: Smooth magnitude variations [3]
+- :class:`~metaforecast.synth.TimeWarping`: Non-linear temporal distortions [3]
+- :class:`~metaforecast.synth.SeasonalMBB`: Seasonal Moving Block Bootstrap
+
+**Online augmentation** — augment data during model training:
+
+- :class:`~metaforecast.synth.OnlineDataAugmentation`: Callback for online augmentation [4]
 
 
-[1] Ansari, A. F., et al. (2024). "Chronos: Learning the language of time series." arXiv preprint arXiv:2403.07815.
+References
+----------
 
-[2] Forestier, G., et al. (2017). "Generating synthetic time series to augment sparse datasets." IEEE International Conference on Data Mining (ICDM).
+[1] Ansari, A. F., et al. (2024). "Chronos: Learning the language of time series."
+arXiv preprint arXiv:2403.07815.
 
-[3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for parkinson's disease monitoring."
-ACM International Conference on Multimodal Interaction.
+[2] Forestier, G., et al. (2017). "Generating synthetic time series to augment sparse datasets."
+IEEE International Conference on Data Mining (ICDM).
 
-.. automodule:: metaforecast.synth
+[3] Um, T. T., et al. (2017). "Data augmentation of wearable sensor data for Parkinson's
+disease monitoring." ACM International Conference on Multimodal Interaction.
+
+[4] Cerqueira, V., Santos, M., Baghoussi, Y., & Soares, C. (2024). "On-the-fly Data
+Augmentation for Forecasting with Deep Learning." arXiv preprint arXiv:2404.16918.
+
+
+Base Classes
+------------
+
+.. autoclass:: metaforecast.synth.generators.base.BaseTimeSeriesGenerator
+   :members:
+   :show-inheritance:
+   :exclude-members: START, END, REQUIRES_N, REQUIRES_DF
+
+.. autoclass:: metaforecast.synth.generators.base.PureSyntheticGenerator
+   :members:
+   :no-inherited-members:
+   :show-inheritance:
+   :exclude-members: START, END
+
+.. autoclass:: metaforecast.synth.generators.base.SemiSyntheticGenerator
+   :members:
+   :no-inherited-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.base.SemiSyntheticTransformer
+   :members:
+   :no-inherited-members:
+   :show-inheritance:
+
+
+Pure Synthetic Generators
+-------------------------
+
+.. autoclass:: metaforecast.synth.generators.kernelsynth.KernelSynth
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Semi-Synthetic Generators
+-------------------------
+
+.. autoclass:: metaforecast.synth.generators.tsmixup.TSMixup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.dba.DBA
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Transformers
+------------
+
+.. autoclass:: metaforecast.synth.generators.jittering.Jittering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.scaling.Scaling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.warping_mag.MagnitudeWarping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.warping_time.TimeWarping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.mbb.SeasonalMBB
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Online Augmentation
+-------------------
+
+.. autoclass:: metaforecast.synth.callbacks.OnlineDataAugmentation
    :members:
    :undoc-members:
    :show-inheritance:

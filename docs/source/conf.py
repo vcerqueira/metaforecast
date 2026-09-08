@@ -3,30 +3,19 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-from unittest.mock import MagicMock
-
-import sphinx_rtd_theme
-
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
 
 sys.path.insert(0, os.path.abspath("../.."))
 
+# -- Project information -----------------------------------------------------
+
 project = "metaforecast"
-copyright = "2024, Vitor Cerqueira"
+copyright = "2024–2026, Vitor Cerqueira"
 author = "Vitor Cerqueira"
-release = "0.1.6"
+release = "0.2.2"
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     "sphinx_copybutton",
@@ -36,14 +25,13 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    # "sphinx.ext.autosummary",
+    "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
     "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx_link",
     "sphinx_rtd_theme",
-    "sphinx.ext.autosummary",
 ]
 
 autodoc_default_options = {
@@ -57,30 +45,42 @@ autodoc_default_options = {
 autodoc_mock_imports = [
     "numpy",
     "scipy",
+    "scipy.interpolate",
+    "scipy.stats",
+    "scipy.special",
     "pandas",
     "tqdm",
     "cython",
     "torch",
+    "torch.nn",
+    "torch.optim",
     "sklearn",
+    "sklearn.gaussian_process",
+    "sklearn.gaussian_process.kernels",
+    "sklearn.multioutput",
+    "sklearn.neighbors",
     "datasetsforecast",
+    "datasetsforecast.evaluation",
+    "datasetsforecast.losses",
     "statsforecast",
     "mlforecast",
+    "mlforecast.target_transforms",
     "neuralforecast",
+    "neuralforecast.losses",
+    "neuralforecast.losses.numpy",
     "numba",
     "arch",
+    "arch.bootstrap",
     "lightgbm",
     "pytorch_lightning",
+    "pytorch_lightning.callbacks",
+    "pytorch_lightning.utilities",
     "lightning_fabric",
     "lightning_utilities",
     "importlib_metadata",
-    "torch.nn",
-    "torch.optim",
-    "pytorch_lightning.callbacks",
-    "pytorch_lightning.utilities",
     "tslearn",
     "tslearn.barycenters",
-    "scipy.interpolate",
-    "scipy.stats",
+    "tslearn.barycenters.dba",
     "statsmodels",
     "statsmodels.tsa",
     "statsmodels.tsa.api",
@@ -90,28 +90,16 @@ autodoc_mock_imports = [
     "patsy",
 ]
 
-MOCK_MODULES = [
-    "numpy",
-    "scipy",
-    "torch",
-    "pytorch_lightning",
-    "lightning_fabric",
-    "lightning_utilities",
-]
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 autosummary_generate = False
 add_module_names = False
-pickle_factory = None
 
 nbsphinx_execute = "never"
 nbsphinx_allow_errors = True

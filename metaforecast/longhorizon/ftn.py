@@ -5,8 +5,8 @@ from warnings import simplefilter
 
 import numpy as np
 import pandas as pd
-from datasetsforecast.evaluation import accuracy
-from datasetsforecast.losses import smape
+from utilsforecast.evaluation import evaluate
+from utilsforecast.losses import smape
 from mlforecast import MLForecast
 from mlforecast.target_transforms import Differences
 from scipy.special import softmax
@@ -54,19 +54,20 @@ class ForecastTrajectoryNeighbors(ABC):
         raise NotImplementedError
 
     def set_alpha_weights(self, alpha: Dict[str, np.ndarray]):
-        """set_alpha_weights
+        """Set the blending weights between FTN-corrected and original forecasts.
 
-        When weighting the corrected (FTN) forecasts with the original ones you need to set the
-        weights of FTN using this function.
-        The function expects an array of weights with size equal to the forecasting horizon.
-        Each weight should be in a 0-1 range, where 1 means that the final prediction only
-        considers FTN
+        Each weight should be in a 0–1 range, where 1 means the final prediction
+        only considers the FTN correction and 0 keeps the original forecast.
 
-        :param alpha: the FTN weights for a dict of forecasting models
-        :type alpha: dict, with keys being the model names (str) and the values a numpy array
-        with weight values for each horizon.
+        Parameters
+        ----------
+        alpha : dict[str, np.ndarray]
+            Keys are model names; values are 1-D arrays of length ``horizon``
+            with per-step blending weights.
 
-        :return: self
+        Returns
+        -------
+        self
         """
         for k in alpha:
             assert len(alpha[k]) == self.horizon
@@ -431,7 +432,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
             eval_by_horizon = {}
             for h_, h_df in cv_.groupby("horizon"):
-                h_df = accuracy(h_df, [smape], agg_by=["unique_id"])
+                h_df = evaluate(df=h_df, metrics=[smape])
                 h_df_avg = h_df.drop(columns=["horizon", "metric", "unique_id"]).mean()
 
                 eval_by_horizon[h_] = h_df_avg

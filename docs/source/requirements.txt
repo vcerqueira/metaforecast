@@ -1,13 +1,13 @@
-sphinx
+sphinx>=7,<8
+sphinx-rtd-theme
+sphinx-copybutton
 nbsphinx
 nbsphinx-link
 ipython
 jupyter
 ipykernel
-sphinx-rtd-theme
 cython
-sphinx-copybutton
-arch==5.6.0
+arch==7.2.0
 lightgbm==4.5.0
 tslearn==0.6.3
 datasetsforecast==0.0.8
