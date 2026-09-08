@@ -40,7 +40,7 @@ dev = [
     "ruff",
     "pytest",
     "pre-commit",
-    "bump2version",
+    "bump-my-version",
 ]
 docs = [
     "sphinx>=7,<8",
@@ -105,7 +105,7 @@ filterwarnings = [
     "ignore::FutureWarning",
 ]
 
-# ---------- bump2version ----------
+# ---------- bump-my-version ----------
 
 [tool.bumpversion]
 current_version = "0.2.2"
@@ -121,3 +121,8 @@ replace = 'version = "{new_version}"'
 filename = "metaforecast/__init__.py"
 search = '__version__ = "{current_version}"'
 replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"
+search = 'release = "{current_version}"'
+replace = 'release = "{new_version}"'
