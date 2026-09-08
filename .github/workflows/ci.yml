@@ -13,11 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Ruff format check
-        uses: astral-sh/ruff-action@v4
+        uses: astral-sh/ruff-action@v3
         with:
           args: format --check
       - name: Ruff lint check
-        uses: astral-sh/ruff-action@v4
+        uses: astral-sh/ruff-action@v3
         with:
           args: check
 
