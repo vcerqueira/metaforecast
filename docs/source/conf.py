@@ -90,6 +90,13 @@ autodoc_mock_imports = [
     "statsmodels.tsa.api",
     "statsmodels.compat",
     "statsmodels.tools",
+    "statsmodels.stats",
+    "statsmodels.stats.diagnostic",
+    "statsmodels.stats.stattools",
+    "statsforecast.models",
+    "tsfeatures",
+    "catboost",
+    "joblib",
     "packaging",
     "patsy",
 ]

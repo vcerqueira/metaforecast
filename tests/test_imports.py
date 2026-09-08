@@ -28,6 +28,11 @@ def test_longhorizon_import():
     assert hasattr(mod, "MLForecastFTN")
 
 
+def test_coseal_import():
+    mod = importlib.import_module("metaforecast.coseal")
+    assert hasattr(mod, "MetaARIMA")
+
+
 def test_version():
     import metaforecast
 

@@ -56,6 +56,16 @@ Improves multi-step forecasting accuracy through instance-based approaches:
 :doc:`Go to API reference → <longhorizon>`
 
 
+Algorithm Configuration and Selection (COSEAL)
+-----------------------------------------------
+
+Metalearning methods for selecting the best algorithm or configuration:
+
+- MetaARIMA: meta-learned ARIMA order selection
+
+:doc:`Go to API reference → <coseal>`
+
+
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
@@ -63,6 +73,7 @@ Improves multi-step forecasting accuracy through instance-based approaches:
    ensembles
    synth
    longhorizon
+   coseal
 
 .. toctree::
    :maxdepth: 1
