@@ -6,7 +6,13 @@ import importlib
 def test_ensembles_import():
     mod = importlib.import_module("metaforecast.ensembles")
     assert hasattr(mod, "ADE")
+    assert hasattr(mod, "BOA")
+    assert hasattr(mod, "FixedShare")
     assert hasattr(mod, "MLewa")
+    assert hasattr(mod, "MLpol")
+    assert hasattr(mod, "MLprod")
+    assert hasattr(mod, "OGD")
+    assert hasattr(mod, "Ridge")
     assert hasattr(mod, "Windowing")
 
 

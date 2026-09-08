@@ -21,10 +21,15 @@ weights over time to changing patterns or across different series:
 - :class:`~metaforecast.ensembles.ADE`: Arbitrated Dynamic Ensemble
 - :class:`~metaforecast.ensembles.MLForecastADE`: ADE with MLForecast integration
 
-**Regret minimization** — exponentially or polynomially weighted online learning:
+**Regret minimization** — online learning ensemble methods:
 
 - :class:`~metaforecast.ensembles.MLewa`: Exponentially weighted averaging
 - :class:`~metaforecast.ensembles.MLpol`: Polynomially weighted averaging
+- :class:`~metaforecast.ensembles.MLprod`: Multiplicative production update
+- :class:`~metaforecast.ensembles.BOA`: Bernstein Online Aggregation
+- :class:`~metaforecast.ensembles.FixedShare`: Fixed-Share with weight redistribution
+- :class:`~metaforecast.ensembles.OGD`: Online Gradient Descent
+- :class:`~metaforecast.ensembles.Ridge`: Online ridge regression
 
 **Windowing** — recent-performance-based weighting:
 
@@ -60,6 +65,31 @@ Regret Minimization Ensembles
    :show-inheritance:
 
 .. autoclass:: metaforecast.ensembles.mlpol.MLpol
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.ensembles.mlprod.MLprod
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.ensembles.boa.BOA
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.ensembles.fixed_share.FixedShare
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.ensembles.ogd.OGD
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.ensembles.ridge.Ridge
    :members:
    :undoc-members:
    :show-inheritance:
