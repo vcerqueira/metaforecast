@@ -25,9 +25,10 @@ classifiers = [
 ]
 
 dependencies = [
-    "arch==8.0.0",
+    "arch==7.2.0",
     "lightgbm==4.7.0",
     "tslearn==0.9.0",
+    "utilsforecast==0.2.16",
     "datasetsforecast==1.0.1",
     "neuralforecast==3.2.1",
     "statsforecast==2.1.1",
