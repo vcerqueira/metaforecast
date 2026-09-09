@@ -38,6 +38,15 @@ def test_coseal_import():
 def test_evaluation_import():
     mod = importlib.import_module("metaforecast.evaluation")
     assert hasattr(mod, "SeriesWiseSplit")
+    assert hasattr(mod, "ModelRadar")
+    assert hasattr(mod, "RopeAnalysis")
+
+
+def test_evaluation_aspects_import():
+    mod = importlib.import_module("metaforecast.evaluation.aspects")
+    assert hasattr(mod, "ModelRadar")
+    assert hasattr(mod, "ModelRadarAcrossId")
+    assert hasattr(mod, "RopeAnalysis")
 
 
 def test_evaluation_cv_import():

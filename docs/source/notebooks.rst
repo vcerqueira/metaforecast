@@ -42,3 +42,12 @@ Algorithm Selection (COSEAL)
 
    notebooks/08-metaarima.ipynb
    notebooks/09-metaarima-vs-autoarima.ipynb
+
+
+Evaluation
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   notebooks/10-modelradar.ipynb

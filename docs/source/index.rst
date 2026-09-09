@@ -70,10 +70,11 @@ Metalearning methods for selecting the best algorithm or configuration:
 Evaluation
 ----------
 
-Evaluation tools for series-wise cross-validation:
+Evaluation tools for series-wise cross-validation and aspect-based scoring:
 
 - Series-wise CV splitters (holdout, K-Fold, bootstrap, Monte Carlo)
 - NeuralForecast extension for training on a subset of series
+- ModelRadar: slice forecast error by horizon, group, anomaly, and hard series
 
 :doc:`Go to API reference → <evaluation>`
 

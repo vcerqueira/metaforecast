@@ -69,7 +69,35 @@ Bootstrap Splitters
 NeuralForecast Extension
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: metaforecast.evaluation.cv.neuralforecast_ext.SeriesWiseNeuralForecast
+.. autoclass:: metaforecast.evaluation.cv._custom_nf.SeriesWiseNeuralForecast
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Aspect-Based Evaluation (ModelRadar)
+------------------------------------
+
+Slice forecast error across overall mean, unique ID, horizon, anomalies,
+and arbitrary groups.  Also reports ROPE win/draw/loss vs. a reference
+model and tail risk (expected shortfall) on hard series.
+
+**References:**
+
+Cerqueira, V., Roque, L., & Soares, C. (2025). Modelradar: aspect-based
+forecast evaluation. *Machine Learning*, 114(10), 229.
+
+.. autoclass:: metaforecast.evaluation.aspects.ModelRadar
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.evaluation.aspects.ModelRadarAcrossId
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.evaluation.aspects.RopeAnalysis
    :members:
    :undoc-members:
    :show-inheritance:

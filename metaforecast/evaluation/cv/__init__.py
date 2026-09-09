@@ -7,6 +7,7 @@ forecasting framework (NeuralForecast / StatsForecast).
 """
 
 from metaforecast.evaluation.cv._base import SeriesWiseSplit
+from metaforecast.evaluation.cv._custom_nf import SeriesWiseNeuralForecast
 from metaforecast.evaluation.cv.bootstrap import (
     SeriesWiseBootstrap,
     SeriesWiseRepeatedBootstrap,
@@ -20,7 +21,6 @@ from metaforecast.evaluation.cv.kfold import (
     SeriesWiseKFold,
     SeriesWiseRepeatedKFold,
 )
-from metaforecast.evaluation.cv.neuralforecast_ext import SeriesWiseNeuralForecast
 
 __all__ = [
     "SeriesWiseBootstrap",
