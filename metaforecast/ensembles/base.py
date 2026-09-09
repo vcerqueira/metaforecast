@@ -316,7 +316,6 @@ class Mixture(ForecastingEnsemble):
         self.uid_weights = {}
         self.uid_coefficient = {}
 
-    # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame):
         """Fitting the dynamic combination rule
 
@@ -398,7 +397,6 @@ class Mixture(ForecastingEnsemble):
             self.uid_weights[uid] = self.weights.iloc[-1]
             self.uid_coefficient[uid] = self._weights_from_regret()
 
-    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
         """Combine ensemble member forecasts using the mixture.
 
@@ -435,7 +433,6 @@ class Mixture(ForecastingEnsemble):
 
         return loss
 
-    # pylint: disable=arguments-differ
     def update_weights(self, fcst: pd.DataFrame):
         raise NotImplementedError
 
@@ -448,7 +445,6 @@ class Mixture(ForecastingEnsemble):
     def _update_mixture(self, fcst: pd.DataFrame, y: np.ndarray, **kwargs):
         raise NotImplementedError
 
-    # pylint: disable=arguments-differ
     def _weights_by_uid(self, weights: pd.DataFrame, **kwargs):
         neg_w = -weights
 
@@ -468,7 +464,6 @@ class Mixture(ForecastingEnsemble):
             uid_weights[uid] = w
 
         weights_df = pd.DataFrame(uid_weights).T
-        weights_df.sum()
         weights_df.index.name = "unique_id"
 
         return weights_df
@@ -513,7 +508,6 @@ class BaseADE(ForecastingEnsemble):
     def predict(self, **kwargs):
         raise NotImplementedError
 
-    # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
         raise NotImplementedError
 

@@ -93,8 +93,6 @@ class TSMixup(SemiSyntheticGenerator):
         self.max_n_uids = max_n_uids
         self.dirichlet_alpha = dirichlet_alpha
 
-    # pylint: disable=arguments-differ
-    # pylint: disable=unused-variable
     def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
         """Apply TSMixup to create synthetic time series variations.
 
@@ -150,7 +148,6 @@ class TSMixup(SemiSyntheticGenerator):
 
         return synth_df
 
-    # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
         uids = df[self.id_col].unique()

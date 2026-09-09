@@ -89,7 +89,6 @@ class DBA(SemiSyntheticGenerator):
         self.max_iter = max_iter
         self.tol = tol
 
-    # pylint: disable=unused-variable
     def transform(self, df: pd.DataFrame, n_series: int = -1, **kwargs):
         """Generate synthetic time series using DTW Barycentric Averaging.
 
@@ -146,7 +145,6 @@ class DBA(SemiSyntheticGenerator):
 
         return synth_df
 
-    # pylint: disable=arguments-differ
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         Apply DBA to a time series dataset

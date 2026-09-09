@@ -127,7 +127,6 @@ class ADE(BaseADE):
         self.use_window = False
         self.weights = None
 
-    # pylint: disable=arguments-differ
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """fit
 
@@ -177,7 +176,6 @@ class ADE(BaseADE):
 
         self.meta_model.fit(x, y)
 
-    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int, **kwargs):
         """Combine ensemble member forecasts using the meta-model.
 
@@ -205,7 +203,6 @@ class ADE(BaseADE):
 
         return ade_fcst
 
-    # pylint: disable=arguments-differ
     def update_weights(self, fcst: pd.DataFrame, **kwargs):
         """Update performance statistics of ensemble members based on recent forecasts.
 
@@ -269,13 +266,11 @@ class ADE(BaseADE):
 
         return in_sample_loss_df
 
-    # pylint: disable=invalid-name
     def _process_meta_data(self, meta_data: pd.DataFrame, return_X_y: bool = True) -> DataFrameLike:
         lag_locs = meta_data.columns.str.startswith("lag")
         lag_cols = meta_data.columns[lag_locs].to_list()
 
         if return_X_y:
-            # pylint: disable=invalid-name
             X_meta, Y_meta = meta_data[lag_cols], meta_data[self.model_names]
             return X_meta, Y_meta
 
@@ -283,7 +278,6 @@ class ADE(BaseADE):
 
         return meta_df
 
-    # pylint: disable=arguments-differ
     def _weights_by_uid(self, df: pd.DataFrame, h: int, **kwargs):
         top_overall = self._get_top_k(self.insample_scores.mean())
         top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
@@ -318,7 +312,6 @@ class ADE(BaseADE):
     def _reweight_by_redundancy(self):
         raise NotImplementedError
 
-    # pylint: disable=arguments-renamed
     @staticmethod
     def _weights_from_errors(meta_predictions: pd.DataFrame) -> pd.Series:
         e_hat = meta_predictions.abs()
@@ -428,7 +421,6 @@ class MLForecastADE(ADE):
             meta_lags=self.mlf.ts.lags,
         )
 
-    # pylint: disable=arguments-differ
     def fit(self, **kwargs):
         """Train the meta-model using ensemble members' in-sample predictions.
 
@@ -452,7 +444,6 @@ class MLForecastADE(ADE):
 
         self._fit(insample_fcst)
 
-    # pylint: disable=arguments-differ
     def predict(self, train: pd.DataFrame, h: int, **kwargs):
         """Generate ensemble forecasts using weighted model combinations.
 

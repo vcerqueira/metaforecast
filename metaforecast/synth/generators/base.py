@@ -156,7 +156,6 @@ class PureSyntheticGenerator(BaseTimeSeriesGenerator):
     REQUIRES_N = True
     REQUIRES_DF = False
 
-    # pylint: disable=arguments-differ
     @abstractmethod
     def transform(self, n_series: int, **kwargs):
         raise NotImplementedError
@@ -178,7 +177,6 @@ class SemiSyntheticGenerator(BaseTimeSeriesGenerator):
     REQUIRES_N = True
     REQUIRES_DF = True
 
-    # pylint: disable=arguments-differ
     @abstractmethod
     def transform(self, df: pd.DataFrame, n_series: int, **kwargs):
         """Transform input time series into synthetic variations.
@@ -245,7 +243,6 @@ class SemiSyntheticTransformer(BaseTimeSeriesGenerator):
 
         self.rename_uids = rename_uids
 
-    # pylint: disable=arguments-differ
     def transform(self, df: pd.DataFrame, **kwargs):
         """Transform time series in a dataset while preserving structure.
 

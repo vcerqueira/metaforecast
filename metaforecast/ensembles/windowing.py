@@ -133,7 +133,6 @@ class Windowing(ForecastingEnsemble):
 
         self.weights = None
 
-    # pylint: disable=arguments-differ
     def fit(self, insample_fcst, **kwargs):
         """Update performance statistics of ensemble members based on recent forecasts.
 
@@ -172,7 +171,6 @@ class Windowing(ForecastingEnsemble):
 
         self.weights = self._weights_by_uid()
 
-    # pylint: disable=arguments-differ
     def predict(self, fcst: pd.DataFrame, **kwargs):
         """Combine ensemble member forecasts based on recent performance.
 
@@ -196,7 +194,6 @@ class Windowing(ForecastingEnsemble):
 
         return fcst_c
 
-    # pylint: disable=arguments-differ
     def update_weights(self, **kwargs):
         """Updating the combination weights
 
