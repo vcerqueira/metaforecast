@@ -186,7 +186,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
     Examples
     --------
-    >>> import lightgbm as lgb
+    >>> from catboost import CatBoostRegressor
     >>> from mlforecast import MLForecast
     >>> from datasetsforecast.m3 import M3
     >>>
@@ -196,7 +196,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
     >>> df, *_ = M3.load('.', group='Monthly')
     >>> horizon = 18
     >>> # setting up forecasting model
-    >>> models = {'lgbm': lgb.LGBMRegressor(verbosity=-1), }
+    >>> models = {'cb': CatBoostRegressor(verbose=0, allow_writing_files=False), }
     >>>
     >>> mlf = MLForecast(
     >>>     models=models,

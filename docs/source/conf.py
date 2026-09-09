@@ -83,7 +83,6 @@ autodoc_mock_imports = [
     "numba",
     "arch",
     "arch.bootstrap",
-    "lightgbm",
     "pytorch_lightning",
     "pytorch_lightning.callbacks",
     "pytorch_lightning.utilities",

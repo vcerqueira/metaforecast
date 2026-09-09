@@ -32,6 +32,7 @@ def test_longhorizon_import():
 def test_coseal_import():
     mod = importlib.import_module("metaforecast.coseal")
     assert hasattr(mod, "MetaARIMA")
+    assert hasattr(mod, "ActiveTesting")
 
 
 def test_evaluation_import():

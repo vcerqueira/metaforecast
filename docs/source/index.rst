@@ -62,6 +62,7 @@ Algorithm Configuration and Selection (COSEAL)
 Metalearning methods for selecting the best algorithm or configuration:
 
 - MetaARIMA: meta-learned ARIMA order selection
+- ActiveTesting: greedy ranking of configs from a score matrix
 
 :doc:`Go to API reference → <coseal>`
 

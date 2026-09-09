@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple, Union
 
-import lightgbm as lgb
 import pandas as pd
+from catboost import CatBoostRegressor
 from mlforecast import MLForecast
 from sklearn.multioutput import MultiOutputRegressor as MIMO
 from statsforecast import StatsForecast
@@ -38,7 +38,7 @@ class ADE(BaseADE):
         a large number of time series.
     meta_model : object, optional
         Learning algorithm to use in the meta-level to forecast the
-        error of ensemble members. Defaults to a linear LGBM with a default configuration.
+        error of ensemble members. Defaults to a CatBoost regressor.
 
     References
     ----------
@@ -89,7 +89,7 @@ class ADE(BaseADE):
         >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df, h=12)
     """
 
-    _LGB_PARS = {"verbosity": -1, "n_jobs": 1, "linear_tree": True}
+    _CB_PARS = {"verbose": 0, "allow_writing_files": False}
     _MLF_PREPROCESS_PARS = {"static_features": []}
 
     def __init__(
@@ -98,7 +98,7 @@ class ADE(BaseADE):
         meta_lags: Optional[List[int]] = None,
         trim_ratio: float = 1,
         trim_by_uid: bool = True,
-        meta_model=MIMO(lgb.LGBMRegressor(**_LGB_PARS)),
+        meta_model=MIMO(CatBoostRegressor(**_CB_PARS)),
     ):
         self.frequency = freq
 
@@ -385,7 +385,7 @@ class MLForecastADE(ADE):
         mlf: MLForecast,
         sf: Optional[StatsForecast] = None,
         trim_ratio: float = 1,
-        meta_model=MIMO(lgb.LGBMRegressor(**ADE._LGB_PARS)),
+        meta_model=MIMO(CatBoostRegressor(**ADE._CB_PARS)),
     ):
         """Initialize the Arbitrated Dynamic Ensemble with MLForecast models.
 

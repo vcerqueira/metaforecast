@@ -4,6 +4,21 @@ Configuration and Selection of Algorithms (COSEAL)
 The ``coseal`` module implements meta-learning methods for algorithm
 configuration and selection, applied to time series forecasting.
 
+
+Active Testing
+--------------
+
+Given a matrix of already-evaluated scores (rows = series, columns =
+configurations), :class:`~metaforecast.coseal.active_testing.ActiveTesting`
+orders configs by how likely they are to beat the current champion.
+This is useful when the evaluation budget is limited.
+
+.. autoclass:: metaforecast.coseal.active_testing.ActiveTesting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 MetaARIMA
 ---------
 

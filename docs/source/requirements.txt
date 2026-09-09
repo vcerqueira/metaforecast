@@ -8,7 +8,7 @@ jupyter
 ipykernel
 cython
 arch==7.2.0
-lightgbm==4.5.0
+catboost==1.2.10
 tslearn==0.6.3
 datasetsforecast==0.0.8
 neuralforecast==1.7.5

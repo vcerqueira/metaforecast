@@ -26,7 +26,7 @@ classifiers = [
 
 dependencies = [
     "arch==7.2.0",
-    "lightgbm==4.6.0",
+    "catboost==1.2.10",
     "tslearn==0.6.4",
     "utilsforecast==0.2.15",
     "neuralforecast==3.1.2",
