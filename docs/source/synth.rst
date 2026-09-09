@@ -20,6 +20,7 @@ into three categories:
 
 - :class:`~metaforecast.synth.TSMixup`: Weighted averaging of multiple series [1]
 - :class:`~metaforecast.synth.DBA`: DTW Barycentric Averaging [2]
+- :class:`~metaforecast.synth.Grasynda`: Quantile-transition graphs on STL components [9]
 
 **Semi-synthetic transformation** — transform existing series while preserving structure:
 
@@ -66,6 +67,10 @@ Powerful Data Augmentation for Time-series Prediction." arXiv preprint arXiv:240
 
 [8] Li, H., Cheng, L., Liu, X., Liu, Z., Long, L., Zhang, Y., & Dai, F. (2026).
 "Homomorphic-Controlled Augmentation for Time Series Forecasting." ICASSP 2026.
+
+[9] Amorim, L., Santos, M., Azevedo, P. J., Soares, C., & Cerqueira, V. (2026).
+"Grasynda: Graph-Based Synthetic Time Series Generation." International Symposium
+on Intelligent Data Analysis.
 
 
 Base Classes
@@ -131,6 +136,11 @@ Semi-Synthetic Generators
    :show-inheritance:
 
 .. autoclass:: metaforecast.synth.generators.dba.DBA
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: metaforecast.synth.generators.grasynda.Grasynda
    :members:
    :undoc-members:
    :show-inheritance:

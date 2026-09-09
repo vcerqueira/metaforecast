@@ -25,14 +25,14 @@ class TSMixup(SemiSyntheticGenerator):
     >>> from neuralforecast.models import NHITS
     >>>
     >>> from metaforecast.synth import TSMixup
-    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.evaluation.cv import SeriesWiseSplit
     >>>
     >>>
     >>> # Loading and preparing data
     >>> df, *_ = M3.load('.', group='Monthly')
     >>>
     >>> horizon = 12
-    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>> train, test = SeriesWiseSplit.time_wise_split(df, horizon)
     >>>
     >>> # Data augmentation
     >>> tsgen = TSMixup(min_len=50, max_len=96, max_n_uids=7)

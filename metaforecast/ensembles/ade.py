@@ -6,8 +6,7 @@ from mlforecast import MLForecast
 from sklearn.multioutput import MultiOutputRegressor as MIMO
 from statsforecast import StatsForecast
 
-from metaforecast.ensembles.base import BaseADE
-from metaforecast.utils.normalization import Normalizations
+from metaforecast.ensembles.base import BaseADE, Normalizations
 
 DataFrameTuple = Tuple[pd.DataFrame, pd.DataFrame]
 DataFrameLike = Union[pd.DataFrame, DataFrameTuple]

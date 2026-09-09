@@ -25,14 +25,14 @@ class Scaling(SemiSyntheticTransformer):
     >>> from neuralforecast.models import NHITS
     >>>
     >>> from metaforecast.synth import Scaling
-    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.evaluation.cv import SeriesWiseSplit
     >>>
     >>>
     >>> # Loading and preparing data
     >>> df, *_ = M3.load('.', group='Monthly')
     >>>
     >>> horizon = 12
-    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>> train, test = SeriesWiseSplit.time_wise_split(df, horizon)
     >>>
     >>> # Data augmentation
     >>> tsgen = Scaling()

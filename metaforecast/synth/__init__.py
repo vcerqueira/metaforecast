@@ -4,6 +4,7 @@ from .generators.base import PURE_SYNTHETIC, SEMI_SYNTHETIC, TRANSFORMER
 from .generators.censor import CensorAugmentation
 from .generators.dba import DBA
 from .generators.dominant_shuffle import DominantShuffle
+from .generators.grasynda import Grasynda
 from .generators.homomorphic import HomomorphicAugmentation
 from .generators.jittering import Jittering
 from .generators.kernelsynth import KernelSynth
@@ -26,6 +27,7 @@ __all__ = [
     "AmplitudeModulation",
     "CensorAugmentation",
     "DominantShuffle",
+    "Grasynda",
     "HomomorphicAugmentation",
     "Jittering",
     "KernelSynth",

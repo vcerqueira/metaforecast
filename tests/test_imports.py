@@ -20,6 +20,7 @@ def test_synth_import():
     mod = importlib.import_module("metaforecast.synth")
     assert hasattr(mod, "KernelSynth")
     assert hasattr(mod, "Jittering")
+    assert hasattr(mod, "Grasynda")
     assert hasattr(mod, "OnlineDataAugmentation")
 
 
@@ -31,6 +32,24 @@ def test_longhorizon_import():
 def test_coseal_import():
     mod = importlib.import_module("metaforecast.coseal")
     assert hasattr(mod, "MetaARIMA")
+
+
+def test_evaluation_import():
+    mod = importlib.import_module("metaforecast.evaluation")
+    assert hasattr(mod, "SeriesWiseSplit")
+
+
+def test_evaluation_cv_import():
+    mod = importlib.import_module("metaforecast.evaluation.cv")
+    assert hasattr(mod, "SeriesWiseSplit")
+    assert hasattr(mod, "SeriesWiseHoldout")
+    assert hasattr(mod, "SeriesWiseRepeatedHoldout")
+    assert hasattr(mod, "SeriesWiseMonteCarlo")
+    assert hasattr(mod, "SeriesWiseKFold")
+    assert hasattr(mod, "SeriesWiseRepeatedKFold")
+    assert hasattr(mod, "SeriesWiseBootstrap")
+    assert hasattr(mod, "SeriesWiseRepeatedBootstrap")
+    assert hasattr(mod, "SeriesWiseNeuralForecast")
 
 
 def test_version():

@@ -6,7 +6,16 @@ from arch.bootstrap import MovingBlockBootstrap
 from statsmodels.tsa.api import STL
 
 from metaforecast.synth.generators.base import SemiSyntheticTransformer
-from metaforecast.utils.log import LogTransformation
+
+
+class _LogTransformation:
+    @staticmethod
+    def transform(x):
+        return np.sign(x) * np.log(np.abs(x) + 1)
+
+    @staticmethod
+    def inverse_transform(xt):
+        return np.sign(xt) * (np.exp(np.abs(xt)) - 1)
 
 
 class _SeasonalMBB:
@@ -47,7 +56,7 @@ class _SeasonalMBB:
         """
 
         if log:
-            y = LogTransformation.transform(y)
+            y = _LogTransformation.transform(y)
 
         try:
             stl = STL(y, period=seas_period).fit()
@@ -62,7 +71,7 @@ class _SeasonalMBB:
             synth_ts = y
 
         if log:
-            synth_ts = LogTransformation.inverse_transform(synth_ts)
+            synth_ts = _LogTransformation.inverse_transform(synth_ts)
 
         return synth_ts
 
@@ -92,14 +101,14 @@ class SeasonalMBB(SemiSyntheticTransformer):
     >>> from neuralforecast.models import NHITS
     >>>
     >>> from metaforecast.synth import SeasonalMBB
-    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.evaluation.cv import SeriesWiseSplit
     >>>
     >>>
     >>> # Loading and preparing data
     >>> df, *_ = M3.load('.', group='Monthly')
     >>>
     >>> horizon = 12
-    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>> train, test = SeriesWiseSplit.time_wise_split(df, horizon)
     >>>
     >>> # Data augmentation
     >>> tsgen = SeasonalMBB(seas_period=12)

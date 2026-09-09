@@ -160,7 +160,7 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
     >>> from neuralforecast import NeuralForecast
     >>> from neuralforecast.models import NHITS
     >>>
-    >>> from metaforecast.utils.data import DataUtils
+    >>> from metaforecast.evaluation.cv import SeriesWiseSplit
     >>> from metaforecast.synth import SeasonalMBB
     >>> from metaforecast.synth.callbacks import OnlineDataAugmentation
     >>>
@@ -170,7 +170,7 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
     >>>
     >>> horizon = 24
     >>>
-    >>> train, test = DataUtils.train_test_split(df, horizon)
+    >>> train, test = SeriesWiseSplit.time_wise_split(df, horizon)
     >>>
     >>> models = [NHITS(input_size=horizon,
     >>>                 h=horizon,

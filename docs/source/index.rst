@@ -66,6 +66,17 @@ Metalearning methods for selecting the best algorithm or configuration:
 :doc:`Go to API reference → <coseal>`
 
 
+Evaluation
+----------
+
+Evaluation tools for series-wise cross-validation:
+
+- Series-wise CV splitters (holdout, K-Fold, bootstrap, Monte Carlo)
+- NeuralForecast extension for training on a subset of series
+
+:doc:`Go to API reference → <evaluation>`
+
+
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
@@ -74,6 +85,7 @@ Metalearning methods for selecting the best algorithm or configuration:
    synth
    longhorizon
    coseal
+   evaluation
 
 .. toctree::
    :maxdepth: 1

@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from neuralforecast.losses.numpy import smape
+from sklearn.preprocessing import MinMaxScaler
 
 from metaforecast.ensembles.expert_loss import (
     AbsoluteLoss,
@@ -12,7 +13,6 @@ from metaforecast.ensembles.expert_loss import (
     PinballLoss,
     SquaredLoss,
 )
-from metaforecast.utils.normalization import Normalizations
 
 EXPERT_LOSS = {
     "square": SquaredLoss,
@@ -21,6 +21,25 @@ EXPERT_LOSS = {
     "absolute": AbsoluteLoss,
     "log": LogLoss,
 }
+
+
+class Normalizations:
+    """Min-max scaling helpers used to convert scores into ensemble weights."""
+
+    @staticmethod
+    def min_max_norm_vector(x: pd.Series) -> pd.Series:
+        if not isinstance(x, pd.Series):
+            x = pd.Series(x)
+
+        scaler = MinMaxScaler()
+        xn = scaler.fit_transform(x.values.reshape(-1, 1)).flatten()
+        return pd.Series(xn, index=x.index)
+
+    @classmethod
+    def normalize_and_proportion(cls, x):
+        """Min-max normalization followed by a convex proportion."""
+        nx = cls.min_max_norm_vector(x)
+        return nx / nx.sum()
 
 
 class ForecastingEnsemble(ABC):
