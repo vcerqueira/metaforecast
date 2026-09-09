@@ -32,3 +32,12 @@ Synthetic Data
 
    notebooks/06-synth-data_augmentation.ipynb
    notebooks/07-synth-online.ipynb
+
+
+Algorithm Selection (COSEAL)
+----------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   notebooks/08-metaarima.ipynb

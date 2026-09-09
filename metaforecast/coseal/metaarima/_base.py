@@ -44,6 +44,60 @@ from tsfeatures import (
 
 warnings.filterwarnings(action="ignore")
 
+BEST_CATBOOST_PARAMS = {
+    'monthly': {'bootstrap_type': 'Bernoulli',
+                'border_count': 32,
+                'depth': 4,
+                'eval_metric': 'MultiRMSE',
+                'iterations': 283,
+                'l2_leaf_reg': 16.732679992180078,
+                'leaf_estimation_iterations': 2,
+                'learning_rate': 0.04248616344796388,
+                'loss_function': 'MultiRMSE',
+                'model_size_reg': 2.0916597401644705,
+                'od_type': 'Iter',
+                'od_wait': 60,
+                'random_seed': 42,
+                'rsm': 0.6406208143252348,
+                'task_type': 'CPU',
+                'use_best_model': False,
+                'verbose': False},
+    'quarterly': {'bootstrap_type': 'Bernoulli',
+                  'border_count': 32,
+                  'depth': 4,
+                  'eval_metric': 'MultiRMSE',
+                  'iterations': 266,
+                  'l2_leaf_reg': 6.032217388079633,
+                  'leaf_estimation_iterations': 2,
+                  'learning_rate': 0.05961229266653637,
+                  'loss_function': 'MultiRMSE',
+                  'model_size_reg': 0.6153682157721689,
+                  'od_type': 'Iter',
+                  'od_wait': 20,
+                  'random_seed': 42,
+                  'rsm': 0.6992272121986959,
+                  'task_type': 'CPU',
+                  'use_best_model': False,
+                  'verbose': False},
+    'yearly': {'bootstrap_type': 'Bernoulli',
+               'border_count': 64,
+               'depth': 4,
+               'eval_metric': 'MultiRMSE',
+               'iterations': 300,
+               'l2_leaf_reg': 5.903373826675397,
+               'leaf_estimation_iterations': 2,
+               'learning_rate': 0.05544986984539306,
+               'loss_function': 'MultiRMSE',
+               'model_size_reg': 1.5546708502742612,
+               'od_type': 'Iter',
+               'od_wait': 70,
+               'random_seed': 42,
+               'rsm': 0.8381786985397336,
+               'task_type': 'CPU',
+               'use_best_model': False,
+               'verbose': False}
+}
+
 FEATURE_ORDER = [
     "hurst",
     "series_length",
@@ -97,11 +151,11 @@ ORDER_MAX_NONSEASONAL = {"AR": 4, "I": 1, "MA": 4, "S_AR": 0, "S_I": 0, "S_MA": 
 
 
 def tsfeatures_uid(
-    uid_df: pd.DataFrame,
-    freq: int,
-    impute_seas: bool = False,
-    target_col: str = "y",
-    id_col: str = "unique_id",
+        uid_df: pd.DataFrame,
+        freq: int,
+        impute_seas: bool = False,
+        target_col: str = "y",
+        id_col: str = "unique_id",
 ) -> pd.DataFrame:
     """Extract tsfeatures for a single time series.
 
@@ -190,11 +244,11 @@ class MetaARIMAUtils:
 
     @classmethod
     def get_models_sf(
-        cls,
-        season_length: int,
-        return_names: bool = False,
-        max_config: Dict | None = None,
-        alias_list: List[str] | None = None,
+            cls,
+            season_length: int,
+            return_names: bool = False,
+            max_config: Dict | None = None,
+            alias_list: List[str] | None = None,
     ) -> list:
         """Enumerate all ARIMA configurations up to ``max_config``.
 
@@ -280,7 +334,7 @@ class MetaARIMAUtils:
         """
         mean_test = stats.ttest_1samp(residuals, 0).pvalue
 
-        squared_resid = residuals**2
+        squared_resid = residuals ** 2
         trend = np.arange(len(residuals))
         bp_test = stats.linregress(trend, squared_resid).pvalue
 
@@ -294,7 +348,6 @@ class MetaARIMAUtils:
             "normality": jb_test,
             "no_autocorrelation": lb_test,
         }
-
 
 
 class _MetaARIMABase:
@@ -355,15 +408,15 @@ class _HalvingMetaARIMABase(_MetaARIMABase):
     """
 
     def __init__(
-        self,
-        config_space: List[str],
-        season_length: int,
-        freq: str,
-        eta: float = 2,
-        resource_factor: float = 2,
-        init_resource_factor: int = 4,
-        min_configs: int = 1,
-        eval_mstl: bool = False,
+            self,
+            config_space: List[str],
+            season_length: int,
+            freq: str,
+            eta: float = 2,
+            resource_factor: float = 2,
+            init_resource_factor: int = 4,
+            min_configs: int = 1,
+            eval_mstl: bool = False,
     ):
         super().__init__(config_space, season_length, freq)
         self.eta = eta
@@ -374,7 +427,7 @@ class _HalvingMetaARIMABase(_MetaARIMABase):
         self.tot_nobs = 0
 
     def _evaluate_models(
-        self, df: pd.DataFrame, model_indices: List[int], sample_size: int
+            self, df: pd.DataFrame, model_indices: List[int], sample_size: int
     ) -> List[Tuple[int, float]]:
         df_subset = df.tail(sample_size).copy()
         models_subset = [self.models[i] for i in model_indices]
@@ -404,7 +457,7 @@ class _HalvingMetaARIMABase(_MetaARIMABase):
 
         self.tot_nobs = 0
         for s in range(s_max + 1):
-            sample_size = min(n_rows, int(min_sample_size * (self.resource_factor**s)))
+            sample_size = min(n_rows, int(min_sample_size * (self.resource_factor ** s)))
 
             eval_results = self._evaluate_models(df, remaining_indices, int(sample_size))
             self.tot_nobs += len(remaining_indices) * int(sample_size)
