@@ -33,6 +33,7 @@ dependencies = [
     "statsforecast==2.0.3",
     "mlforecast==1.0.2",
     "pytorch_lightning==2.5.6",
+    "tsfeatures==0.4.5",
 ]
 
 [project.optional-dependencies]

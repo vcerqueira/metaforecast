@@ -19,5 +19,5 @@ numpy==1.26.4
 numba==0.60.0
 statsmodels==0.14.2
 pytorch_lightning==2.5.6
-tsfeatures
+tsfeatures==0.4.5
 joblib
