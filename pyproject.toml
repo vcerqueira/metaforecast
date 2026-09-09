@@ -39,7 +39,6 @@ dependencies = [
 dev = [
     "ruff",
     "pytest",
-    "pre-commit",
     "bump-my-version",
 ]
 docs = [

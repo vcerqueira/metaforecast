@@ -36,9 +36,8 @@ To install metaforecast from source, clone the repository and run the following 
 
 ```bash
 git clone https://github.com/vcerqueira/metaforecast
-pip install -e metaforecast
 cd metaforecast
-pre-commit install
+pip install -e .
 ```
 
 ## Documentation
