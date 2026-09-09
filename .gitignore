@@ -170,3 +170,4 @@ scripts/
 dist/
 m3/
 agent-workflow/
+catboost_info/

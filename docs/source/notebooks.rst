@@ -41,3 +41,4 @@ Algorithm Selection (COSEAL)
    :maxdepth: 1
 
    notebooks/08-metaarima.ipynb
+   notebooks/09-metaarima-vs-autoarima.ipynb

@@ -27,6 +27,7 @@ import gzip
 import io
 import sys
 import warnings
+from pathlib import Path
 from typing import List
 
 import joblib
@@ -80,12 +81,16 @@ class MetaARIMA:
 
     Examples
     --------
-    **Load a pre-trained model and run inference:**
+    **Load a pre-trained model by frequency and run inference:**
 
     >>> from metaforecast.coseal import MetaARIMA
-    >>> meta = MetaARIMA.load("trained_metaarima_m4_monthly.joblib.gz")
+    >>> meta = MetaARIMA.load(freq="ME")
     >>> meta.fit(train_df, freq="ME", seas_length=12)
     >>> forecast = meta.predict(h=12)
+
+    **Load from a custom path:**
+
+    >>> meta = MetaARIMA.load(path="my_models/custom_metaarima.joblib.gz")
 
     **Train from scratch:**
 
@@ -262,22 +267,50 @@ class MetaARIMA:
             joblib.dump(self, f)
 
     @staticmethod
-    def load(path: str) -> MetaARIMA:
-        """Load a pre-trained MetaARIMA from disk.
+    def load(
+        path: str | None = None,
+        freq: str | None = None,
+    ) -> MetaARIMA:
+        """Load a pre-trained MetaARIMA.
 
-        Handles models saved with either the current module paths or the
-        legacy ``src.meta.arima.*`` paths from the experiments directory.
+        Provide **either** ``freq`` to load a bundled pretrained model,
+        or ``path`` to load from an arbitrary file.  Exactly one of the
+        two must be given.
 
         Parameters
         ----------
-        path : str
-            Path to a ``.joblib.gz`` file produced by :meth:`save` (or
-            the legacy ``ModelIO.save_model``).
+        path : str, optional
+            Path to a ``.joblib.gz`` file produced by :meth:`save`.
+        freq : str, optional
+            Pandas frequency alias.  Monthly (``'ME'``, ``'MS'``,
+            ``'M'``), quarterly (``'QE'``, ``'QS'``, ``'Q'``), and
+            yearly (``'YE'``, ``'YS'``, ``'Y'``, ``'A'``) variants
+            are supported and map to the corresponding pretrained model.
 
         Returns
         -------
         MetaARIMA
+
+        Raises
+        ------
+        ValueError
+            If both or neither arguments are given, or if ``freq`` does
+            not map to an available pretrained model.
+        FileNotFoundError
+            If the resolved file does not exist.
+
+        Examples
+        --------
+        >>> meta = MetaARIMA.load(freq="ME")       # monthly
+        >>> meta = MetaARIMA.load(freq="QS")       # quarterly
+        >>> meta = MetaARIMA.load(path="custom.joblib.gz")
         """
+        if (path is None) == (freq is None):
+            raise ValueError("Provide exactly one of 'path' or 'freq'.")
+
+        if freq is not None:
+            path = str(_resolve_pretrained(freq))
+
         with gzip.open(path, "rb") as f:
             data = f.read()
 
@@ -357,6 +390,47 @@ class MetaARIMA:
 
         return selected_indices
 
+
+# -- Pretrained model resolution -----------------------------------------------
+
+_PRETRAINED_DIR = Path(__file__).parent / "pretrained"
+
+_FREQ_TO_MODEL: dict[str, str] = {
+    # Monthly
+    "ME": "m4_monthly.joblib.gz",
+    "MS": "m4_monthly.joblib.gz",
+    "M": "m4_monthly.joblib.gz",
+    # Quarterly
+    "QE": "m4_quarterly.joblib.gz",
+    "QS": "m4_quarterly.joblib.gz",
+    "Q": "m4_quarterly.joblib.gz",
+    "QE-DEC": "m4_quarterly.joblib.gz",
+    # Yearly / Annual
+    "YE": "m4_yearly.joblib.gz",
+    "YS": "m4_yearly.joblib.gz",
+    "Y": "m4_yearly.joblib.gz",
+    "A": "m4_yearly.joblib.gz",
+    "YE-DEC": "m4_yearly.joblib.gz",
+}
+
+_AVAILABLE_FREQS = sorted(set(_FREQ_TO_MODEL.values()))
+
+
+def _resolve_pretrained(freq: str) -> Path:
+    """Map a frequency alias to a pretrained model file path."""
+    filename = _FREQ_TO_MODEL.get(freq.upper())
+    if filename is None:
+        raise ValueError(
+            f"No pretrained model for freq={freq!r}. "
+            f"Available frequency aliases: {sorted(_FREQ_TO_MODEL.keys())}"
+        )
+    path = _PRETRAINED_DIR / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Pretrained model not found at {path}. Expected file: {filename}")
+    return path
+
+
+# -- Legacy pickle support -----------------------------------------------------
 
 _MODULE_REMAP = {
     "src.meta.arima.meta_arima": "metaforecast.coseal.metaarima.meta_arima",

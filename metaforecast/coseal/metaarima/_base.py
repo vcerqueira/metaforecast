@@ -44,7 +44,7 @@ from tsfeatures import (
 
 warnings.filterwarnings(action="ignore")
 
-BEST_CATBOOST_PARAMS = {
+CATBOOST_PARAMS = {
     'monthly': {'bootstrap_type': 'Bernoulli',
                 'border_count': 32,
                 'depth': 4,
