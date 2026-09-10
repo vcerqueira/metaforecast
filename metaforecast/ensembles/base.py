@@ -50,6 +50,8 @@ class ForecastingEnsemble(ABC):
 
     METADATA = ["unique_id", "ds", "y"]
     METADATA_NO_T = ["unique_id", "ds"]
+    # CV frames often also carry these; they are not ensemble members.
+    NON_MODEL_COLS = (*METADATA, "h", "cutoff", "horizon", "index")
 
     WINDOW_SIZE_BY_FREQ = {
         "H": 48,
@@ -340,8 +342,7 @@ class Mixture(ForecastingEnsemble):
         """
 
         if self.model_names is None:
-            self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [x for x in self.model_names if x not in [*self.METADATA, "h"]]
+            self.model_names = [c for c in insample_fcst.columns if c not in self.NON_MODEL_COLS]
 
         self._initialize_params(insample_fcst)
         self._set_n_models()
@@ -357,10 +358,7 @@ class Mixture(ForecastingEnsemble):
         for uid, fcst_uid in grouped_fcst:
             y = fcst_uid["y"].values
 
-            fcst_uid = fcst_uid.reset_index(drop=True)
-            fcst_uid = fcst_uid.drop(columns=self.METADATA)
-            if "h" in fcst_uid.columns:
-                fcst_uid = fcst_uid.drop(columns="h")
+            fcst_uid = fcst_uid.reset_index(drop=True)[self.model_names]
 
             self._initialize_params(fcst_uid)
 
@@ -385,10 +383,7 @@ class Mixture(ForecastingEnsemble):
 
         y = insample_fcst_["y"].values
 
-        fcst = insample_fcst_.reset_index(drop=True)
-        fcst = fcst.drop(columns=self.METADATA)
-        if "h" in fcst.columns:
-            fcst = fcst.drop(columns="h")
+        fcst = insample_fcst_.reset_index(drop=True)[self.model_names]
 
         self._update_mixture(fcst, y)
         self.weights = pd.DataFrame(self.weights, columns=self.model_names)

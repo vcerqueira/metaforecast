@@ -153,8 +153,7 @@ class ADE(BaseADE):
 
     def _fit(self, insample_fcst):
         if self.model_names is None:
-            self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [x for x in self.model_names if x not in [*self.METADATA, "h"]]
+            self.model_names = [c for c in insample_fcst.columns if c not in self.NON_MODEL_COLS]
 
         self._set_n_models()
 
@@ -402,7 +401,7 @@ class MLForecastADE(ADE):
 
         meta_model : object, optional
             Model used to predict ensemble members' errors.
-            If None, defaults to LightGBM with linear trees and default parameters.
+            If None, defaults to a CatBoost regressor.
 
         Notes
         -----

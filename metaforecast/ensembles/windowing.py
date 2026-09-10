@@ -160,8 +160,7 @@ class Windowing(ForecastingEnsemble):
 
         """
         if self.model_names is None:
-            self.model_names = insample_fcst.columns.to_list()
-            self.model_names = [x for x in self.model_names if x not in [*self.METADATA, "h"]]
+            self.model_names = [c for c in insample_fcst.columns if c not in self.NON_MODEL_COLS]
 
         self._set_n_models()
 
