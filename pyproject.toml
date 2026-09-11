@@ -17,15 +17,18 @@ keywords = [
 ]
 description = "Meta-learning and Data-centric Forecasting"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11,<3.14"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
 dependencies = [
-    "arch==7.2.0",
+    "arch==8.0.0",
+    "pandas>=3,<4",
     "catboost==1.2.10",
     "tslearn==0.6.4",
     "utilsforecast==0.2.15",
@@ -62,7 +65,7 @@ packages = ["metaforecast"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py311"
 exclude = [
     ".git",
     ".venv",
@@ -86,12 +89,12 @@ select = [
 ]
 ignore = [
     "E501",    # line length (handled by formatter)
-    "B905",    # zip without strict= (py3.9 compat)
+    "B905",    # zip without strict=
     "B008",    # function calls in default args (common in ML APIs)
     "RUF012",  # mutable class-level defaults (ubiquitous in data science code)
     "RUF001",  # ambiguous unicode characters (false positive on en-dash in copyright)
-    "UP006",   # deprecated typing generics — keep py3.9 compat
-    "UP035",   # deprecated typing imports — keep py3.9 compat
+    "UP006",   # keep existing typing generics
+    "UP035",   # keep existing typing imports
 ]
 
 [tool.ruff.lint.isort]
