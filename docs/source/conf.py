@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "metaforecast"
 copyright = "2024–2026, Vitor Cerqueira"
 author = "Vitor Cerqueira"
-release = "0.2.3"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 
