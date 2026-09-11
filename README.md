@@ -1,5 +1,9 @@
 # metaforecast
 
+<p align="center">
+  <img src="cover.png" alt="metaforecast">
+</p>
+
 [![PyPi Version](https://img.shields.io/pypi/v/metaforecast)](https://pypi.org/project/metaforecast/)
 [![Documentation Status](https://readthedocs.org/projects/metaforecast/badge/?version=latest)](https://metaforecast.readthedocs.io/en/latest/?badge=latest)
 [![GitHub](https://img.shields.io/github/stars/vcerqueira/metaforecast?style=social)](https://github.com/vcerqueira/metaforecast)
