@@ -426,15 +426,15 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
             cv_ = cv[[*self._EVAL_BASE_COLS, m, f"{m}(FTN)"]]
 
             eval_by_horizon = {}
+            ftn_name = f"{m}(FTN)"
             for h_, h_df in cv_.groupby("horizon"):
-                h_df = evaluate(df=h_df, metrics=[smape])
-                h_df_avg = h_df.drop(columns=["horizon", "metric", "unique_id"]).mean()
+                h_df = evaluate(df=h_df, metrics=[smape], models=[m, ftn_name])
+                h_df_avg = h_df.drop(columns=["metric", "unique_id"], errors="ignore").mean()
 
                 eval_by_horizon[h_] = h_df_avg
 
             h_eval_df = pd.DataFrame(eval_by_horizon).T
-
-            horizon_weights = h_eval_df.apply(lambda x: 1 - softmax(x)[1], axis=1)
-            weights[m] = horizon_weights.values
+            scores = h_eval_df[[m, ftn_name]].to_numpy()
+            weights[m] = 1 - softmax(scores, axis=1)[:, 1]
 
         return weights

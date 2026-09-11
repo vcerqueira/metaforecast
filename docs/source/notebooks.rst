@@ -32,6 +32,7 @@ Synthetic Data
 
    notebooks/06-synth-data_augmentation.ipynb
    notebooks/07-synth-online.ipynb
+   notebooks/11-synth-generators.ipynb
 
 
 Algorithm Selection (COSEAL)
