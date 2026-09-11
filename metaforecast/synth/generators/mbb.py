@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 import pandas as pd
 from arch.bootstrap import MovingBlockBootstrap
@@ -130,9 +128,7 @@ class SeasonalMBB(SemiSyntheticTransformer):
     >>> fcst = nf.predict(df=train)
     """
 
-    def __init__(
-        self, seas_period: int, log: bool = True, max_samples_in_stl: Optional[int] = None
-    ):
+    def __init__(self, seas_period: int, log: bool = True, max_samples_in_stl: int | None = None):
         """Initialize seasonal moving blocks bootstrap transformer.
 
         Parameters

@@ -19,9 +19,9 @@ class Heteroskedasticity:
     """
 
     TESTS = {
-        'white': 'White',
-        'breuschpagan': 'Breusch-Pagan',
-        'breakvar': 'Goldfeld-Quandt',
+        "white": "White",
+        "breuschpagan": "Breusch-Pagan",
+        "breakvar": "Goldfeld-Quandt",
     }
 
     TEST_NAMES = [*TESTS.values()]
@@ -38,14 +38,16 @@ class Heteroskedasticity:
         Returns:
             float: p-value of the test.
         """
-        assert test in cls.TEST_NAMES, 'Unknown test'
+        assert test in cls.TEST_NAMES, "Unknown test"
 
         mod = cls.get_ols_model(series)
 
-        if test == 'White':
+        if test == "White":
             _, p_value, _, _ = sms.het_white(mod.resid, mod.model.exog)
-        elif test == 'Goldfeld-Quandt':
-            _, p_value, _ = sms.het_goldfeldquandt(mod.resid, mod.model.exog, alternative='two-sided')
+        elif test == "Goldfeld-Quandt":
+            _, p_value, _ = sms.het_goldfeldquandt(
+                mod.resid, mod.model.exog, alternative="two-sided"
+            )
         else:
             _, p_value, _, _ = sms.het_breuschpagan(mod.resid, mod.model.exog)
 
@@ -78,10 +80,10 @@ class Heteroskedasticity:
         """
 
         series = series.reset_index(drop=True).reset_index()
-        series.columns = ['time', 'value']
-        series['time'] += 1
+        series.columns = ["time", "value"]
+        series["time"] += 1
 
-        olsr = ols('value ~ time', series).fit()
+        olsr = ols("value ~ time", series).fit()
 
         return olsr
 

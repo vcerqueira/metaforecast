@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Tuple
 
 import pandas as pd
 from catboost import CatBoostRegressor
@@ -9,7 +9,7 @@ from statsforecast import StatsForecast
 from metaforecast.ensembles.base import BaseADE, Normalizations
 
 DataFrameTuple = Tuple[pd.DataFrame, pd.DataFrame]
-DataFrameLike = Union[pd.DataFrame, DataFrameTuple]
+DataFrameLike = pd.DataFrame | DataFrameTuple
 
 
 class ADE(BaseADE):
@@ -95,7 +95,7 @@ class ADE(BaseADE):
     def __init__(
         self,
         freq: str,
-        meta_lags: Optional[List[int]] = None,
+        meta_lags: List[int] | None = None,
         trim_ratio: float = 1,
         trim_by_uid: bool = True,
         meta_model=MIMO(CatBoostRegressor(**_CB_PARS)),
@@ -375,7 +375,7 @@ class MLForecastADE(ADE):
     def __init__(
         self,
         mlf: MLForecast,
-        sf: Optional[StatsForecast] = None,
+        sf: StatsForecast | None = None,
         trim_ratio: float = 1,
         meta_model=MIMO(CatBoostRegressor(**ADE._CB_PARS)),
     ):

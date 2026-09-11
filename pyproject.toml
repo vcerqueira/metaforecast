@@ -17,12 +17,13 @@ keywords = [
 ]
 description = "Meta-learning and Data-centric Forecasting"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.11,<3.14"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
 ]
 
@@ -37,6 +38,7 @@ dependencies = [
     "mlforecast==1.0.2",
     "pytorch_lightning==2.5.6",
     "tsfeatures==0.4.5",
+    "pandas-stubs~=3.0.5",
 ]
 
 [project.optional-dependencies]

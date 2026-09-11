@@ -125,70 +125,67 @@ class TSMixup(SemiSyntheticGenerator):
         """
         self._assert_datatypes(df)
 
-        unq_uids = df[self.id_col].unique()
+        y_by_uid, ds_by_uid, lengths = self._index_series(df)
+        n_pool = len(y_by_uid)
+        if n_pool == 0:
+            raise ValueError("df contains no series to mix")
 
         if n_series < 0:
-            n_series = len(unq_uids)
+            n_series = n_pool
 
-        dataset = []
+        uid_chunks = []
+        ds_chunks = []
+        y_chunks = []
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
-
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()  # noqa: F841 (used via @selected_uids in query)
-
-            df_uids = df.query("unique_id == @selected_uids")
-
-            ts_df = self._create_synthetic_ts(df_uids)
-            ts_df[self.id_col] = f"{self.alias}_{self.counter}"
+            chosen = np.unique(np.random.choice(n_pool, n_uids, replace=True))
+            ds, y = self._mix_series(y_by_uid, ds_by_uid, lengths, chosen)
+            uid_chunks.append(np.full(len(y), f"{self.alias}_{self.counter}", dtype=object))
+            ds_chunks.append(ds)
+            y_chunks.append(y)
             self.counter += 1
 
-            dataset.append(ts_df)
+        return pd.DataFrame(
+            {
+                self.id_col: np.concatenate(uid_chunks),
+                self.time_col: np.concatenate(ds_chunks),
+                self.target_col: np.concatenate(y_chunks),
+            }
+        )
 
-        synth_df = pd.concat(dataset).reset_index(drop=True)
-
-        return synth_df
+    def _index_series(self, df: pd.DataFrame):
+        """Split the panel into per-series NumPy arrays (one groupby)."""
+        y_by_uid = []
+        ds_by_uid = []
+        lengths = []
+        for _, uid_df in df.groupby(self.id_col, sort=False):
+            y_by_uid.append(uid_df[self.target_col].to_numpy())
+            ds_by_uid.append(uid_df[self.time_col].to_numpy())
+            lengths.append(len(uid_df))
+        return y_by_uid, ds_by_uid, np.asarray(lengths)
 
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+        y_by_uid, ds_by_uid, lengths = self._index_series(df)
+        ds, y = self._mix_series(y_by_uid, ds_by_uid, lengths, np.arange(len(y_by_uid)))
+        return pd.DataFrame({self.time_col: ds, self.target_col: y})
 
-        uids = df[self.id_col].unique()
-
-        smallest_n = df[self.id_col].value_counts().min()
-
-        max_len_ = smallest_n if smallest_n < self.max_len else self.max_len
-        min_len_ = smallest_n if smallest_n < self.min_len else self.min_len
+    def _mix_series(self, y_by_uid, ds_by_uid, lengths, chosen: np.ndarray):
+        """Weighted mix of the series indexed by ``chosen``."""
+        smallest_n = int(lengths[chosen].min())
+        max_len_ = min(smallest_n, self.max_len)
+        min_len_ = min(smallest_n, self.min_len)
 
         if self.min_len == self.max_len:
             n_obs = min_len_
         elif max_len_ < min_len_:
             n_obs = max_len_
         else:
-            n_obs = np.random.randint(min_len_, max_len_ + 1)
+            n_obs = int(np.random.randint(min_len_, max_len_ + 1))
 
-        w = self.sample_weights_dirichlet(self.dirichlet_alpha, len(uids))
+        weights = self.sample_weights_dirichlet(self.dirichlet_alpha, len(chosen))
+        y = np.zeros(n_obs, dtype=float)
+        for weight, idx in zip(weights, chosen, strict=True):
+            start = int(np.random.randint(0, lengths[idx] - n_obs + 1))
+            y += weight * y_by_uid[idx][start : start + n_obs]
 
-        ds = df.query(f'{self.id_col}=="{uids[0]}"').head(n_obs)[self.time_col].values
-
-        mixup = []
-        for j, k in enumerate(uids):
-            df_j = df.query(f'{self.id_col}=="{k}"')
-
-            start_idx = np.random.randint(0, df_j.shape[0] - n_obs + 1)
-
-            uid_df = df_j.iloc[start_idx : start_idx + n_obs]
-
-            uid_y = uid_df[self.target_col].reset_index(drop=True)
-
-            uid_y *= w[j]
-
-            mixup.append(uid_y)
-
-        y = pd.concat(mixup, axis=1).sum(axis=1).values
-
-        synth_df = pd.DataFrame(
-            {
-                self.time_col: ds,
-                self.target_col: y,
-            }
-        )
-
-        return synth_df
+        return ds_by_uid[chosen[0]][:n_obs], y

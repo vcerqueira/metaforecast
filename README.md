@@ -57,3 +57,13 @@ You can get started with a few [tutorials](https://metaforecast.readthedocs.io/e
 > The codebase may undergo significant changes.
 > If you encounter any issues, please report
 > them in [GitHub Issues](https://github.com/vcerqueira/metaforecast/issues)
+
+## License
+
+metaforecast is dual-licensed.
+
+- **AGPL-3.0-or-later** for open-source use. You may use, modify, and share the
+  source. If you distribute a modified version or run one in production, you
+  must make the corresponding source available.
+
+See [LICENSE](LICENSE) for the full terms.

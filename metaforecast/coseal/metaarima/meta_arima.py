@@ -25,7 +25,6 @@ from __future__ import annotations
 import copy
 import gzip
 import io
-import sys
 import warnings
 from pathlib import Path
 from typing import List
@@ -317,9 +316,11 @@ class MetaARIMA:
         buf = io.BytesIO(data)
         try:
             return joblib.load(buf)
-        except ModuleNotFoundError:
-            buf.seek(0)
-            return _load_legacy(buf)
+        except ModuleNotFoundError as exc:
+            raise ModuleNotFoundError(
+                "Could not unpickle this MetaARIMA file. "
+                "It may have been saved with an older package layout."
+            ) from exc
 
     def _fit_on_configs(self, df: pd.DataFrame, config_space: List[str]):
         assert self.is_fit

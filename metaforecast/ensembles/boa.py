@@ -27,7 +27,7 @@ import pandas as pd
 
 from metaforecast.ensembles.base import Mixture
 
-RowIdentifierType = typing.Union[int, typing.Hashable]
+RowIdentifierType = int | typing.Hashable
 
 
 class BOA(Mixture):

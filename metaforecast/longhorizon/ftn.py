@@ -1,6 +1,6 @@
 import copy
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List
 from warnings import simplefilter
 
 import numpy as np
@@ -394,7 +394,7 @@ class MLForecastFTN(ForecastTrajectoryNeighbors):
 
         return fcst_ftn_df
 
-    def alpha_cv_scoring(self, cv: pd.DataFrame, model_names: Optional[List[str]] = None):
+    def alpha_cv_scoring(self, cv: pd.DataFrame, model_names: List[str] | None = None):
         """Compute optimal FTN combination weights using validation data.
 
         Uses cross-validation or validation results to determine optimal

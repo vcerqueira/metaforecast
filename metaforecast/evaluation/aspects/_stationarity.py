@@ -1,12 +1,12 @@
 import warnings
 
 import pandas as pd
-from statsmodels.tsa.stattools import kpss, adfuller
-from statsmodels.tsa.api import STL
-from statsmodels.tools.sm_exceptions import InterpolationWarning
 from arch.unitroot import PhillipsPerron
+from statsmodels.tools.sm_exceptions import InterpolationWarning
+from statsmodels.tsa.api import STL
+from statsmodels.tsa.stattools import adfuller, kpss
 
-warnings.simplefilter('ignore', InterpolationWarning)
+warnings.simplefilter("ignore", InterpolationWarning)
 
 
 class DifferencingTests:
@@ -31,21 +31,17 @@ class DifferencingTests:
     """
 
     NSDIFF_TESTS = {
-        'seas': 'Wang-Smith-Hyndman',
-        'ocsb': 'OCSB',
+        "seas": "Wang-Smith-Hyndman",
+        "ocsb": "OCSB",
         # 'ch': 'Canova-Hansen'
     }
 
-    NDIFF_TESTS = {
-        'kpss': 'KPSS',
-        'adf': 'Augmented Dickey-Fuller',
-        'pp': 'Philips-Perron'
-    }
+    NDIFF_TESTS = {"kpss": "KPSS", "adf": "Augmented Dickey-Fuller", "pp": "Philips-Perron"}
 
-    TEST_TYPES = ['trend', 'level']
+    TEST_TYPES = ["trend", "level"]
 
     @staticmethod
-    def nsdiffs(series: pd.Series, period: int, test: str = 'seas') -> int:
+    def nsdiffs(series: pd.Series, period: int, test: str = "seas") -> int:
         """
         Estimate number of seasonal differences required for seasonal stationarity.
 
@@ -64,9 +60,11 @@ class DifferencingTests:
         """
 
         if test not in DifferencingTests.NSDIFF_TESTS:
-            raise ValueError(f"Unknown test type. Must be one of {[*DifferencingTests.NSDIFF_TESTS]}")
+            raise ValueError(
+                f"Unknown test type. Must be one of {[*DifferencingTests.NSDIFF_TESTS]}"
+            )
 
-        if test == 'seas':
+        if test == "seas":
             n_diffs = DifferencingTests._wang_smith_hyndman_test(series, period)
         else:
             n_diffs = DifferencingTests._ocsb_test(series, period)
@@ -74,7 +72,7 @@ class DifferencingTests:
         return n_diffs
 
     @staticmethod
-    def ndiffs(series: pd.Series, test: str = 'kpss', test_type: str = 'trend') -> int:
+    def ndiffs(series: pd.Series, test: str = "kpss", test_type: str = "trend") -> int:
         """
         Estimate number of differences required for non-seasonal stationarity.
 
@@ -92,7 +90,9 @@ class DifferencingTests:
         int : Recommended number of differences.
         """
         if test not in DifferencingTests.NDIFF_TESTS:
-            raise ValueError(f"Unknown test type. Must be one of {[*DifferencingTests.NDIFF_TESTS]}")
+            raise ValueError(
+                f"Unknown test type. Must be one of {[*DifferencingTests.NDIFF_TESTS]}"
+            )
 
         if test_type not in DifferencingTests.TEST_TYPES:
             raise ValueError(f"Unknown test_type. Must be one of {DifferencingTests.TEST_TYPES}")
@@ -113,17 +113,17 @@ class DifferencingTests:
     def _check_stationarity(series: pd.Series, test: str, test_type: str) -> bool:
         """Check if series is stationary using specified test"""
 
-        if test == 'kpss':
-            regression = 'ct' if test_type == 'trend' else 'c'
+        if test == "kpss":
+            regression = "ct" if test_type == "trend" else "c"
             _, p_value, *_ = kpss(series, regression=regression)
             return p_value > 0.05
 
-        if test == 'adf':
-            regression = 'ct' if test_type == 'trend' else 'c'
+        if test == "adf":
+            regression = "ct" if test_type == "trend" else "c"
             _, p_value, *_ = adfuller(series, regression=regression)
             return p_value < 0.05
 
-        regression = 'ct' if test_type == 'trend' else 'c'
+        regression = "ct" if test_type == "trend" else "c"
         test = PhillipsPerron(y=series, trend=regression)
         return test.pvalue < 0.05
 

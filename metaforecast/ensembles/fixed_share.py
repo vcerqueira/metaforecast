@@ -28,7 +28,7 @@ import pandas as pd
 
 from metaforecast.ensembles.base import EXPERT_LOSS, Mixture
 
-RowIdentifierType = typing.Union[int, typing.Hashable]
+RowIdentifierType = int | typing.Hashable
 
 
 class FixedShare(Mixture):

@@ -1,0 +1,81 @@
+DUAL LICENSE AGREEMENT
+
+Open Source License (AGPL 3.0)
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public
+License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see https://www.gnu.org/licenses/.
+
+Additional Terms for Open Source License
+
+Any modified version of this software that is publicly distributed, made
+available, or used in production must make the complete corresponding
+source code available to users.
+
+If you modify and distribute this software, you must include a prominent
+notice stating that you have modified the software and the date of any
+change.
+
+
+Commercial License
+
+Vitor Cerqueira ("Licensor") provides an alternative Commercial License
+for users who wish to use metaforecast without the requirements of the
+AGPL 3.0 license.
+
+1. GRANT OF LICENSE
+
+Subject to the terms of this Agreement and payment of applicable license
+fees, Licensor grants to you ("Licensee") a non-exclusive,
+non-transferable license to use metaforecast ("Software").
+
+2. SCOPE OF LICENSE
+
+This Commercial License permits Licensee to:
+
+- Use the Software for commercial purposes
+- Incorporate the Software into proprietary applications
+- Modify the Software without obligation to release source code
+- Deploy the Software in production environments
+
+3. COMMERCIAL LICENSING
+
+For information regarding commercial licensing terms, pricing, and
+payment options, interested parties should contact:
+
+cerqueira.vitormanuel@gmail.com
+
+4. TERM AND TERMINATION
+
+This license shall remain in effect until terminated. Licensor may
+terminate this license if Licensee fails to comply with any term or
+condition of this Agreement.
+
+5. WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. GENERAL
+
+This Agreement constitutes the entire agreement between the parties
+concerning the subject matter hereof.
+
+For commercial licensing inquiries, please contact:
+cerqueira.vitormanuel@gmail.com

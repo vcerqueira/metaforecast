@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pandas as pd
 
 from metaforecast.ensembles.base import ForecastingEnsemble
@@ -74,7 +72,7 @@ class Windowing(ForecastingEnsemble):
         select_best: bool = False,
         trim_ratio: float = 1,
         weight_by_uid: bool = False,
-        window_size: Optional[int] = None,
+        window_size: int | None = None,
     ):
         """Initialize window-based dynamic ensemble.
 

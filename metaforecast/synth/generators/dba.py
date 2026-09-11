@@ -122,46 +122,54 @@ class DBA(SemiSyntheticGenerator):
 
         self._assert_datatypes(df)
 
-        unq_uids = df[self.id_col].unique()
+        y_by_uid, ds_by_uid, lengths = self._index_series(df)
+        n_pool = len(y_by_uid)
+        if n_pool == 0:
+            raise ValueError("df contains no series to average")
 
         if n_series < 0:
-            n_series = len(unq_uids)
+            n_series = n_pool
 
-        dataset = []
+        uid_chunks = []
+        ds_chunks = []
+        y_chunks = []
         for _ in range(n_series):
             n_uids = np.random.randint(1, self.max_n_uids + 1)
-
-            selected_uids = np.random.choice(unq_uids, n_uids, replace=True).tolist()  # noqa: F841 (used via @selected_uids in query)
-
-            df_uids = df.query("unique_id == @selected_uids")
-
-            ts_df = self._create_synthetic_ts(df_uids)
-            ts_df[self.id_col] = f"{self.alias}_{self.counter}"
+            chosen = np.unique(np.random.choice(n_pool, n_uids, replace=True))
+            ds, y = self._average_series(y_by_uid, ds_by_uid, lengths, chosen)
+            uid_chunks.append(np.full(len(y), f"{self.alias}_{self.counter}", dtype=object))
+            ds_chunks.append(ds)
+            y_chunks.append(y)
             self.counter += 1
 
-            dataset.append(ts_df)
+        return pd.DataFrame(
+            {
+                self.id_col: np.concatenate(uid_chunks),
+                self.time_col: np.concatenate(ds_chunks),
+                self.target_col: np.concatenate(y_chunks),
+            }
+        )
 
-        synth_df = pd.concat(dataset).reset_index(drop=True)
-
-        return synth_df
+    def _index_series(self, df: pd.DataFrame):
+        """Split the panel into per-series NumPy arrays (one groupby)."""
+        y_by_uid = []
+        ds_by_uid = []
+        lengths = []
+        for _, uid_df in df.groupby(self.id_col, sort=False):
+            y_by_uid.append(uid_df[self.target_col].to_numpy())
+            ds_by_uid.append(uid_df[self.time_col].to_numpy())
+            lengths.append(len(uid_df))
+        return y_by_uid, ds_by_uid, np.asarray(lengths)
 
     def _create_synthetic_ts(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        """
-        Apply DBA to a time series dataset
+        y_by_uid, ds_by_uid, lengths = self._index_series(df)
+        ds, y = self._average_series(y_by_uid, ds_by_uid, lengths, np.arange(len(y_by_uid)))
+        return pd.DataFrame({self.time_col: ds, self.target_col: y})
 
-        :param df: time series dataset with a sample of unique_id's
-        :return: pd.DataFrame with synthetic time series
-        """
-        y_list = [y[self.target_col].values for _, y in df.groupby(self.id_col)]
-        uid_size = df[self.id_col].value_counts()
-
-        ds = df.query(f'{self.id_col}=="{uid_size.index[0]}"')[self.time_col].values
-
-        w = self.sample_weights_dirichlet(1, len(y_list))
-
-        synth_y = dtw(X=y_list, weights=w, max_iter=self.max_iter, tol=self.tol)
-        synth_y = synth_y.flatten()
-
-        synth_df = pd.DataFrame({self.time_col: ds[: len(synth_y)], self.target_col: synth_y})
-
-        return synth_df
+    def _average_series(self, y_by_uid, ds_by_uid, lengths, chosen: np.ndarray):
+        """DTW barycenter of the series indexed by ``chosen``."""
+        y_list = [y_by_uid[i] for i in chosen]
+        longest = chosen[int(np.argmax(lengths[chosen]))]
+        weights = self.sample_weights_dirichlet(self.dirichlet_alpha, len(y_list))
+        synth_y = dtw(X=y_list, weights=weights, max_iter=self.max_iter, tol=self.tol).flatten()
+        return ds_by_uid[longest][: len(synth_y)], synth_y

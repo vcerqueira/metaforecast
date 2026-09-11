@@ -1,6 +1,6 @@
 import copy
 import random
-from typing import List, Union
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ from metaforecast.synth.generators.base import (
     SemiSyntheticTransformer,
 )
 
-TSGenerator = Union[PureSyntheticGenerator, SemiSyntheticGenerator, SemiSyntheticTransformer]
+TSGenerator = PureSyntheticGenerator | SemiSyntheticGenerator | SemiSyntheticTransformer
 TSGeneratorList = List[TSGenerator]
 
 
@@ -184,9 +184,7 @@ class OnlineDataAugmentation(pl.Callback, BaseDataAugmentation):
 
     """
 
-    def __init__(
-        self, generator: Union[TSGenerator, TSGeneratorList], augment_on_valid: bool = False
-    ):
+    def __init__(self, generator: TSGenerator | TSGeneratorList, augment_on_valid: bool = False):
         """Initialize online data augmentation callback.
 
         Parameters
