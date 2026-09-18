@@ -61,6 +61,7 @@ class ForecastingEnsemble(ABC):
         "ME": 12,
         "MS": 12,
         "Q": 4,
+        "QE": 4,
         "QS": 4,
         "Y": 6,
         "": -1,

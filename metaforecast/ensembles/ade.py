@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
+import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
 from mlforecast import MLForecast
-from sklearn.multioutput import MultiOutputRegressor as MIMO
 from statsforecast import StatsForecast
 
-from metaforecast.ensembles.base import BaseADE, Normalizations
+from metaforecast.ensembles.base import BaseADE
 
 DataFrameTuple = Tuple[pd.DataFrame, pd.DataFrame]
 DataFrameLike = pd.DataFrame | DataFrameTuple
@@ -27,13 +27,17 @@ class ADE(BaseADE):
     ----------
     freq : str
         String denoting the sampling frequency of the time series (e.g. "MS").
+    h : int
+        Forecast horizon (number of future periods to predict).
+    meta_lags : int, list of int, or None
+        Lags to be used in the training of the meta-model.
+        If an integer ``n``, lags are set to ``list(range(1, n + 1))``.
+        If a list, follows the structure of mlforecast. Example: [1,2,3,8].
+        If None, ``n`` is taken from the frequency-based window size.
     trim_ratio : float, optional
         Ratio (0-1) of ensemble members to keep in the ensemble.
         (1-trim_ratio) of models will not be used during inference based on validation accuracy.
         Defaults to 1, which means all ensemble members are used.
-    meta_lags : list of int
-        List of lags to be used in the training of the meta-model.
-        Follows the structure of mlforecast. Example: [1,2,3,8].
     trim_by_uid : bool, optional
         Whether to trim the ensemble by unique_id (True) or dataset (False).
         Defaults to True, but this can become computationally demanding for datasets with
@@ -80,7 +84,7 @@ class ADE(BaseADE):
         >>> fcst_cv = fcst_cv.groupby(['unique_id', 'cutoff']).head(1).drop(columns='cutoff')
         >>>
         >>> # fitting combination rule
-        >>> ensemble = ADE(freq='ME', meta_lags=list(range(1,7)), trim_ratio=0.6)
+        >>> ensemble = ADE(freq='ME', h=12, meta_lags=list(range(1,7)), trim_ratio=0.6)
         >>> ensemble.fit(fcst_cv)
         >>>
         >>> # re-fitting models
@@ -88,21 +92,34 @@ class ADE(BaseADE):
         >>>
         >>> # forecasting and combining
         >>> fcst = nf.predict()
-        >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df, h=12)
+        >>> fcst_ensemble = ensemble.predict(fcst.reset_index(), train=df)
     """
 
-    _CB_PARS = {"verbose": 0, "allow_writing_files": False}
+    _CB_PARS = {
+        'eval_metric': 'MultiRMSE',
+        'loss_function': 'MultiRMSE',
+        'od_type': 'Iter',
+        'allow_writing_files': False,
+        'task_type': 'CPU',
+        'verbose': False
+    }
+
     _MLF_PREPROCESS_PARS = {"static_features": []}
 
     def __init__(
         self,
         freq: str,
-        meta_lags: List[int] | None = None,
+        h: int,
+        meta_lags: int | List[int] | None = None,
         trim_ratio: float = 1,
         trim_by_uid: bool = True,
-        meta_model=MIMO(CatBoostRegressor(**_CB_PARS)),
+        meta_model=None,
     ):
         self.frequency = freq
+        self.h = h
+
+        if meta_model is None:
+            meta_model = CatBoostRegressor(**self._CB_PARS)
 
         super().__init__(
             window_size=self.WINDOW_SIZE_BY_FREQ[self.frequency],
@@ -113,11 +130,15 @@ class ADE(BaseADE):
 
         self.model_names = None
 
-        if meta_lags is None:
-            n_lags = self.WINDOW_SIZE_BY_FREQ[self.frequency]
-            self.meta_lags = list((1, n_lags + 1))
+        if self._is_lag_count(meta_lags):
+            n_lags = (
+                int(meta_lags)
+                if meta_lags is not None
+                else self.WINDOW_SIZE_BY_FREQ[self.frequency]
+            )
+            self.meta_lags = list(range(1, n_lags + 1))
         else:
-            self.meta_lags = meta_lags
+            self.meta_lags = list(meta_lags)
 
         self.lag_names = [f"lag{i}" for i in self.meta_lags]
 
@@ -128,6 +149,12 @@ class ADE(BaseADE):
         self.insample_scores = None
         self.use_window = False
         self.weights = None
+
+    @staticmethod
+    def _is_lag_count(meta_lags) -> bool:
+        if meta_lags is None:
+            return True
+        return isinstance(meta_lags, (int, np.integer)) and not isinstance(meta_lags, bool)
 
     def fit(self, insample_fcst: pd.DataFrame, **kwargs):
         """fit
@@ -152,6 +179,7 @@ class ADE(BaseADE):
 
         """
         self._fit(insample_fcst)
+        return self
 
     def _fit(self, insample_fcst):
         if self.model_names is None:
@@ -177,7 +205,7 @@ class ADE(BaseADE):
 
         self.meta_model.fit(x, y)
 
-    def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, h: int, **kwargs):
+    def predict(self, fcst: pd.DataFrame, train: pd.DataFrame, **kwargs):
         """Combine ensemble member forecasts using the meta-model.
 
         Parameters
@@ -188,18 +216,16 @@ class ADE(BaseADE):
         train : pd.DataFrame
             Training dataset used to compute recent lags for meta-model input.
             Expected columns: ['unique_id', 'ds', 'y']
-        h : int
-            Forecast horizon (number of future periods to predict)
 
         Returns
         -------
         pd.Series
-            Combined ensemble forecasts for h periods ahead.
+            Combined ensemble forecasts for ``self.h`` periods ahead.
 
         """
         self._assert_fcst(fcst)
 
-        ade_fcst = self._predict(preds=fcst, train=train, h=h)
+        ade_fcst = self._predict(preds=fcst, train=train)
         ade_fcst.name = self.alias
 
         return ade_fcst
@@ -226,18 +252,33 @@ class ADE(BaseADE):
         """
         raise NotImplementedError
 
-    def _predict(self, preds: pd.DataFrame, train: pd.DataFrame, h: int):
-        df_ext = train.merge(preds, on=["unique_id", "ds"], how="outer")
-        df_ext = df_ext[self.METADATA]
-        df_ext["y"] = df_ext["y"].fillna(value=-1)
+    def _predict(self, preds: pd.DataFrame, train: pd.DataFrame):
+        # Append forecast timestamps so lag1 at the origin is the last actual y.
+        # MLForecast drops rows with null y even when dropna=False, so future y
+        # is filled with a dummy; we then keep only the first forecast row per
+        # series, whose lags still come from actuals.
+        timeline = (
+            train[self.METADATA]
+            .merge(preds[["unique_id", "ds"]], on=["unique_id", "ds"], how="outer")
+            .sort_values(["unique_id", "ds"])
+        )
+        timeline["y"] = timeline["y"].fillna(-1)
+        meta_dataset = self.meta_mlf.preprocess(timeline, **self._MLF_PREPROCESS_PARS)
 
-        meta_dataset = self.meta_mlf.preprocess(df_ext, **self._MLF_PREPROCESS_PARS)
+        origin = (
+            preds[["unique_id", "ds"]]
+            .sort_values(["unique_id", "ds"])
+            .groupby("unique_id", sort=False)
+            .head(1)
+        )
+        meta_at_origin = meta_dataset.merge(origin, on=["unique_id", "ds"])
 
-        self.weights = self._weights_by_uid(meta_dataset, h=h)
+        self.weights = self._weights_by_uid(meta_at_origin)
 
-        fcst = preds.apply(lambda x: self._weighted_average(x, self.weights), axis=1)
+        w = self.weights.reindex(preds["unique_id"].to_numpy())
+        fcst = (preds[self.model_names].to_numpy() * w[self.model_names].to_numpy()).sum(axis=1)
 
-        return fcst
+        return pd.Series(fcst, index=preds.index)
 
     def _get_insample_loss(self, insample_fcst: pd.DataFrame):
         """_get_insample_loss
@@ -250,22 +291,15 @@ class ADE(BaseADE):
         :return: pd.DataFrame with point-wise error scores of each ensemble member
         across the validation set
         """
-        in_sample_loss = []
-        in_sample_uid = insample_fcst.copy().groupby("unique_id")
-        for _, uid_df in in_sample_uid:
-            for mod in self.model_names:
-                uid_df[mod] = uid_df[mod] - uid_df["y"]
-
-            in_sample_loss.append(uid_df)
-
-        in_sample_loss_df = pd.concat(in_sample_loss)
+        loss_df = insample_fcst.copy()
+        loss_df[self.model_names] = loss_df[self.model_names].sub(loss_df["y"], axis=0)
 
         # first h forward
         # could average all horizons
-        if "h" in in_sample_loss_df.columns:
-            in_sample_loss_df = in_sample_loss_df.query("h==1").drop(columns=["h"])
+        if "h" in loss_df.columns:
+            loss_df = loss_df.query("h==1").drop(columns=["h"])
 
-        return in_sample_loss_df
+        return loss_df
 
     def _process_meta_data(self, meta_data: pd.DataFrame, return_X_y: bool = True) -> DataFrameLike:
         lag_locs = meta_data.columns.str.startswith("lag")
@@ -279,49 +313,56 @@ class ADE(BaseADE):
 
         return meta_df
 
-    def _weights_by_uid(self, df: pd.DataFrame, h: int, **kwargs):
+    def _weights_by_uid(self, df: pd.DataFrame, **kwargs):
         top_overall = self._get_top_k(self.insample_scores.mean())
         top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
 
-        uid_weights = {}
-        for uid, meta_uid_df in df.groupby("unique_id"):
-            if h > 1:
-                lags = meta_uid_df.head(-(h - 1)).tail(1)[self.lag_names]
-            else:
-                lags = meta_uid_df.tail(1)[self.lag_names]
+        latest = df.sort_values(["unique_id", "ds"]).groupby("unique_id", sort=False).tail(1)
+        lags = latest[self.lag_names]
+        meta_pred = pd.DataFrame(
+            self.meta_model.predict(lags),
+            columns=self.model_names,
+            index=pd.Index(latest["unique_id"].to_numpy(), name="unique_id"),
+        )
 
-            meta_pred = self.meta_model.predict(lags)
-            meta_pred = pd.DataFrame(meta_pred, columns=self.model_names)
+        weights = self._weights_from_errors(meta_pred)
+        keep = self._kept_models_mask(weights.index, top_overall, top_by_uid)
 
-            weights = self._weights_from_errors(meta_pred)
+        weights = weights.where(keep, 0.0)
+        row_sums = weights.sum(axis=1)
+        fallback = keep.div(keep.sum(axis=1).replace(0, np.nan), axis=0).fillna(0.0)
+        weights = weights.where(row_sums.gt(0), fallback)
+        weights = weights.div(weights.sum(axis=1).replace(0, np.nan), axis=0)
+        weights.index.name = "unique_id"
 
-            if self.trim_by_uid:
-                poor_models = [x not in top_by_uid[uid] for x in weights.index]
-            else:
-                poor_models = [x not in top_overall for x in weights.index]
+        return weights
 
-            weights[poor_models] = 0
-            weights /= weights.sum()
-
-            uid_weights[uid] = weights
-
-        weights_df = pd.DataFrame(uid_weights).T
-        weights_df.index.name = "unique_id"
-
-        return weights_df
+    def _kept_models_mask(
+        self,
+        uids: pd.Index,
+        top_overall: List[str],
+        top_by_uid: pd.Series,
+    ) -> pd.DataFrame:
+        keep = pd.DataFrame(False, index=uids, columns=self.model_names)
+        if self.trim_by_uid:
+            for uid in uids:
+                keep.loc[uid, top_by_uid[uid]] = True
+        else:
+            keep.loc[:, top_overall] = True
+        return keep
 
     def _reweight_by_redundancy(self):
         raise NotImplementedError
 
     @staticmethod
-    def _weights_from_errors(meta_predictions: pd.DataFrame) -> pd.Series:
-        e_hat = meta_predictions.abs()
-
-        weights = e_hat.apply(func=lambda x: Normalizations.normalize_and_proportion(-x), axis=1)
-
-        weight_s = weights.iloc[0]
-
-        return weight_s
+    def _weights_from_errors(meta_predictions: pd.DataFrame) -> pd.DataFrame:
+        neg = -meta_predictions.abs()
+        row_min = neg.min(axis=1)
+        span = neg.max(axis=1) - row_min
+        scaled = neg.sub(row_min, axis=0).div(span.replace(0, np.nan), axis=0)
+        n_models = scaled.shape[1]
+        scaled = scaled.fillna(1.0 / n_models)
+        return scaled.div(scaled.sum(axis=1), axis=0)
 
 
 class MLForecastADE(ADE):
@@ -367,19 +408,20 @@ class MLForecastADE(ADE):
     >>> mlf.fit(df=df, fitted=True)
     >>>
     >>> # fitting combination rule
-    >>> ensemble = MLForecastADE(mlf=mlf, trim_ratio=0.5)
+    >>> ensemble = MLForecastADE(mlf=mlf, h=12, trim_ratio=0.5)
     >>> ensemble.fit()
     >>>
-    >>> fcst = ensemble.predict(train=df, h=12)
+    >>> fcst = ensemble.predict(train=df)
 
     """
 
     def __init__(
         self,
         mlf: MLForecast,
+        h: int,
         sf: StatsForecast | None = None,
         trim_ratio: float = 1,
-        meta_model=MIMO(CatBoostRegressor(**ADE._CB_PARS)),
+        meta_model=None,
     ):
         """Initialize the Arbitrated Dynamic Ensemble with MLForecast models.
 
@@ -389,6 +431,9 @@ class MLForecastADE(ADE):
             Fitted MLForecast object containing ensemble members.
             Must be initialized with fitted=True to generate the meta-dataset
             for error prediction.
+
+        h : int
+            Forecast horizon (number of future periods to predict).
 
         sf : StatsForecast, optional
             StatsForecast object containing classical forecasting models to be
@@ -417,6 +462,7 @@ class MLForecastADE(ADE):
 
         super().__init__(
             freq=self.frequency,
+            h=h,
             trim_ratio=trim_ratio,
             meta_model=meta_model,
             meta_lags=self.mlf.ts.lags,
@@ -431,6 +477,11 @@ class MLForecastADE(ADE):
         3. Update model weights based on validation performance
         4. If trim_ratio < 1, selects top performing models
 
+        Returns
+        -------
+        self
+            self, with a fitted self.meta_model
+
         """
 
         insample_fcst = self.mlf.fcst_fitted_values_
@@ -444,8 +495,9 @@ class MLForecastADE(ADE):
             )
 
         self._fit(insample_fcst)
+        return self
 
-    def predict(self, train: pd.DataFrame, h: int, **kwargs):
+    def predict(self, train: pd.DataFrame, **kwargs):
         """Generate ensemble forecasts using weighted model combinations.
 
         Parameters
@@ -457,32 +509,20 @@ class MLForecastADE(ADE):
             - ds: Timestamp
             - y: Target variable
 
-        h : int
-            Forecast horizon (number of periods to predict ahead)
-
         Returns
         -------
         pd.Series
             Combined ensemble predictions.
 
         """
-        base_fcst = self.mlf.predict(h=h)
+        base_fcst = self.mlf.predict(h=self.h)
 
         if self.sf is not None:
-            base_fcst_sf = self.sf.predict(h=h)
+            base_fcst_sf = self.sf.predict(h=self.h)
 
             base_fcst = base_fcst.merge(base_fcst_sf, on=self.METADATA_NO_T)
 
-        fcst = self._predict(preds=base_fcst, train=train, h=h)
+        fcst = self._predict(preds=base_fcst, train=train)
+        fcst.name = self.alias
 
         return fcst
-
-    def update_weights(self, fcst: pd.DataFrame, **kwargs):
-        """Update performance statistics of ensemble members.
-
-        See :meth:`ADE.update_weights` for full documentation.
-        """
-        raise NotImplementedError
-
-    def _reweight_by_redundancy(self):
-        raise NotImplementedError
