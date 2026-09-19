@@ -53,7 +53,7 @@ class Ridge(Mixture):
         Passed through to ``Mixture`` (has no effect on the ridge update).
     trim_ratio : float, default 1.0
         Proportion of models to retain (1.0 keeps all).
-    weight_by_uid : bool, default False
+    weight_by_uid : bool, default True
         If True, maintain separate weights per series.
 
     Examples
@@ -76,7 +76,7 @@ class Ridge(Mixture):
         loss_type: str = "square",
         gradient: bool = False,
         trim_ratio: float = 1.0,
-        weight_by_uid: bool = False,
+        weight_by_uid: bool = True,
     ):
         super().__init__(
             loss_type=loss_type,

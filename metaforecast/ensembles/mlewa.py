@@ -87,7 +87,7 @@ class MLewa(Mixture):
         self,
         loss_type: str,
         gradient: bool,
-        weight_by_uid: bool = False,
+        weight_by_uid: bool = True,
         trim_ratio: float = 1,
     ):
         """Initialize online ensemble with exponential weighting strategy.
@@ -103,7 +103,7 @@ class MLewa(Mixture):
             - absolute: Mean absolute error
             - log: Log loss
 
-        gradient : bool, default=False
+        gradient : bool
             If True, use gradient for weight updates
 
         weight_by_uid : bool, default=True

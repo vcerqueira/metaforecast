@@ -96,12 +96,12 @@ class ADE(BaseADE):
     """
 
     _CB_PARS = {
-        'eval_metric': 'MultiRMSE',
-        'loss_function': 'MultiRMSE',
-        'od_type': 'Iter',
-        'allow_writing_files': False,
-        'task_type': 'CPU',
-        'verbose': False
+        "eval_metric": "MultiRMSE",
+        "loss_function": "MultiRMSE",
+        "od_type": "Iter",
+        "allow_writing_files": False,
+        "task_type": "CPU",
+        "verbose": False,
     }
 
     _MLF_PREPROCESS_PARS = {"static_features": []}
@@ -275,10 +275,7 @@ class ADE(BaseADE):
 
         self.weights = self._weights_by_uid(meta_at_origin)
 
-        w = self.weights.reindex(preds["unique_id"].to_numpy())
-        fcst = (preds[self.model_names].to_numpy() * w[self.model_names].to_numpy()).sum(axis=1)
-
-        return pd.Series(fcst, index=preds.index)
+        return self._combine_forecasts(preds, self.weights)
 
     def _get_insample_loss(self, insample_fcst: pd.DataFrame):
         """_get_insample_loss
@@ -314,9 +311,6 @@ class ADE(BaseADE):
         return meta_df
 
     def _weights_by_uid(self, df: pd.DataFrame, **kwargs):
-        top_overall = self._get_top_k(self.insample_scores.mean())
-        top_by_uid = self.insample_scores.apply(self._get_top_k, axis=1)
-
         latest = df.sort_values(["unique_id", "ds"]).groupby("unique_id", sort=False).tail(1)
         lags = latest[self.lag_names]
         meta_pred = pd.DataFrame(
@@ -326,30 +320,7 @@ class ADE(BaseADE):
         )
 
         weights = self._weights_from_errors(meta_pred)
-        keep = self._kept_models_mask(weights.index, top_overall, top_by_uid)
-
-        weights = weights.where(keep, 0.0)
-        row_sums = weights.sum(axis=1)
-        fallback = keep.div(keep.sum(axis=1).replace(0, np.nan), axis=0).fillna(0.0)
-        weights = weights.where(row_sums.gt(0), fallback)
-        weights = weights.div(weights.sum(axis=1).replace(0, np.nan), axis=0)
-        weights.index.name = "unique_id"
-
-        return weights
-
-    def _kept_models_mask(
-        self,
-        uids: pd.Index,
-        top_overall: List[str],
-        top_by_uid: pd.Series,
-    ) -> pd.DataFrame:
-        keep = pd.DataFrame(False, index=uids, columns=self.model_names)
-        if self.trim_by_uid:
-            for uid in uids:
-                keep.loc[uid, top_by_uid[uid]] = True
-        else:
-            keep.loc[:, top_overall] = True
-        return keep
+        return self._apply_trim(weights, by_uid=self.trim_by_uid, scores=self.insample_scores)
 
     def _reweight_by_redundancy(self):
         raise NotImplementedError

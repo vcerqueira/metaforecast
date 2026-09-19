@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 
 from metaforecast.ensembles.windowing import Windowing
@@ -53,38 +55,39 @@ class BestOnTrain(Windowing):
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
     """
 
-    def __init__(self, select_by_uid: bool = True):
+    def __init__(self, weight_by_uid: bool = True, select_by_uid: bool | None = None):
         """Initialize best model selector.
 
         Parameters
         ----------
-        select_by_uid : bool, default=True
+        weight_by_uid : bool, default=True
             Strategy for selecting best performing model:
             - True: Select best model separately for each series
             - False: Select single best model across all series
+        select_by_uid : bool, optional
+            Deprecated alias for ``weight_by_uid``.
 
         Notes
         -----
-        Per-series selection (select_by_uid=True) allows for more granular model
+        Per-series selection (weight_by_uid=True) allows for more granular model
         choice but requires sufficient data per series for reliable selection.
         Global selection may be more robust when individual series are short.
 
         """
+        if select_by_uid is not None:
+            weight_by_uid = select_by_uid
 
         super().__init__(
             freq="",
             select_best=True,
             trim_ratio=1,
-            weight_by_uid=select_by_uid,
+            weight_by_uid=weight_by_uid,
         )
 
         self.alias = "BestOnTrain"
 
         self.use_window = False
-        self.select_by_uid = select_by_uid
-
-    def update_weights(self, **kwargs):
-        raise NotImplementedError
+        self.select_by_uid = weight_by_uid
 
 
 class LossOnTrain(Windowing):
@@ -144,7 +147,7 @@ class LossOnTrain(Windowing):
 
     """
 
-    def __init__(self, trim_ratio: float, weight_by_uid: bool = True):
+    def __init__(self, trim_ratio: float = 1.0, weight_by_uid: bool = True):
         """Initialize static ensemble with training-based weights.
 
         Parameters
@@ -179,9 +182,6 @@ class LossOnTrain(Windowing):
         self.alias = "LossOnTrain"
 
         self.use_window = False
-
-    def update_weights(self, **kwargs):
-        raise NotImplementedError
 
 
 class EqAverage(Windowing):
@@ -240,23 +240,30 @@ class EqAverage(Windowing):
     >>> fcst_ensemble = ensemble.predict(fcst.reset_index())
     """
 
-    def __init__(self, trim_ratio: float = 1, select_by_uid: bool = True):
+    def __init__(
+        self,
+        trim_ratio: float = 1,
+        weight_by_uid: bool = True,
+        select_by_uid: bool | None = None,
+    ):
         """Initialize equal-weights ensemble with optional trimming.
 
         Parameters
         ----------
-        select_by_uid : bool, default=True
-            Strategy for model selection in trimming:
-            - True: Select best models separately for each series
-            - False: Select best models across all series
-            Per-series selection allows more granular model choice
-            but requires sufficient data per series.
-
         trim_ratio : float, default=1.0
             Proportion of models to retain in ensemble, between 0 and 1:
             - 1.0: Keep all models (simple average)
             - 0.5: Keep top 50% of models
             - Lower values create more selective ensembles
+
+        weight_by_uid : bool, default=True
+            Strategy for model selection in trimming:
+            - True: Select best models separately for each series
+            - False: Select best models across all series
+            Per-series selection allows more granular model choice
+            but requires sufficient data per series.
+        select_by_uid : bool, optional
+            Deprecated alias for ``weight_by_uid``.
 
         Notes
         -----
@@ -271,19 +278,19 @@ class EqAverage(Windowing):
         "Simple robust averages of forecasts: Some empirical results."
         International Journal of Forecasting, 24(1), 163-169.
         """
+        if select_by_uid is not None:
+            weight_by_uid = select_by_uid
+
         super().__init__(
             freq="",
             select_best=False,
             trim_ratio=trim_ratio,
-            weight_by_uid=select_by_uid,
+            weight_by_uid=weight_by_uid,
         )
 
         self.alias = "EqAverage"
 
         self.use_window = False
-
-    def update_weights(self, **kwargs):
-        raise NotImplementedError
 
     @staticmethod
     def _weights_from_errors(scores: pd.Series) -> pd.Series:

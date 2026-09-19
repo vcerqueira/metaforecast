@@ -55,7 +55,7 @@ class MLprod(Mixture):
         If True, use the gradient of the loss for weight updates.
     trim_ratio : float, default 1.0
         Proportion of models to retain (1.0 keeps all).
-    weight_by_uid : bool, default False
+    weight_by_uid : bool, default True
         If True, maintain separate weights per series.
 
     Examples
@@ -77,7 +77,7 @@ class MLprod(Mixture):
         loss_type: str,
         gradient: bool,
         trim_ratio: float = 1.0,
-        weight_by_uid: bool = False,
+        weight_by_uid: bool = True,
     ):
         super().__init__(
             loss_type=loss_type,

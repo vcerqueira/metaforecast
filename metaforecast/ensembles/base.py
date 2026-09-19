@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import List
 
 import numpy as np
 import pandas as pd
 from neuralforecast.losses.numpy import smape
-from sklearn.preprocessing import MinMaxScaler
 
 from metaforecast.ensembles.expert_loss import (
     AbsoluteLoss,
@@ -31,15 +32,19 @@ class Normalizations:
         if not isinstance(x, pd.Series):
             x = pd.Series(x)
 
-        scaler = MinMaxScaler()
-        xn = scaler.fit_transform(x.values.reshape(-1, 1)).flatten()
-        return pd.Series(xn, index=x.index)
+        span = x.max() - x.min()
+        if span == 0 or pd.isna(span):
+            return pd.Series(0.0, index=x.index)
+        return (x - x.min()) / span
 
     @classmethod
     def normalize_and_proportion(cls, x):
         """Min-max normalization followed by a convex proportion."""
         nx = cls.min_max_norm_vector(x)
-        return nx / nx.sum()
+        total = nx.sum()
+        if total == 0:
+            return pd.Series(1.0 / len(x), index=x.index)
+        return nx / total
 
 
 class ForecastingEnsemble(ABC):
@@ -92,7 +97,7 @@ class ForecastingEnsemble(ABC):
         Returns
         -------
         ForecastingEnsemble
-            self, optional
+            self
 
         """
         raise NotImplementedError
@@ -201,6 +206,56 @@ class ForecastingEnsemble(ABC):
 
         self.n_poor_models = self.tot_n_models - self.n_models
 
+    @classmethod
+    def _window_size_for_freq(cls, freq: str) -> int:
+        if freq not in cls.WINDOW_SIZE_BY_FREQ:
+            known = ", ".join(repr(k) for k in cls.WINDOW_SIZE_BY_FREQ if k != "")
+            raise ValueError(f"Unknown freq {freq!r}. Known frequencies: {known}.")
+        return cls.WINDOW_SIZE_BY_FREQ[freq]
+
+    def _combine_forecasts(self, fcst: pd.DataFrame, weights: pd.DataFrame) -> pd.Series:
+        """Weighted combination of member forecasts, aligned by unique_id."""
+        model_cols = [c for c in weights.columns if c in fcst.columns]
+        w = weights.reindex(fcst["unique_id"].to_numpy())
+        combined = (fcst[model_cols].to_numpy() * w[model_cols].to_numpy()).sum(axis=1)
+        return pd.Series(combined, index=fcst.index, name=getattr(self, "alias", None))
+
+    def _apply_trim(
+        self,
+        weights: pd.DataFrame,
+        by_uid: bool,
+        scores: pd.DataFrame | None = None,
+    ) -> pd.DataFrame:
+        """Zero models outside the top-k, then renormalize.
+
+        If ``scores`` is given, top-k is the lowest scores (errors).
+        Otherwise top-k is the highest weights.
+        Rows that sum to 0 after trimming fall back to equal weights on the kept models.
+        """
+        rank = (
+            scores.reindex(index=weights.index, columns=weights.columns)
+            if scores is not None
+            else -weights
+        )
+
+        keep = pd.DataFrame(False, index=weights.index, columns=weights.columns)
+        if by_uid:
+            top_by_uid = rank.apply(self._get_top_k, axis=1)
+            for uid in weights.index:
+                keep.loc[uid, top_by_uid.loc[uid]] = True
+        else:
+            keep.loc[:, self._get_top_k(rank.mean())] = True
+
+        trimmed = weights.where(keep, 0.0)
+        row_sums = trimmed.sum(axis=1)
+        n_kept = keep.sum(axis=1).replace(0, np.nan)
+        fallback = keep.div(n_kept, axis=0).fillna(0.0)
+        trimmed = trimmed.where(row_sums.gt(0), fallback)
+        denom = trimmed.sum(axis=1).replace(0, np.nan)
+        trimmed = trimmed.div(denom, axis=0)
+        trimmed.index.name = "unique_id"
+        return trimmed
+
     def _get_top_k(self, scores: pd.Series) -> List[str]:
         """_get_top_k
 
@@ -247,9 +302,8 @@ class ForecastingEnsemble(ABC):
 
     @staticmethod
     def _assert_fcst(fcst: pd.DataFrame):
-        assert "unique_id" in fcst.columns, (
-            '"unique_id" should be included in the predictions object'
-        )
+        if "unique_id" not in fcst.columns:
+            raise ValueError('"unique_id" should be included in the predictions object')
 
 
 class Mixture(ForecastingEnsemble):
@@ -278,7 +332,7 @@ class Mixture(ForecastingEnsemble):
         - 0.5 keeps top 50% of models
         - Lower values create a more selective ensemble
 
-    weight_by_uid : bool, default=False
+    weight_by_uid : bool, default=True
         If True, compute separate weights for each time series
         If False, use global weights across all series
         Note: Setting to True may be computationally intensive
@@ -298,7 +352,7 @@ class Mixture(ForecastingEnsemble):
         loss_type: str,
         gradient: bool,
         trim_ratio: float,
-        weight_by_uid: bool,
+        weight_by_uid: bool = True,
     ):
         self.alias = "Mixture"
 
@@ -352,6 +406,8 @@ class Mixture(ForecastingEnsemble):
             self._fit_by_uid(insample_fcst)
         else:
             self._fit_all(insample_fcst)
+
+        return self
 
     def _fit_by_uid(self, insample_fcst: pd.DataFrame):
         grouped_fcst = insample_fcst.groupby("unique_id")
@@ -416,10 +472,7 @@ class Mixture(ForecastingEnsemble):
         if self.trim_ratio < 1:
             weights = self._weights_by_uid(weights)
 
-        fcst_c = fcst.apply(lambda x: self._weighted_average(x, weights), axis=1)
-        fcst_c.name = self.alias
-
-        return fcst_c
+        return self._combine_forecasts(fcst, weights)
 
     def _calc_loss(self, fcst: pd.Series, y: float, fcst_c: float):
         if self.gradient:
@@ -442,27 +495,7 @@ class Mixture(ForecastingEnsemble):
         raise NotImplementedError
 
     def _weights_by_uid(self, weights: pd.DataFrame, **kwargs):
-        neg_w = -weights
-
-        top_overall = self._get_top_k(-weights.mean())
-        top_by_uid = neg_w.apply(self._get_top_k, axis=1)
-
-        uid_weights = {}
-        for uid, w in weights.iterrows():
-            if self.weight_by_uid:
-                poor_models = [x not in top_by_uid[uid] for x in w.index]
-            else:
-                poor_models = [x not in top_overall for x in w.index]
-
-            w[poor_models] = 0
-            w /= w.sum()
-
-            uid_weights[uid] = w
-
-        weights_df = pd.DataFrame(uid_weights).T
-        weights_df.index.name = "unique_id"
-
-        return weights_df
+        return self._apply_trim(weights, by_uid=self.weight_by_uid)
 
     @staticmethod
     def _calc_ensemble_fcst(fcst: pd.Series, weight: pd.Series):

@@ -52,24 +52,24 @@ class FixedShare(Mixture):
         Loss function for evaluating and weighting ensemble members.
     gradient : bool
         If True, use the gradient of the loss for weight updates.
-    eta : float
+    eta : float, default 0.1
         Learning rate (> 0).  Controls the sensitivity of weights to
-        cumulative regret.
-    alpha : float
+        cumulative regret.  0.1 is a moderate value used in opera-style
+        examples; larger eta reacts faster, smaller eta is more stable.
+    alpha : float, default 0.01
         Sharing parameter in (0, 1).  At each round, a fraction ``alpha``
-        of each expert's weight is redistributed uniformly.  Larger values
-        make the algorithm more reactive to regime changes.
+        of each expert's weight is redistributed uniformly.  0.01 (1%) is
+        the usual Herbster-Warmuth / opera scale: enough to track regime
+        changes without collapsing to a uniform mixture.
     trim_ratio : float, default 1.0
         Proportion of models to retain (1.0 keeps all).
-    weight_by_uid : bool, default False
+    weight_by_uid : bool, default True
         If True, maintain separate weights per series.
 
     Examples
     --------
     >>> from metaforecast.ensembles import FixedShare
-    >>> ensemble = FixedShare(
-    ...     loss_type='square', gradient=True, eta=0.1, alpha=0.01,
-    ... )
+    >>> ensemble = FixedShare(loss_type='square', gradient=True)
     >>> ensemble.fit(fcst_cv)
     >>> combined = ensemble.predict(fcst)
 
@@ -83,10 +83,10 @@ class FixedShare(Mixture):
         self,
         loss_type: str,
         gradient: bool,
-        eta: float,
-        alpha: float,
+        eta: float = 0.1,
+        alpha: float = 0.01,
         trim_ratio: float = 1.0,
-        weight_by_uid: bool = False,
+        weight_by_uid: bool = True,
     ):
         super().__init__(
             loss_type=loss_type,

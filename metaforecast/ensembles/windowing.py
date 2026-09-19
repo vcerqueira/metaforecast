@@ -73,7 +73,7 @@ class Windowing(ForecastingEnsemble):
         freq: str,
         select_best: bool = False,
         trim_ratio: float = 1,
-        weight_by_uid: bool = False,
+        weight_by_uid: bool = True,
         window_size: int | None = None,
     ):
         """Initialize window-based dynamic ensemble.
@@ -105,7 +105,7 @@ class Windowing(ForecastingEnsemble):
             Number of recent observations used for performance evaluation.
             If None, defaults to frequency-based size:
             - Monthly: 12 observations
-            - Daily: 30 observations
+            - Daily: 14 observations
             etc.
 
         """
@@ -114,18 +114,14 @@ class Windowing(ForecastingEnsemble):
 
         self.alias = "Windowing"
         self.frequency = freq
-
-        if window_size is None:
-            self.window_size = self.WINDOW_SIZE_BY_FREQ[self.frequency]
-        else:
-            self.window_size = window_size
+        self.window_size = (
+            window_size if window_size is not None else self._window_size_for_freq(self.frequency)
+        )
 
         self.select_best = select_best
+        self.trim_ratio = trim_ratio
         if self.select_best:
-            self.trim_ratio = 1e-10
             self.alias = "BLAST"
-        else:
-            self.trim_ratio = trim_ratio
 
         self.weight_by_uid = weight_by_uid
         self.insample_scores = None
@@ -163,12 +159,16 @@ class Windowing(ForecastingEnsemble):
             self.model_names = [c for c in insample_fcst.columns if c not in self.NON_MODEL_COLS]
 
         self._set_n_models()
+        if self.select_best:
+            self.n_models = 1
+            self.n_poor_models = self.tot_n_models - self.n_models
 
         self.insample_scores = self.evaluate_base_fcst(
             insample_fcst=insample_fcst, use_window=self.use_window
         )
 
         self.weights = self._weights_by_uid()
+        return self
 
     def predict(self, fcst: pd.DataFrame, **kwargs):
         """Combine ensemble member forecasts based on recent performance.
@@ -188,10 +188,7 @@ class Windowing(ForecastingEnsemble):
 
         self._assert_fcst(fcst)
 
-        fcst_c = fcst.apply(lambda x: self._weighted_average(x, self.weights), axis=1)
-        fcst_c.name = self.alias
-
-        return fcst_c
+        return self._combine_forecasts(fcst, self.weights)
 
     def update_weights(self, **kwargs):
         """Updating the combination weights
@@ -204,26 +201,5 @@ class Windowing(ForecastingEnsemble):
         raise NotImplementedError
 
     def _weights_by_uid(self, **kwargs):
-        if self.weight_by_uid:
-            top_models = self.insample_scores.apply(self._get_top_k, axis=1)
-        else:
-            top_models = self._get_top_k(self.insample_scores.mean())
-
-        uid_weights = {}
-        for uid, uid_scr in self.insample_scores.iterrows():
-            weights = self._weights_from_errors(uid_scr)
-
-            if self.weight_by_uid:
-                poor_models = [x not in top_models[uid] for x in weights.index]
-            else:
-                poor_models = [x not in top_models for x in weights.index]
-
-            weights[poor_models] = 0
-            weights /= weights.sum()
-
-            uid_weights[uid] = weights
-
-        weights_df = pd.DataFrame(uid_weights).T
-        weights_df.index.name = "unique_id"
-
-        return weights_df
+        weights = self.insample_scores.apply(self._weights_from_errors, axis=1)
+        return self._apply_trim(weights, by_uid=self.weight_by_uid, scores=self.insample_scores)
