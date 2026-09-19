@@ -47,6 +47,7 @@ def test_evaluation_aspects_import():
     assert hasattr(mod, "ModelRadar")
     assert hasattr(mod, "ModelRadarAcrossId")
     assert hasattr(mod, "RopeAnalysis")
+    assert not hasattr(mod, "BaseModelRadar")
 
 
 def test_evaluation_cv_import():

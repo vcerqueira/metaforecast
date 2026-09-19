@@ -10,16 +10,17 @@ class RopeAnalysis:
     """Compare models against a reference using a ROPE threshold.
 
     Percentage differences vs. the reference are binned into three
-    outcomes: the reference loses, a draw (within ``±rope`` percent),
-    or the reference wins.
+    outcomes: the reference loses, a draw (within ``±rope`` percent,
+    inclusive), or the reference wins.
 
     Parameters
     ----------
     rope : float
         Region of practical equivalence as a percentage.  Differences
         inside ``±rope`` count as draws.
-    reference : str
+    reference : str or None
         Column name of the reference model in the per-UID score matrix.
+        Required when calling :meth:`get_winning_ratios`.
     """
 
     SIDES = ["{reference} loses", "draw", "{reference} wins"]
@@ -51,9 +52,12 @@ class RopeAnalysis:
         return prob_df
 
     def _calc_vector_side_probs(self, diff_vec: pd.Series) -> tuple[float, float, float]:
-        left = float((diff_vec < -self.rope).mean())
-        right = float((diff_vec > self.rope).mean())
-        mid = float(np.mean([-self.rope < x_ < self.rope for x_ in diff_vec]))
+        valid = diff_vec.dropna()
+        if valid.empty:
+            return 0.0, 0.0, 0.0
+        left = float((valid < -self.rope).mean())
+        right = float((valid > self.rope).mean())
+        mid = float((valid.abs() <= self.rope).mean())
         return left, mid, right
 
     def _calc_percentage_diff(self, scores: pd.DataFrame) -> pd.DataFrame:
@@ -65,9 +69,13 @@ class RopeAnalysis:
         return pd.DataFrame(scores_pd, index=scores.index)
 
     def _assert_params(self, scores: pd.DataFrame) -> None:
+        if self.reference is None:
+            raise ValueError("ROPE reference model is not set")
         if self.reference not in scores.columns:
             raise ValueError(f"{self.reference} not in scores columns")
 
     @staticmethod
-    def _percentage_diff(x, y):
-        return ((x - y) / abs(y)) * 100
+    def _percentage_diff(x: pd.Series, y: pd.Series) -> pd.Series:
+        denom = y.abs()
+        out = ((x - y) / denom) * 100
+        return out.where(np.isfinite(denom) & (denom > 0))
