@@ -122,7 +122,7 @@ class ADE(BaseADE):
             meta_model = CatBoostRegressor(**self._CB_PARS)
 
         super().__init__(
-            window_size=self.WINDOW_SIZE_BY_FREQ[self.frequency],
+            window_size=self._window_size_for_freq(self.frequency),
             trim_ratio=trim_ratio,
             trim_by_uid=trim_by_uid,
             meta_model=meta_model,
@@ -134,7 +134,7 @@ class ADE(BaseADE):
             n_lags = (
                 int(meta_lags)
                 if meta_lags is not None
-                else self.WINDOW_SIZE_BY_FREQ[self.frequency]
+                else self._window_size_for_freq(self.frequency)
             )
             self.meta_lags = list(range(1, n_lags + 1))
         else:

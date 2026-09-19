@@ -87,6 +87,27 @@ def test_weight_by_uid_defaults_true():
     assert MLewa(loss_type="square", gradient=True).weight_by_uid is True
 
 
+def test_window_size_aliases():
+    expected = {
+        "h": 48,
+        "H": 48,
+        "B": 10,
+        "W-SUN": 16,
+        "W-MON": 16,
+        "BME": 12,
+        "BMS": 12,
+        "QE-DEC": 4,
+        "BQE": 4,
+        "BQS": 4,
+        "YE": 6,
+        "YS": 6,
+        "A": 6,
+        "AS": 6,
+    }
+    for freq, window_size in expected.items():
+        assert Windowing(freq=freq).window_size == window_size
+
+
 def test_unknown_freq_raises_value_error():
     try:
         Windowing(freq="foo")
