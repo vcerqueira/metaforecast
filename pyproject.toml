@@ -32,6 +32,8 @@ dependencies = [
     "pandas>=3,<4",
     "catboost==1.2.10",
     "tslearn==0.6.4",
+    "numba>=0.61,<0.62; python_version >= '3.13'",
+    "numpy>=2.1,<2.3; python_version >= '3.13'",
     "utilsforecast==0.2.15",
     "neuralforecast==3.2.1",
     "statsforecast==2.0.3",
@@ -39,6 +41,7 @@ dependencies = [
     "pytorch_lightning==2.5.6",
     "tsfeatures==0.4.5",
     "pandas-stubs~=3.0.5",
+    "ipykernel>=7.4.0",
 ]
 
 [project.optional-dependencies]

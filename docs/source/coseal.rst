@@ -56,6 +56,42 @@ Pre-trained models (M4 monthly, quarterly, yearly) are available in the
    :undoc-members:
    :show-inheritance:
 
+StatsForecast
+^^^^^^^^^^^^^
+
+:class:`~metaforecast.coseal.metaarima.sf.MetaARIMAModel` wraps a
+meta-fitted MetaARIMA so it can be passed to ``statsforecast.StatsForecast``
+beside ``AutoARIMA`` and the other statistical models. StatsForecast calls
+the model with the series values and the horizon. The wrapper rebuilds a
+one-series frame and runs the usual feature extraction, shortlist, and
+AICc selection.
+
+.. code-block:: python
+
+   from statsforecast import StatsForecast
+   from statsforecast.models import AutoARIMA, AutoETS
+   from metaforecast.coseal import MetaARIMA, MetaARIMAModel
+
+   meta = MetaARIMA.load(freq="ME")
+   sf = StatsForecast(
+       models=[
+           MetaARIMAModel(meta),
+           AutoARIMA(season_length=12),
+           AutoETS(season_length=12),
+       ],
+       freq="ME",
+   )
+   sf.fit(train)
+   fcst = sf.predict(h=12)
+
+Pass ``level`` for native ARIMA intervals, or set ``prediction_intervals``
+on the model or on ``StatsForecast`` for conformal intervals.
+
+.. autoclass:: metaforecast.coseal.metaarima.sf.MetaARIMAModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Utilities
 ^^^^^^^^^
 
