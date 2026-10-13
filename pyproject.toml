@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 
 name = "metaforecast"
-version = "0.3.4"
+version = "0.3.5"
 authors = [
     { name = "Vitor Cerqueira", email = "cerqueira.vitormanuel@gmail.com" },
 ]
@@ -122,7 +122,7 @@ filterwarnings = [
 # ---------- bump-my-version ----------
 
 [tool.bumpversion]
-current_version = "0.3.4"
+current_version = "0.3.5"
 commit = true
 tag = true
 
