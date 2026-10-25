@@ -8,7 +8,7 @@ jupyter
 ipykernel
 cython
 arch==8.0.0
-pandas>=3,<4
+pandas>=2.2,<3
 catboost==1.2.10
 tslearn==0.6.4
 datasetsforecast==0.0.8
